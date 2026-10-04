@@ -51,13 +51,13 @@ class Settings:
     comfyui_checkpoint: str = "sd_xl_base_1.0.safetensors"
     comfyui_steps: int = 25
     comfyui_cfg: float = 6.5
-    comfyui_width: int = 832
-    comfyui_height: int = 832
     comfyui_timeout: int = 600
 
     hosted_image_api_url: str = ""
     hosted_image_api_key: str = ""
 
+    # Panel images are generated at about IMAGE_BASE_SIZE² pixels, in the panel's shape.
+    image_base_size: int = 832
     output_dir: Path = BACKEND_DIR / "output"
     panels_per_page: int = 4
     max_pages: int = 2
@@ -77,11 +77,10 @@ class Settings:
             comfyui_checkpoint=_env("COMFYUI_CHECKPOINT", "sd_xl_base_1.0.safetensors"),
             comfyui_steps=_env_int("COMFYUI_STEPS", 25),
             comfyui_cfg=_env_float("COMFYUI_CFG", 6.5),
-            comfyui_width=_env_int("COMFYUI_WIDTH", 832),
-            comfyui_height=_env_int("COMFYUI_HEIGHT", 832),
             comfyui_timeout=_env_int("COMFYUI_TIMEOUT", 600),
             hosted_image_api_url=_env("HOSTED_IMAGE_API_URL"),
             hosted_image_api_key=_env("HOSTED_IMAGE_API_KEY"),
+            image_base_size=max(256, min(2048, _env_int("IMAGE_BASE_SIZE", 832))),
             output_dir=output,
             panels_per_page=max(1, min(6, _env_int("PANELS_PER_PAGE", 4))),
             max_pages=max(1, min(10, _env_int("MAX_PAGES", 2))),
