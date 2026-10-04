@@ -1,6 +1,8 @@
 # Progress
 
-## Phase 1 + 2 (agents, character bible, consistency) — in progress
+## Phase 1 + 2 (agents, character bible, consistency) — all milestones M0–M8 done
+
+`python scripts/tasks.py test` → 124 passed, 2 skipped (opt-in real-CLIP test, integration test).
 
 ### Done
 - **M0** ComfyUI layer: `app/comfy/client.py` (ping, `/object_info` discovery of nodes,
@@ -67,7 +69,28 @@
   fallback without torch. Measured on this laptop (CPU): first CLIP load ~106 s incl. download,
   then ~1 s per comparison; same mock character 0.84 vs unrelated scenery 0.54.
 
+- **M8** Three sample stories (`samples/stories/`: action, emotional drama, comedy) run end to end
+  with `python scripts/tasks.py sample`; outputs committed in `samples/output/<story>/` (mock LLM +
+  mock images + real CLIP scores: 0.64–0.88 per panel, avg ≈0.75). Integration test
+  (`tests/test_integration.py`) auto-skips without ComfyUI or an LLM key. Docker updated
+  (workflows copied, optional CLIP build arg, samples mounted). README rewritten (agents,
+  consistency, providers, ComfyUI, UI tour, tests, API). Final browser run: drama story →
+  cast approval → reader with consistency badges, no console errors.
+- Timings in mock mode (this laptop): agents + mock images + layout ≈3 s per 10-panel story; CLIP
+  consistency ≈60 s per CLI run, of which ≈35 s is the `transformers` import on Windows (the
+  server preloads it in the background at startup, so jobs only pay ≈15–25 s of embedding).
+  Real SDXL timings/VRAM still need measuring (`comfy_check --generate` records them).
+
 ### Known issues / measurements
+- **Not yet run against real services**: no ComfyUI install and no LLM key on this machine.
+  Claude, Gemini, OpenAI-compatible and ComfyUI/IP-Adapter paths are tested with fakes that
+  follow the documented APIs. First real things to check: `comfy_check --generate`, then one
+  story with a real LLM (`pytest tests/test_integration.py -s`).
+- Mock-mode heuristics are simple (names = capitalised words, one setting per page); real
+  agents do this properly.
+- Multi-character panels apply both IP-Adapter references to the whole image (no regional
+  masks yet) — see DECISIONS.md #40.
+- Jobs live in memory: restarting the server forgets job status (project folders remain on disk).
 - ComfyUI is not installed on this machine, so there's **no real test panel yet**. Run
   `python -m app.tools.comfy_check --generate` (in backend/) after following SETUP_COMFYUI.md;
   it writes `samples/comfyui_test_panel.png` plus timing and VRAM numbers.

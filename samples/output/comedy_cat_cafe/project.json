@@ -1,0 +1,1831 @@
+{
+  "job_id": "0423e4700734",
+  "project_id": "0423e4700734",
+  "created_at": "2026-10-04T21:43:53+00:00",
+  "story": "Riku had exactly one job at the Neko Neko Cat Cafe: make sure nobody fed the cats any cake. On his first day, a fat orange cat named Mochi stared at him like a tiny emperor.\n\"Don't even think about it,\" Riku warned. Mochi yawned.\nAt noon, a strict food critic named Ms. Tanabe arrived and ordered the famous strawberry shortcake. The whole cafe held its breath.\nRiku carried the cake across the room with trembling hands. Mochi crouched on the bookshelf, tail twitching.\n\"No. No, no, no,\" Riku whispered.\nMochi launched himself through the air like a furry cannonball! Riku spun, slipped on a toy mouse, and crashed onto the floor.\nThe cake flew upward, turned once, and landed perfectly on Ms. Tanabe's plate. Mochi landed perfectly on Ms. Tanabe's lap.\nThe critic looked at the cake, then at the cat, then at Riku on the floor. \"Five stars,\" she said. \"For the show.\"\nMochi purred. Riku decided he would never understand cats.",
+  "title": "Riku's Story",
+  "status": "done",
+  "auto_approve": true,
+  "max_pages": 2,
+  "max_panels_per_page": 6,
+  "providers": {
+    "llm": "mock",
+    "llm_model": "",
+    "image": "mock"
+  },
+  "beat_sheet": {
+    "title": "Riku's Story",
+    "logline": "Riku had exactly one job at the Neko Neko Cat Cafe: make sure nobody fed the cats any cake.",
+    "emotional_arc": "calm -> dramatic -> calm",
+    "beats": [
+      {
+        "id": 1,
+        "summary": "Riku had exactly one job at the Neko Neko Cat Cafe: make sure nobody fed the cats any cake.",
+        "emotion": "calm",
+        "intensity": 1,
+        "kind": "setup"
+      },
+      {
+        "id": 2,
+        "summary": "On his first day, a fat orange cat named Mochi stared at him like a tiny emperor. \"Don't even think about it,\" Riku warned.",
+        "emotion": "calm",
+        "intensity": 1,
+        "kind": "quiet"
+      },
+      {
+        "id": 3,
+        "summary": "Mochi yawned. At noon, a strict food critic named Ms. Tanabe arrived and ordered the famous strawberry shortcake.",
+        "emotion": "calm",
+        "intensity": 1,
+        "kind": "quiet"
+      },
+      {
+        "id": 4,
+        "summary": "The whole cafe held its breath. Riku carried the cake across the room with trembling hands.",
+        "emotion": "calm",
+        "intensity": 1,
+        "kind": "quiet"
+      },
+      {
+        "id": 5,
+        "summary": "Mochi crouched on the bookshelf, tail twitching. \"No.",
+        "emotion": "calm",
+        "intensity": 1,
+        "kind": "quiet"
+      },
+      {
+        "id": 6,
+        "summary": "No, no, no,\" Riku whispered.",
+        "emotion": "calm",
+        "intensity": 1,
+        "kind": "quiet"
+      },
+      {
+        "id": 7,
+        "summary": "Mochi launched himself through the air like a furry cannonball! Riku spun, slipped on a toy mouse, and crashed onto the floor.",
+        "emotion": "dramatic",
+        "intensity": 5,
+        "kind": "climax"
+      },
+      {
+        "id": 8,
+        "summary": "The cake flew upward, turned once, and landed perfectly on Ms. Tanabe's plate. Mochi landed perfectly on Ms. Tanabe's lap.",
+        "emotion": "calm",
+        "intensity": 1,
+        "kind": "resolution"
+      },
+      {
+        "id": 9,
+        "summary": "The critic looked at the cake, then at the cat, then at Riku on the floor. \"Five stars,\" she said.",
+        "emotion": "calm",
+        "intensity": 1,
+        "kind": "resolution"
+      },
+      {
+        "id": 10,
+        "summary": "\"For the show.\" Mochi purred. Riku decided he would never understand cats.",
+        "emotion": "calm",
+        "intensity": 1,
+        "kind": "resolution"
+      }
+    ],
+    "climax_beat": 7,
+    "characters": [
+      {
+        "name": "Riku",
+        "role": "protagonist",
+        "importance": "main",
+        "summary": "Appears in the story as Riku."
+      },
+      {
+        "name": "Mochi",
+        "role": "supporting character",
+        "importance": "main",
+        "summary": "Appears in the story as Mochi."
+      },
+      {
+        "name": "Tanabe",
+        "role": "supporting character",
+        "importance": "supporting",
+        "summary": "Appears in the story as Tanabe."
+      }
+    ]
+  },
+  "page_plan": {
+    "pages": [
+      {
+        "page_number": 1,
+        "panels": [
+          {
+            "panel_number": 1,
+            "beat": 1,
+            "purpose": "Establish the scene",
+            "size": "large",
+            "characters": [
+              "Riku"
+            ],
+            "action": "Riku had exactly one job at the Neko Neko Cat Cafe: make sure nobody fed the cats any cake.",
+            "setting": "a cafe",
+            "emotion": "calm",
+            "dialogue": [],
+            "narration": "Riku had exactly one job at the Neko Neko Cat Cafe: make sure nobody fed the cats any cake.",
+            "sfx": []
+          },
+          {
+            "panel_number": 2,
+            "beat": 2,
+            "purpose": "Let the emotion land",
+            "size": "medium",
+            "characters": [
+              "Riku",
+              "Mochi"
+            ],
+            "action": "On his first day, a fat orange cat named Mochi stared at him like a tiny emperor. Riku warned.",
+            "setting": "a cafe",
+            "emotion": "calm",
+            "dialogue": [
+              {
+                "speaker": "Riku",
+                "text": "Don't even think about it."
+              }
+            ],
+            "narration": "On his first day, a fat orange cat named Mochi stared at him like a tiny emperor.",
+            "sfx": []
+          },
+          {
+            "panel_number": 3,
+            "beat": 3,
+            "purpose": "Let the emotion land",
+            "size": "medium",
+            "characters": [
+              "Mochi",
+              "Tanabe"
+            ],
+            "action": "Mochi yawned. At noon, a strict food critic named Ms. Tanabe arrived and ordered the famous strawberry shortcake.",
+            "setting": "a cafe",
+            "emotion": "calm",
+            "dialogue": [],
+            "narration": "Mochi yawned. At noon, a strict food critic named Ms. Tanabe arrived and ordered the famous strawberry shortcake.",
+            "sfx": []
+          },
+          {
+            "panel_number": 4,
+            "beat": 4,
+            "purpose": "Let the emotion land",
+            "size": "medium",
+            "characters": [
+              "Riku"
+            ],
+            "action": "The whole cafe held its breath. Riku carried the cake across the room with trembling hands.",
+            "setting": "a cafe",
+            "emotion": "calm",
+            "dialogue": [],
+            "narration": "The whole cafe held its breath. Riku carried the cake across the room with trembling hands.",
+            "sfx": []
+          },
+          {
+            "panel_number": 5,
+            "beat": 5,
+            "purpose": "Let the emotion land",
+            "size": "medium",
+            "characters": [
+              "Mochi"
+            ],
+            "action": "Mochi crouched on the bookshelf, tail twitching. \"No.",
+            "setting": "a cafe",
+            "emotion": "calm",
+            "dialogue": [],
+            "narration": "Mochi crouched on the bookshelf, tail twitching. \"No.",
+            "sfx": []
+          }
+        ],
+        "page_turn": "Ends on: Mochi crouched on the bookshelf, tail twitching. \"No."
+      },
+      {
+        "page_number": 2,
+        "panels": [
+          {
+            "panel_number": 1,
+            "beat": 6,
+            "purpose": "Let the emotion land",
+            "size": "medium",
+            "characters": [
+              "Riku"
+            ],
+            "action": "No, no, no,\" Riku whispered.",
+            "setting": "a cafe",
+            "emotion": "calm",
+            "dialogue": [],
+            "narration": "No, no, no,\" Riku whispered.",
+            "sfx": []
+          },
+          {
+            "panel_number": 2,
+            "beat": 7,
+            "purpose": "Deliver the climax",
+            "size": "large",
+            "characters": [
+              "Riku",
+              "Mochi"
+            ],
+            "action": "Mochi launched himself through the air like a furry cannonball! Riku spun, slipped on a toy mouse, and crashed onto the floor.",
+            "setting": "a cafe",
+            "emotion": "dramatic",
+            "dialogue": [],
+            "narration": null,
+            "sfx": [
+              "CRASH"
+            ]
+          },
+          {
+            "panel_number": 3,
+            "beat": 8,
+            "purpose": "Resolve the story",
+            "size": "medium",
+            "characters": [
+              "Mochi",
+              "Tanabe"
+            ],
+            "action": "The cake flew upward, turned once, and landed perfectly on Ms. Tanabe's plate. Mochi landed perfectly on Ms. Tanabe's lap.",
+            "setting": "a cafe",
+            "emotion": "calm",
+            "dialogue": [],
+            "narration": "The cake flew upward, turned once, and landed perfectly on Ms. Tanabe's plate. Mochi landed perfectly on Ms. Tanabe's lap.",
+            "sfx": []
+          },
+          {
+            "panel_number": 4,
+            "beat": 9,
+            "purpose": "Resolve the story",
+            "size": "medium",
+            "characters": [
+              "Riku"
+            ],
+            "action": "The critic looked at the cake, then at the cat, then at Riku on the floor. she said.",
+            "setting": "a cafe",
+            "emotion": "calm",
+            "dialogue": [
+              {
+                "speaker": "Riku",
+                "text": "Five stars."
+              }
+            ],
+            "narration": "The critic looked at the cake, then at the cat, then at Riku on the floor.",
+            "sfx": []
+          },
+          {
+            "panel_number": 5,
+            "beat": 10,
+            "purpose": "Resolve the story",
+            "size": "medium",
+            "characters": [
+              "Riku",
+              "Mochi"
+            ],
+            "action": "Mochi purred. Riku decided he would never understand cats.",
+            "setting": "a cafe",
+            "emotion": "calm",
+            "dialogue": [
+              {
+                "speaker": "Mochi",
+                "text": "For the show."
+              }
+            ],
+            "narration": "Riku decided he would never understand cats.",
+            "sfx": []
+          }
+        ],
+        "page_turn": "Ends on: Mochi purred. Riku decided he would never understand cats."
+      }
+    ]
+  },
+  "director": {
+    "pages": [
+      {
+        "page_number": 1,
+        "layout": "dialogue_5",
+        "panels": [
+          {
+            "panel_number": 1,
+            "shot": "establishing",
+            "angle": "bird's eye",
+            "composition": "Riku small in the frame, the setting fills the panel"
+          },
+          {
+            "panel_number": 2,
+            "shot": "over-the-shoulder",
+            "angle": "eye level",
+            "composition": "over one shoulder toward Riku and Mochi, speaker in the foreground"
+          },
+          {
+            "panel_number": 3,
+            "shot": "medium",
+            "angle": "eye level",
+            "composition": "Mochi and Tanabe from the waist up, centred"
+          },
+          {
+            "panel_number": 4,
+            "shot": "close-up",
+            "angle": "eye level",
+            "composition": "Riku from the waist up, centred"
+          },
+          {
+            "panel_number": 5,
+            "shot": "medium",
+            "angle": "eye level",
+            "composition": "Mochi from the waist up, centred"
+          }
+        ]
+      },
+      {
+        "page_number": 2,
+        "layout": "dialogue_5",
+        "panels": [
+          {
+            "panel_number": 1,
+            "shot": "medium",
+            "angle": "eye level",
+            "composition": "Riku from the waist up, centred"
+          },
+          {
+            "panel_number": 2,
+            "shot": "close-up",
+            "angle": "low",
+            "composition": "Riku and Mochi's face fills the frame, background dropped to screentone"
+          },
+          {
+            "panel_number": 3,
+            "shot": "medium",
+            "angle": "eye level",
+            "composition": "Mochi and Tanabe from the waist up, centred"
+          },
+          {
+            "panel_number": 4,
+            "shot": "medium",
+            "angle": "eye level",
+            "composition": "Riku from the waist up, centred"
+          },
+          {
+            "panel_number": 5,
+            "shot": "over-the-shoulder",
+            "angle": "eye level",
+            "composition": "over one shoulder toward Riku and Mochi, speaker in the foreground"
+          }
+        ]
+      }
+    ]
+  },
+  "rule_fixes": [
+    "p1·4: third 'medium' in a row → close-up"
+  ],
+  "characters": [
+    {
+      "name": "Riku",
+      "role": "protagonist",
+      "age_range": "late teens",
+      "body_type": "slim and tall",
+      "description": "Riku is a slim and tall character in their late teens, with short wavy white hair, bright almond eyes and a light kimono-style top with a sash.",
+      "visual_tags": {
+        "hair": "short wavy white hair",
+        "eyes": "bright almond eyes",
+        "outfit": "a light kimono-style top with a sash",
+        "accessories": "a silver hairpin",
+        "distinguishing_marks": "a small scar on the left cheek"
+      },
+      "personality": "cheerful and impulsive",
+      "expression_range": [
+        "neutral",
+        "happy",
+        "angry",
+        "sad",
+        "surprised"
+      ],
+      "slug": "riku",
+      "turnaround_seed": 2866601953,
+      "expression_seed": 4236419873,
+      "sheets": {
+        "turnaround": "characters/riku/turnaround_v1.png",
+        "expressions": "characters/riku/expressions_v1.png",
+        "views": {
+          "front": "characters/riku/front_v1.png",
+          "side": "characters/riku/side_v1.png",
+          "back": "characters/riku/back_v1.png"
+        },
+        "expression_refs": {
+          "neutral": "characters/riku/neutral_v1.png",
+          "happy": "characters/riku/happy_v1.png",
+          "angry": "characters/riku/angry_v1.png",
+          "sad": "characters/riku/sad_v1.png",
+          "surprised": "characters/riku/surprised_v1.png"
+        }
+      },
+      "status": "approved",
+      "approved": true,
+      "version": 1,
+      "reused_from": null
+    },
+    {
+      "name": "Mochi",
+      "role": "supporting character",
+      "age_range": "mid teens",
+      "body_type": "short and wiry",
+      "description": "Mochi is a short and wiry character in their mid teens, with long straight silver hair, large round dark eyes and a dark school uniform with a striped tie.",
+      "visual_tags": {
+        "hair": "long straight silver hair",
+        "eyes": "large round dark eyes",
+        "outfit": "a dark school uniform with a striped tie",
+        "accessories": "a small pendant necklace",
+        "distinguishing_marks": "a small scar on the left cheek"
+      },
+      "personality": "determined but secretly anxious",
+      "expression_range": [
+        "neutral",
+        "happy",
+        "angry",
+        "sad",
+        "surprised"
+      ],
+      "slug": "mochi",
+      "turnaround_seed": 359105079,
+      "expression_seed": 3908238520,
+      "sheets": {
+        "turnaround": "characters/mochi/turnaround_v1.png",
+        "expressions": "characters/mochi/expressions_v1.png",
+        "views": {
+          "front": "characters/mochi/front_v1.png",
+          "side": "characters/mochi/side_v1.png",
+          "back": "characters/mochi/back_v1.png"
+        },
+        "expression_refs": {
+          "neutral": "characters/mochi/neutral_v1.png",
+          "happy": "characters/mochi/happy_v1.png",
+          "angry": "characters/mochi/angry_v1.png",
+          "sad": "characters/mochi/sad_v1.png",
+          "surprised": "characters/mochi/surprised_v1.png"
+        }
+      },
+      "status": "approved",
+      "approved": true,
+      "version": 1,
+      "reused_from": null
+    },
+    {
+      "name": "Tanabe",
+      "role": "supporting character",
+      "age_range": "late twenties",
+      "body_type": "lanky",
+      "description": "Tanabe is a lanky character in their late twenties, with shoulder-length hair with blunt bangs, bright almond eyes and a sailor-collar uniform and knee socks.",
+      "visual_tags": {
+        "hair": "shoulder-length hair with blunt bangs",
+        "eyes": "bright almond eyes",
+        "outfit": "a sailor-collar uniform and knee socks",
+        "accessories": "a wristwatch",
+        "distinguishing_marks": "a bandage on the nose"
+      },
+      "personality": "quiet and observant",
+      "expression_range": [
+        "neutral",
+        "happy",
+        "angry",
+        "sad",
+        "surprised"
+      ],
+      "slug": "tanabe",
+      "turnaround_seed": 661585833,
+      "expression_seed": 3571504100,
+      "sheets": {
+        "turnaround": null,
+        "expressions": null,
+        "views": {},
+        "expression_refs": {}
+      },
+      "status": "approved",
+      "approved": true,
+      "version": 1,
+      "reused_from": null
+    }
+  ],
+  "renames": {},
+  "prompts": [
+    {
+      "page": 1,
+      "panel": 1,
+      "prompt": "monochrome, greyscale, manga, comic panel, establishing shot, wide view, scenery, detailed background, small figures in distance, bird's eye view, from above, top-down view, solo, (short wavy white hair, bright almond eyes, a light kimono-style top with a sash, a silver hairpin, a small scar on the left cheek), Riku had exactly one job at the Neko Neko Cat Cafe: make sure nobody fed the cats any cake, setting: a cafe, Riku small in the frame, the setting fills the panel, soft light, peaceful, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2416734095,
+      "width": 1536,
+      "height": 640,
+      "characters": [
+        "Riku"
+      ],
+      "references": [
+        "characters/riku/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Riku: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 1,
+      "panel": 2,
+      "prompt": "monochrome, greyscale, manga, comic panel, over-the-shoulder shot, from behind, foreground shoulder, depth of field, eye level, two people, (short wavy white hair, bright almond eyes, a light kimono-style top with a sash, a silver hairpin, a small scar on the left cheek, calm expression), (long straight silver hair, large round dark eyes, a dark school uniform with a striped tie, a small pendant necklace, a small scar on the left cheek, calm expression), On his first day, a fat orange cat named Mochi stared at him like a tiny emperor. Riku warned, setting: a cafe, over one shoulder toward Riku and Mochi, speaker in the foreground, soft light, peaceful, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2416734096,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Riku",
+        "Mochi"
+      ],
+      "references": [
+        "characters/riku/neutral_v1.png",
+        "characters/mochi/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Riku: neutral",
+        "Mochi: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 1,
+      "panel": 3,
+      "prompt": "monochrome, greyscale, manga, comic panel, medium shot, upper body, eye level, two people, (long straight silver hair, large round dark eyes, a dark school uniform with a striped tie, a small pendant necklace, a small scar on the left cheek, calm expression), (shoulder-length hair with blunt bangs, bright almond eyes, a sailor-collar uniform and knee socks, a wristwatch, a bandage on the nose, calm expression), Mochi yawned. At noon, a strict food critic named Ms. Tanabe arrived and ordered the famous strawberry shortcake, setting: a cafe, Mochi and Tanabe from the waist up, centred, soft light, peaceful, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2416734097,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Mochi",
+        "Tanabe"
+      ],
+      "references": [
+        "characters/mochi/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Mochi: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 1,
+      "panel": 4,
+      "prompt": "monochrome, greyscale, manga, comic panel, close-up, portrait, face focus, head and shoulders, eye level, solo, (short wavy white hair, bright almond eyes, a light kimono-style top with a sash, a silver hairpin, a small scar on the left cheek, calm expression), The whole cafe held its breath. Riku carried the cake across the room with trembling hands, setting: a cafe, Riku from the waist up, centred, soft light, peaceful, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2416734098,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Riku"
+      ],
+      "references": [
+        "characters/riku/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Riku: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 1,
+      "panel": 5,
+      "prompt": "monochrome, greyscale, manga, comic panel, medium shot, upper body, eye level, solo, (long straight silver hair, large round dark eyes, a dark school uniform with a striped tie, a small pendant necklace, a small scar on the left cheek, calm expression), Mochi crouched on the bookshelf, tail twitching. \"No, setting: a cafe, Mochi from the waist up, centred, soft light, peaceful, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2416734099,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Mochi"
+      ],
+      "references": [
+        "characters/mochi/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Mochi: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 2,
+      "panel": 1,
+      "prompt": "monochrome, greyscale, manga, comic panel, medium shot, upper body, eye level, solo, (short wavy white hair, bright almond eyes, a light kimono-style top with a sash, a silver hairpin, a small scar on the left cheek, calm expression), No, no, no,\" Riku whispered, setting: a cafe, Riku from the waist up, centred, soft light, peaceful, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2416735095,
+      "width": 1536,
+      "height": 640,
+      "characters": [
+        "Riku"
+      ],
+      "references": [
+        "characters/riku/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Riku: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 2,
+      "panel": 2,
+      "prompt": "monochrome, greyscale, manga, comic panel, close-up, portrait, face focus, head and shoulders, from below, low angle, dramatic perspective, two people, (short wavy white hair, bright almond eyes, a light kimono-style top with a sash, a silver hairpin, a small scar on the left cheek, calm expression), (long straight silver hair, large round dark eyes, a dark school uniform with a striped tie, a small pendant necklace, a small scar on the left cheek, calm expression), Mochi launched himself through the air like a furry cannonball! Riku spun, slipped on a toy mouse, and crashed onto the floor, setting: a cafe, Riku and Mochi's face fills the frame, background dropped to screentone, speed lines, dynamic pose, intense, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2416735096,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Riku",
+        "Mochi"
+      ],
+      "references": [
+        "characters/riku/neutral_v1.png",
+        "characters/mochi/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Riku: neutral",
+        "Mochi: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 2,
+      "panel": 3,
+      "prompt": "monochrome, greyscale, manga, comic panel, medium shot, upper body, eye level, two people, (long straight silver hair, large round dark eyes, a dark school uniform with a striped tie, a small pendant necklace, a small scar on the left cheek, calm expression), (shoulder-length hair with blunt bangs, bright almond eyes, a sailor-collar uniform and knee socks, a wristwatch, a bandage on the nose, calm expression), The cake flew upward, turned once, and landed perfectly on Ms. Tanabe's plate. Mochi landed perfectly on Ms. Tanabe's lap, setting: a cafe, Mochi and Tanabe from the waist up, centred, soft light, peaceful, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2416735097,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Mochi",
+        "Tanabe"
+      ],
+      "references": [
+        "characters/mochi/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Mochi: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 2,
+      "panel": 4,
+      "prompt": "monochrome, greyscale, manga, comic panel, medium shot, upper body, eye level, solo, (short wavy white hair, bright almond eyes, a light kimono-style top with a sash, a silver hairpin, a small scar on the left cheek, calm expression), The critic looked at the cake, then at the cat, then at Riku on the floor. she said, setting: a cafe, Riku from the waist up, centred, soft light, peaceful, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2416735098,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Riku"
+      ],
+      "references": [
+        "characters/riku/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Riku: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 2,
+      "panel": 5,
+      "prompt": "monochrome, greyscale, manga, comic panel, over-the-shoulder shot, from behind, foreground shoulder, depth of field, eye level, two people, (short wavy white hair, bright almond eyes, a light kimono-style top with a sash, a silver hairpin, a small scar on the left cheek, calm expression), (long straight silver hair, large round dark eyes, a dark school uniform with a striped tie, a small pendant necklace, a small scar on the left cheek, calm expression), Mochi purred. Riku decided he would never understand cats, setting: a cafe, over one shoulder toward Riku and Mochi, speaker in the foreground, soft light, peaceful, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2416735099,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Riku",
+        "Mochi"
+      ],
+      "references": [
+        "characters/riku/neutral_v1.png",
+        "characters/mochi/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Riku: neutral",
+        "Mochi: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    }
+  ],
+  "panels": [
+    {
+      "page": 1,
+      "panel": 1,
+      "image": "panels/p01_01.png",
+      "seconds": 0.03,
+      "workflow": "mock",
+      "consistency": {
+        "Riku": 0.711
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 1,
+      "panel": 2,
+      "image": "panels/p01_02.png",
+      "seconds": 0.03,
+      "workflow": "mock",
+      "consistency": {
+        "Riku": 0.673,
+        "Mochi": 0.654
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 1,
+      "panel": 3,
+      "image": "panels/p01_03.png",
+      "seconds": 0.03,
+      "workflow": "mock",
+      "consistency": {
+        "Mochi": 0.635
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 1,
+      "panel": 4,
+      "image": "panels/p01_04.png",
+      "seconds": 0.04,
+      "workflow": "mock",
+      "consistency": {
+        "Riku": 0.869
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 1,
+      "panel": 5,
+      "image": "panels/p01_05.png",
+      "seconds": 0.02,
+      "workflow": "mock",
+      "consistency": {
+        "Mochi": 0.718
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 2,
+      "panel": 1,
+      "image": "panels/p02_01.png",
+      "seconds": 0.02,
+      "workflow": "mock",
+      "consistency": {
+        "Riku": 0.767
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 2,
+      "panel": 2,
+      "image": "panels/p02_02.png",
+      "seconds": 0.05,
+      "workflow": "mock",
+      "consistency": {
+        "Riku": 0.82,
+        "Mochi": 0.806
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 2,
+      "panel": 3,
+      "image": "panels/p02_03.png",
+      "seconds": 0.04,
+      "workflow": "mock",
+      "consistency": {
+        "Mochi": 0.635
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 2,
+      "panel": 4,
+      "image": "panels/p02_04.png",
+      "seconds": 0.03,
+      "workflow": "mock",
+      "consistency": {
+        "Riku": 0.704
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 2,
+      "panel": 5,
+      "image": "panels/p02_05.png",
+      "seconds": 0.04,
+      "workflow": "mock",
+      "consistency": {
+        "Riku": 0.673,
+        "Mochi": 0.654
+      },
+      "consistency_method": "clip"
+    }
+  ],
+  "outputs": {
+    "rtl": {
+      "pages": [
+        "pages/rtl/page_01.png",
+        "pages/rtl/page_02.png"
+      ],
+      "layout": [
+        {
+          "page": 1,
+          "rtl": true,
+          "layout": "dialogue_5",
+          "panels": [
+            {
+              "panel": 1,
+              "rect": {
+                "x": 64,
+                "y": 64,
+                "w": 1112,
+                "h": 444
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 634,
+                  "y": 79,
+                  "w": 527,
+                  "h": 108
+                }
+              ]
+            },
+            {
+              "panel": 2,
+              "rect": {
+                "x": 631,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 920,
+                  "y": 545,
+                  "w": 241,
+                  "h": 130
+                },
+                {
+                  "kind": "speech",
+                  "x": 646,
+                  "y": 545,
+                  "w": 244,
+                  "h": 139
+                }
+              ]
+            },
+            {
+              "panel": 3,
+              "rect": {
+                "x": 64,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 341,
+                  "y": 545,
+                  "w": 253,
+                  "h": 133
+                }
+              ]
+            },
+            {
+              "panel": 4,
+              "rect": {
+                "x": 631,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 907,
+                  "y": 1131,
+                  "w": 254,
+                  "h": 158
+                }
+              ]
+            },
+            {
+              "panel": 5,
+              "rect": {
+                "x": 64,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 338,
+                  "y": 1131,
+                  "w": 256,
+                  "h": 108
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "page": 2,
+          "rtl": true,
+          "layout": "dialogue_5",
+          "panels": [
+            {
+              "panel": 1,
+              "rect": {
+                "x": 64,
+                "y": 64,
+                "w": 1112,
+                "h": 444
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 808,
+                  "y": 79,
+                  "w": 353,
+                  "h": 48
+                }
+              ]
+            },
+            {
+              "panel": 2,
+              "rect": {
+                "x": 631,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "sfx",
+                  "x": 982,
+                  "y": 1024,
+                  "w": 179,
+                  "h": 54
+                }
+              ]
+            },
+            {
+              "panel": 3,
+              "rect": {
+                "x": 64,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 342,
+                  "y": 922,
+                  "w": 252,
+                  "h": 156
+                }
+              ]
+            },
+            {
+              "panel": 4,
+              "rect": {
+                "x": 631,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 909,
+                  "y": 1131,
+                  "w": 252,
+                  "h": 138
+                },
+                {
+                  "kind": "speech",
+                  "x": 684,
+                  "y": 1131,
+                  "w": 213,
+                  "h": 61
+                }
+              ]
+            },
+            {
+              "panel": 5,
+              "rect": {
+                "x": 64,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 371,
+                  "y": 1131,
+                  "w": 223,
+                  "h": 108
+                },
+                {
+                  "kind": "speech",
+                  "x": 167,
+                  "y": 1131,
+                  "w": 165,
+                  "h": 100
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "pdf": "manga_rtl.pdf"
+    },
+    "ltr": {
+      "pages": [
+        "pages/ltr/page_01.png",
+        "pages/ltr/page_02.png"
+      ],
+      "layout": [
+        {
+          "page": 1,
+          "rtl": false,
+          "layout": "dialogue_5",
+          "panels": [
+            {
+              "panel": 1,
+              "rect": {
+                "x": 64,
+                "y": 64,
+                "w": 1112,
+                "h": 444
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 79,
+                  "y": 79,
+                  "w": 527,
+                  "h": 108
+                }
+              ]
+            },
+            {
+              "panel": 2,
+              "rect": {
+                "x": 64,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 79,
+                  "y": 545,
+                  "w": 241,
+                  "h": 130
+                },
+                {
+                  "kind": "speech",
+                  "x": 350,
+                  "y": 545,
+                  "w": 244,
+                  "h": 139
+                }
+              ]
+            },
+            {
+              "panel": 3,
+              "rect": {
+                "x": 631,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 646,
+                  "y": 545,
+                  "w": 253,
+                  "h": 133
+                }
+              ]
+            },
+            {
+              "panel": 4,
+              "rect": {
+                "x": 64,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 79,
+                  "y": 1131,
+                  "w": 254,
+                  "h": 158
+                }
+              ]
+            },
+            {
+              "panel": 5,
+              "rect": {
+                "x": 631,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 646,
+                  "y": 1131,
+                  "w": 256,
+                  "h": 108
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "page": 2,
+          "rtl": false,
+          "layout": "dialogue_5",
+          "panels": [
+            {
+              "panel": 1,
+              "rect": {
+                "x": 64,
+                "y": 64,
+                "w": 1112,
+                "h": 444
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 79,
+                  "y": 79,
+                  "w": 353,
+                  "h": 48
+                }
+              ]
+            },
+            {
+              "panel": 2,
+              "rect": {
+                "x": 64,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "sfx",
+                  "x": 79,
+                  "y": 1024,
+                  "w": 179,
+                  "h": 54
+                }
+              ]
+            },
+            {
+              "panel": 3,
+              "rect": {
+                "x": 631,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 646,
+                  "y": 922,
+                  "w": 252,
+                  "h": 156
+                }
+              ]
+            },
+            {
+              "panel": 4,
+              "rect": {
+                "x": 64,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 79,
+                  "y": 1131,
+                  "w": 252,
+                  "h": 138
+                },
+                {
+                  "kind": "speech",
+                  "x": 343,
+                  "y": 1131,
+                  "w": 213,
+                  "h": 61
+                }
+              ]
+            },
+            {
+              "panel": 5,
+              "rect": {
+                "x": 631,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 646,
+                  "y": 1131,
+                  "w": 223,
+                  "h": 108
+                },
+                {
+                  "kind": "speech",
+                  "x": 908,
+                  "y": 1131,
+                  "w": 165,
+                  "h": 100
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "pdf": "manga_ltr.pdf"
+    }
+  },
+  "trace": [
+    {
+      "agent": "writer",
+      "label": "Beat sheet",
+      "started_at": "2026-10-04T21:43:55+00:00",
+      "duration_s": 0.005,
+      "status": "ok",
+      "attempts": 1,
+      "errors": [],
+      "model": "mock",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "inputs": {
+        "story_words": 164,
+        "max_beats": 10
+      },
+      "output": {
+        "title": "Riku's Story",
+        "logline": "Riku had exactly one job at the Neko Neko Cat Cafe: make sure nobody fed the cats any cake.",
+        "emotional_arc": "calm -> dramatic -> calm",
+        "beats": [
+          {
+            "id": 1,
+            "summary": "Riku had exactly one job at the Neko Neko Cat Cafe: make sure nobody fed the cats any cake.",
+            "emotion": "calm",
+            "intensity": 1,
+            "kind": "setup"
+          },
+          {
+            "id": 2,
+            "summary": "On his first day, a fat orange cat named Mochi stared at him like a tiny emperor. \"Don't even think about it,\" Riku warned.",
+            "emotion": "calm",
+            "intensity": 1,
+            "kind": "quiet"
+          },
+          {
+            "id": 3,
+            "summary": "Mochi yawned. At noon, a strict food critic named Ms. Tanabe arrived and ordered the famous strawberry shortcake.",
+            "emotion": "calm",
+            "intensity": 1,
+            "kind": "quiet"
+          },
+          {
+            "id": 4,
+            "summary": "The whole cafe held its breath. Riku carried the cake across the room with trembling hands.",
+            "emotion": "calm",
+            "intensity": 1,
+            "kind": "quiet"
+          },
+          {
+            "id": 5,
+            "summary": "Mochi crouched on the bookshelf, tail twitching. \"No.",
+            "emotion": "calm",
+            "intensity": 1,
+            "kind": "quiet"
+          },
+          {
+            "id": 6,
+            "summary": "No, no, no,\" Riku whispered.",
+            "emotion": "calm",
+            "intensity": 1,
+            "kind": "quiet"
+          },
+          {
+            "id": 7,
+            "summary": "Mochi launched himself through the air like a furry cannonball! Riku spun, slipped on a toy mouse, and crashed onto the floor.",
+            "emotion": "dramatic",
+            "intensity": 5,
+            "kind": "climax"
+          },
+          {
+            "id": 8,
+            "summary": "The cake flew upward, turned once, and landed perfectly on Ms. Tanabe's plate. Mochi landed perfectly on Ms. Tanabe's lap.",
+            "emotion": "calm",
+            "intensity": 1,
+            "kind": "resolution"
+          },
+          {
+            "id": 9,
+            "summary": "The critic looked at the cake, then at the cat, then at Riku on the floor. \"Five stars,\" she said.",
+            "emotion": "calm",
+            "intensity": 1,
+            "kind": "resolution"
+          },
+          {
+            "id": 10,
+            "summary": "\"For the show.\" Mochi purred. Riku decided he would never understand cats.",
+            "emotion": "calm",
+            "intensity": 1,
+            "kind": "resolution"
+          }
+        ],
+        "climax_beat": 7,
+        "characters": [
+          {
+            "name": "Riku",
+            "role": "protagonist",
+            "importance": "main",
+            "summary": "Appears in the story as Riku."
+          },
+          {
+            "name": "Mochi",
+            "role": "supporting character",
+            "importance": "main",
+            "summary": "Appears in the story as Mochi."
+          },
+          {
+            "name": "Tanabe",
+            "role": "supporting character",
+            "importance": "supporting",
+            "summary": "Appears in the story as Tanabe."
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "agent": "writer",
+      "label": "Page plan",
+      "started_at": "2026-10-04T21:43:55+00:00",
+      "duration_s": 0.011,
+      "status": "ok",
+      "attempts": 1,
+      "errors": [],
+      "model": "mock",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "inputs": {
+        "beats": 10,
+        "max_pages": 2,
+        "max_panels_per_page": 6
+      },
+      "output": {
+        "pages": [
+          {
+            "page_number": 1,
+            "panels": [
+              {
+                "panel_number": 1,
+                "beat": 1,
+                "purpose": "Establish the scene",
+                "size": "large",
+                "characters": [
+                  "Riku"
+                ],
+                "action": "Riku had exactly one job at the Neko Neko Cat Cafe: make sure nobody fed the cats any cake.",
+                "setting": "a cafe",
+                "emotion": "calm",
+                "dialogue": [],
+                "narration": "Riku had exactly one job at the Neko Neko Cat Cafe: make sure nobody fed the cats any cake.",
+                "sfx": []
+              },
+              {
+                "panel_number": 2,
+                "beat": 2,
+                "purpose": "Let the emotion land",
+                "size": "medium",
+                "characters": [
+                  "Riku",
+                  "Mochi"
+                ],
+                "action": "On his first day, a fat orange cat named Mochi stared at him like a tiny emperor. Riku warned.",
+                "setting": "a cafe",
+                "emotion": "calm",
+                "dialogue": [
+                  {
+                    "speaker": "Riku",
+                    "text": "Don't even think about it."
+                  }
+                ],
+                "narration": "On his first day, a fat orange cat named Mochi stared at him like a tiny emperor.",
+                "sfx": []
+              },
+              {
+                "panel_number": 3,
+                "beat": 3,
+                "purpose": "Let the emotion land",
+                "size": "medium",
+                "characters": [
+                  "Mochi",
+                  "Tanabe"
+                ],
+                "action": "Mochi yawned. At noon, a strict food critic named Ms. Tanabe arrived and ordered the famous strawberry shortcake.",
+                "setting": "a cafe",
+                "emotion": "calm",
+                "dialogue": [],
+                "narration": "Mochi yawned. At noon, a strict food critic named Ms. Tanabe arrived and ordered the famous strawberry shortcake.",
+                "sfx": []
+              },
+              {
+                "panel_number": 4,
+                "beat": 4,
+                "purpose": "Let the emotion land",
+                "size": "medium",
+                "characters": [
+                  "Riku"
+                ],
+                "action": "The whole cafe held its breath. Riku carried the cake across the room with trembling hands.",
+                "setting": "a cafe",
+                "emotion": "calm",
+                "dialogue": [],
+                "narration": "The whole cafe held its breath. Riku carried the cake across the room with trembling hands.",
+                "sfx": []
+              },
+              {
+                "panel_number": 5,
+                "beat": 5,
+                "purpose": "Let the emotion land",
+                "size": "medium",
+                "characters": [
+                  "Mochi"
+                ],
+                "action": "Mochi crouched on the bookshelf, tail twitching. \"No.",
+                "setting": "a cafe",
+                "emotion": "calm",
+                "dialogue": [],
+                "narration": "Mochi crouched on the bookshelf, tail twitching. \"No.",
+                "sfx": []
+              }
+            ],
+            "page_turn": "Ends on: Mochi crouched on the bookshelf, tail twitching. \"No."
+          },
+          {
+            "page_number": 2,
+            "panels": [
+              {
+                "panel_number": 1,
+                "beat": 6,
+                "purpose": "Let the emotion land",
+                "size": "medium",
+                "characters": [
+                  "Riku"
+                ],
+                "action": "No, no, no,\" Riku whispered.",
+                "setting": "a cafe",
+                "emotion": "calm",
+                "dialogue": [],
+                "narration": "No, no, no,\" Riku whispered.",
+                "sfx": []
+              },
+              {
+                "panel_number": 2,
+                "beat": 7,
+                "purpose": "Deliver the climax",
+                "size": "large",
+                "characters": [
+                  "Riku",
+                  "Mochi"
+                ],
+                "action": "Mochi launched himself through the air like a furry cannonball! Riku spun, slipped on a toy mouse, and crashed onto the floor.",
+                "setting": "a cafe",
+                "emotion": "dramatic",
+                "dialogue": [],
+                "narration": null,
+                "sfx": [
+                  "CRASH"
+                ]
+              },
+              {
+                "panel_number": 3,
+                "beat": 8,
+                "purpose": "Resolve the story",
+                "size": "medium",
+                "characters": [
+                  "Mochi",
+                  "Tanabe"
+                ],
+                "action": "The cake flew upward, turned once, and landed perfectly on Ms. Tanabe's plate. Mochi landed perfectly on Ms. Tanabe's lap.",
+                "setting": "a cafe",
+                "emotion": "calm",
+                "dialogue": [],
+                "narration": "The cake flew upward, turned once, and landed perfectly on Ms. Tanabe's plate. Mochi landed perfectly on Ms. Tanabe's lap.",
+                "sfx": []
+              },
+              {
+                "panel_number": 4,
+                "beat": 9,
+                "purpose": "Resolve the story",
+                "size": "medium",
+                "characters": [
+                  "Riku"
+                ],
+                "action": "The critic looked at the cake, then at the cat, then at Riku on the floor. she said.",
+                "setting": "a cafe",
+                "emotion": "calm",
+                "dialogue": [
+                  {
+                    "speaker": "Riku",
+                    "text": "Five stars."
+                  }
+                ],
+                "narration": "The critic looked at the cake, then at the cat, then at Riku on the floor.",
+                "sfx": []
+              },
+              {
+                "panel_number": 5,
+                "beat": 10,
+                "purpose": "Resolve the story",
+                "size": "medium",
+                "characters": [
+                  "Riku",
+                  "Mochi"
+                ],
+                "action": "Mochi purred. Riku decided he would never understand cats.",
+                "setting": "a cafe",
+                "emotion": "calm",
+                "dialogue": [
+                  {
+                    "speaker": "Mochi",
+                    "text": "For the show."
+                  }
+                ],
+                "narration": "Riku decided he would never understand cats.",
+                "sfx": []
+              }
+            ],
+            "page_turn": "Ends on: Mochi purred. Riku decided he would never understand cats."
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "agent": "director",
+      "label": "Director plan",
+      "started_at": "2026-10-04T21:43:55+00:00",
+      "duration_s": 0.002,
+      "status": "ok",
+      "attempts": 1,
+      "errors": [],
+      "model": "mock",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "inputs": {
+        "pages": 2,
+        "panels": 10,
+        "templates": 10
+      },
+      "output": {
+        "pages": [
+          {
+            "page_number": 1,
+            "layout": "dialogue_5",
+            "panels": [
+              {
+                "panel_number": 1,
+                "shot": "establishing",
+                "angle": "bird's eye",
+                "composition": "Riku small in the frame, the setting fills the panel"
+              },
+              {
+                "panel_number": 2,
+                "shot": "over-the-shoulder",
+                "angle": "eye level",
+                "composition": "over one shoulder toward Riku and Mochi, speaker in the foreground"
+              },
+              {
+                "panel_number": 3,
+                "shot": "medium",
+                "angle": "eye level",
+                "composition": "Mochi and Tanabe from the waist up, centred"
+              },
+              {
+                "panel_number": 4,
+                "shot": "close-up",
+                "angle": "eye level",
+                "composition": "Riku from the waist up, centred"
+              },
+              {
+                "panel_number": 5,
+                "shot": "medium",
+                "angle": "eye level",
+                "composition": "Mochi from the waist up, centred"
+              }
+            ]
+          },
+          {
+            "page_number": 2,
+            "layout": "dialogue_5",
+            "panels": [
+              {
+                "panel_number": 1,
+                "shot": "medium",
+                "angle": "eye level",
+                "composition": "Riku from the waist up, centred"
+              },
+              {
+                "panel_number": 2,
+                "shot": "close-up",
+                "angle": "low",
+                "composition": "Riku and Mochi's face fills the frame, background dropped to screentone"
+              },
+              {
+                "panel_number": 3,
+                "shot": "medium",
+                "angle": "eye level",
+                "composition": "Mochi and Tanabe from the waist up, centred"
+              },
+              {
+                "panel_number": 4,
+                "shot": "medium",
+                "angle": "eye level",
+                "composition": "Riku from the waist up, centred"
+              },
+              {
+                "panel_number": 5,
+                "shot": "over-the-shoulder",
+                "angle": "eye level",
+                "composition": "over one shoulder toward Riku and Mochi, speaker in the foreground"
+              }
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "p1·4: third 'medium' in a row → close-up"
+      ]
+    },
+    {
+      "agent": "character_designer",
+      "label": "Character bible",
+      "started_at": "2026-10-04T21:43:55+00:00",
+      "duration_s": 0.0,
+      "status": "ok",
+      "attempts": 1,
+      "errors": [],
+      "model": "mock",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "inputs": {
+        "characters": [
+          "Riku",
+          "Mochi",
+          "Tanabe"
+        ],
+        "reused": []
+      },
+      "output": [
+        {
+          "name": "Riku",
+          "role": "protagonist",
+          "age_range": "late teens",
+          "body_type": "slim and tall",
+          "description": "Riku is a slim and tall character in their late teens, with short wavy white hair, bright almond eyes and a light kimono-style top with a sash.",
+          "visual_tags": {
+            "hair": "short wavy white hair",
+            "eyes": "bright almond eyes",
+            "outfit": "a light kimono-style top with a sash",
+            "accessories": "a silver hairpin",
+            "distinguishing_marks": "a small scar on the left cheek"
+          },
+          "personality": "cheerful and impulsive",
+          "expression_range": [
+            "neutral",
+            "happy",
+            "angry",
+            "sad",
+            "surprised"
+          ]
+        },
+        {
+          "name": "Mochi",
+          "role": "supporting character",
+          "age_range": "mid teens",
+          "body_type": "short and wiry",
+          "description": "Mochi is a short and wiry character in their mid teens, with long straight silver hair, large round dark eyes and a dark school uniform with a striped tie.",
+          "visual_tags": {
+            "hair": "long straight silver hair",
+            "eyes": "large round dark eyes",
+            "outfit": "a dark school uniform with a striped tie",
+            "accessories": "a small pendant necklace",
+            "distinguishing_marks": "a small scar on the left cheek"
+          },
+          "personality": "determined but secretly anxious",
+          "expression_range": [
+            "neutral",
+            "happy",
+            "angry",
+            "sad",
+            "surprised"
+          ]
+        },
+        {
+          "name": "Tanabe",
+          "role": "supporting character",
+          "age_range": "late twenties",
+          "body_type": "lanky",
+          "description": "Tanabe is a lanky character in their late twenties, with shoulder-length hair with blunt bangs, bright almond eyes and a sailor-collar uniform and knee socks.",
+          "visual_tags": {
+            "hair": "shoulder-length hair with blunt bangs",
+            "eyes": "bright almond eyes",
+            "outfit": "a sailor-collar uniform and knee socks",
+            "accessories": "a wristwatch",
+            "distinguishing_marks": "a bandage on the nose"
+          },
+          "personality": "quiet and observant",
+          "expression_range": [
+            "neutral",
+            "happy",
+            "angry",
+            "sad",
+            "surprised"
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "agent": "studio",
+      "label": "Cast approval",
+      "started_at": "",
+      "duration_s": 0.0,
+      "status": "ok",
+      "attempts": 0,
+      "errors": [],
+      "model": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "inputs": {},
+      "output": [
+        "Riku",
+        "Mochi",
+        "Tanabe"
+      ],
+      "notes": [
+        "Auto-approved (unattended run)"
+      ]
+    }
+  ],
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0
+  },
+  "timings": {
+    "writer_beats": 0.009,
+    "writer_pages": 0.016,
+    "director": 0.005,
+    "character_designer": 0.004,
+    "reference_sheets": 0.367,
+    "approval": 0.088,
+    "prompts": 0.009,
+    "panels": 0.407,
+    "consistency": 62.542,
+    "layout": 2.175,
+    "export": 0.424
+  },
+  "warnings": [],
+  "error": null
+}

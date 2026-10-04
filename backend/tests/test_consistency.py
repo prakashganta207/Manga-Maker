@@ -67,7 +67,9 @@ def test_get_scorer_modes():
 CLIP_CACHED = (BACKEND_DIR / ".cache" / "huggingface" / "hub" / "models--openai--clip-vit-base-patch32").exists()
 
 
-@pytest.mark.skipif(not CLIP_CACHED or os.environ.get("SKIP_CLIP") == "1", reason="CLIP model not downloaded")
+# Opt-in: importing transformers takes ~30-60 s on Windows. Run with RUN_SLOW=1.
+@pytest.mark.skipif(not CLIP_CACHED or os.environ.get("RUN_SLOW") != "1",
+                    reason="slow: set RUN_SLOW=1 (needs the CLIP model in backend/.cache)")
 def test_real_clip_scores_same_character_higher(tmp_path):
     from app.providers.base import ImageRequest
     from app.providers.mock_image import MockImageProvider

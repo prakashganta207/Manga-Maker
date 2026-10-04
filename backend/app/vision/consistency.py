@@ -81,23 +81,28 @@ class ClipScorer(Scorer):
     @lru_cache(maxsize=2)
     def _load(model_name: str):
         import torch  # imported lazily: optional dependency
-        from transformers import CLIPModel, CLIPProcessor
+        from transformers import CLIPImageProcessor, CLIPVisionModelWithProjection
+        from transformers.utils import logging as hf_logging
 
         torch.set_grad_enabled(False)
-        model = CLIPModel.from_pretrained(model_name).eval()  # CPU
-        processor = CLIPProcessor.from_pretrained(model_name)
-        return model, processor
+        hf_logging.set_verbosity_error()  # the unused text-tower weights are reported as "unexpected"
+        # Only the image half of CLIP is needed (no text tower, no tokenizer).
+        try:  # use the local cache without asking the Hub (fast, works offline)
+            model = CLIPVisionModelWithProjection.from_pretrained(model_name, local_files_only=True)
+            processor = CLIPImageProcessor.from_pretrained(model_name, local_files_only=True)
+        except OSError:  # first use: download (~600 MB) into backend/.cache/huggingface
+            model = CLIPVisionModelWithProjection.from_pretrained(model_name)
+            processor = CLIPImageProcessor.from_pretrained(model_name)
+        return model.eval(), processor  # stays on the CPU
 
     def _clip_embed(self, image: Image.Image) -> list[float]:
         import torch
 
         model, processor = self._load(self.model_name)
-        inputs = processor(images=image, return_tensors="pt")
+        inputs = processor(images=image, return_tensors="pt")  # resize to 224², normalise
         with torch.no_grad():
-            features = model.get_image_features(**inputs)
-        if not isinstance(features, torch.Tensor):  # some versions return an output object
-            features = getattr(features, "image_embeds", None) or features.pooler_output
-        return features[0].tolist()
+            embedding = model(**inputs).image_embeds  # the 512-number CLIP image embedding
+        return embedding[0].tolist()
 
 
 def clip_available() -> bool:

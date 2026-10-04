@@ -1,0 +1,1718 @@
+{
+  "job_id": "a9899644349a",
+  "project_id": "a9899644349a",
+  "created_at": "2026-10-04T21:45:06+00:00",
+  "story": "Every evening for forty years, Grandpa Isamu had climbed the hundred steps of the old lighthouse to light the lamp. Tonight his granddaughter Hana climbed them alone.\nThe room at the top was quiet. His reading glasses still lay folded beside the logbook, as if he had only stepped out for tea.\nHana opened the logbook. On the last page, in his shaky handwriting, was a note addressed to her.\n\"If you are reading this, the light is yours now. Don't be afraid of the dark, Hana. The dark is how the ships find home.\"\nHer hands trembled. She pressed the book to her chest and cried for the first time since the funeral.\nOutside, the fog rolled in thick and grey. Somewhere out at sea, a ship's horn called, low and lost.\nHana wiped her eyes, struck a match, and lit the great lamp. The beam swept across the water.\nThe horn called again, closer now, answering the light. Hana smiled through her tears. \"Welcome home,\" she said softly.",
+  "title": "Hana's Story",
+  "status": "failed",
+  "auto_approve": true,
+  "max_pages": 2,
+  "max_panels_per_page": 6,
+  "providers": {
+    "llm": "mock",
+    "llm_model": "",
+    "image": "mock"
+  },
+  "beat_sheet": {
+    "title": "Hana's Story",
+    "logline": "Every evening for forty years, Grandpa Isamu had climbed the hundred steps of the old lighthouse to light the lamp.",
+    "emotional_arc": "calm -> tense -> melancholy",
+    "beats": [
+      {
+        "id": 1,
+        "summary": "Every evening for forty years, Grandpa Isamu had climbed the hundred steps of the old lighthouse to light the lamp.",
+        "emotion": "calm",
+        "intensity": 1,
+        "kind": "setup"
+      },
+      {
+        "id": 2,
+        "summary": "Tonight his granddaughter Hana climbed them alone. The room at the top was quiet.",
+        "emotion": "melancholy",
+        "intensity": 3,
+        "kind": "quiet"
+      },
+      {
+        "id": 3,
+        "summary": "His reading glasses still lay folded beside the logbook, as if he had only stepped out for tea. Hana opened the logbook.",
+        "emotion": "calm",
+        "intensity": 1,
+        "kind": "quiet"
+      },
+      {
+        "id": 4,
+        "summary": "On the last page, in his shaky handwriting, was a note addressed to her.",
+        "emotion": "calm",
+        "intensity": 1,
+        "kind": "quiet"
+      },
+      {
+        "id": 5,
+        "summary": "\"If you are reading this, the light is yours now. Don't be afraid of the dark, Hana.",
+        "emotion": "tense",
+        "intensity": 4,
+        "kind": "action"
+      },
+      {
+        "id": 6,
+        "summary": "The dark is how the ships find home.\" Her hands trembled. She pressed the book to her chest and cried for the first time since the funeral.",
+        "emotion": "tense",
+        "intensity": 5,
+        "kind": "climax"
+      },
+      {
+        "id": 7,
+        "summary": "Outside, the fog rolled in thick and grey.",
+        "emotion": "calm",
+        "intensity": 1,
+        "kind": "resolution"
+      },
+      {
+        "id": 8,
+        "summary": "Somewhere out at sea, a ship's horn called, low and lost. Hana wiped her eyes, struck a match, and lit the great lamp.",
+        "emotion": "melancholy",
+        "intensity": 3,
+        "kind": "resolution"
+      },
+      {
+        "id": 9,
+        "summary": "The beam swept across the water. The horn called again, closer now, answering the light.",
+        "emotion": "calm",
+        "intensity": 1,
+        "kind": "resolution"
+      },
+      {
+        "id": 10,
+        "summary": "Hana smiled through her tears. \"Welcome home,\" she said softly.",
+        "emotion": "melancholy",
+        "intensity": 3,
+        "kind": "resolution"
+      }
+    ],
+    "climax_beat": 6,
+    "characters": [
+      {
+        "name": "Hana",
+        "role": "protagonist",
+        "importance": "main",
+        "summary": "Appears in the story as Hana."
+      },
+      {
+        "name": "Isamu",
+        "role": "supporting character",
+        "importance": "main",
+        "summary": "Appears in the story as Isamu."
+      }
+    ]
+  },
+  "page_plan": {
+    "pages": [
+      {
+        "page_number": 1,
+        "panels": [
+          {
+            "panel_number": 1,
+            "beat": 1,
+            "purpose": "Establish the scene",
+            "size": "large",
+            "characters": [
+              "Isamu"
+            ],
+            "action": "Every evening for forty years, Grandpa Isamu had climbed the hundred steps of the old lighthouse to light the lamp.",
+            "setting": "a room",
+            "emotion": "calm",
+            "dialogue": [],
+            "narration": "Every evening for forty years, Grandpa Isamu had climbed the hundred steps of the old lighthouse to light the lamp.",
+            "sfx": [
+              "VMMMM"
+            ]
+          },
+          {
+            "panel_number": 2,
+            "beat": 2,
+            "purpose": "Let the emotion land",
+            "size": "medium",
+            "characters": [
+              "Hana",
+              "Isamu"
+            ],
+            "action": "Tonight his granddaughter Hana climbed them alone. The room at the top was quiet.",
+            "setting": "a room",
+            "emotion": "melancholy",
+            "dialogue": [],
+            "narration": "Tonight his granddaughter Hana climbed them alone. The room at the top was quiet.",
+            "sfx": []
+          },
+          {
+            "panel_number": 3,
+            "beat": 3,
+            "purpose": "Let the emotion land",
+            "size": "medium",
+            "characters": [
+              "Hana"
+            ],
+            "action": "His reading glasses still lay folded beside the logbook, as if he had only stepped out for tea. Hana opened the logbook.",
+            "setting": "a room",
+            "emotion": "calm",
+            "dialogue": [],
+            "narration": "His reading glasses still lay folded beside the logbook, as if he had only stepped out for tea. Hana opened the logbook.",
+            "sfx": []
+          },
+          {
+            "panel_number": 4,
+            "beat": 4,
+            "purpose": "Let the emotion land",
+            "size": "medium",
+            "characters": [
+              "Hana"
+            ],
+            "action": "On the last page, in his shaky handwriting, was a note addressed to her.",
+            "setting": "a room",
+            "emotion": "calm",
+            "dialogue": [],
+            "narration": "On the last page, in his shaky handwriting, was a note addressed to her.",
+            "sfx": []
+          },
+          {
+            "panel_number": 5,
+            "beat": 5,
+            "purpose": "Keep the action moving",
+            "size": "small",
+            "characters": [
+              "Hana"
+            ],
+            "action": "\"If you are reading this, the light is yours now. Don't be afraid of the dark, Hana.",
+            "setting": "a room",
+            "emotion": "tense",
+            "dialogue": [],
+            "narration": null,
+            "sfx": [
+              "VMMMM"
+            ]
+          }
+        ],
+        "page_turn": "Ends on: \"If you are reading this, the light is yours now. Don't be afraid of the dark, Hana."
+      },
+      {
+        "page_number": 2,
+        "panels": [
+          {
+            "panel_number": 1,
+            "beat": 6,
+            "purpose": "Deliver the climax",
+            "size": "large",
+            "characters": [
+              "Hana"
+            ],
+            "action": "The dark is how the ships find home.\" Her hands trembled. She pressed the book to her chest and cried for the first time since the funeral.",
+            "setting": "a ship deck",
+            "emotion": "tense",
+            "dialogue": [],
+            "narration": null,
+            "sfx": []
+          },
+          {
+            "panel_number": 2,
+            "beat": 7,
+            "purpose": "Resolve the story",
+            "size": "medium",
+            "characters": [
+              "Hana"
+            ],
+            "action": "Outside, the fog rolled in thick and grey.",
+            "setting": "a ship deck",
+            "emotion": "calm",
+            "dialogue": [],
+            "narration": "Outside, the fog rolled in thick and grey.",
+            "sfx": []
+          },
+          {
+            "panel_number": 3,
+            "beat": 8,
+            "purpose": "Resolve the story",
+            "size": "medium",
+            "characters": [
+              "Hana"
+            ],
+            "action": "Somewhere out at sea, a ship's horn called, low and lost. Hana wiped her eyes, struck a match, and lit the great lamp.",
+            "setting": "a ship deck",
+            "emotion": "melancholy",
+            "dialogue": [],
+            "narration": "Somewhere out at sea, a ship's horn called, low and lost. Hana wiped her eyes, struck a match, and lit the great lamp.",
+            "sfx": []
+          },
+          {
+            "panel_number": 4,
+            "beat": 9,
+            "purpose": "Resolve the story",
+            "size": "medium",
+            "characters": [
+              "Hana"
+            ],
+            "action": "The beam swept across the water. The horn called again, closer now, answering the light.",
+            "setting": "a ship deck",
+            "emotion": "calm",
+            "dialogue": [],
+            "narration": "The beam swept across the water. The horn called again, closer now, answering the light.",
+            "sfx": [
+              "VMMMM"
+            ]
+          },
+          {
+            "panel_number": 5,
+            "beat": 10,
+            "purpose": "Resolve the story",
+            "size": "medium",
+            "characters": [
+              "Hana"
+            ],
+            "action": "Hana smiled through her tears. she said softly.",
+            "setting": "a ship deck",
+            "emotion": "melancholy",
+            "dialogue": [
+              {
+                "speaker": "Hana",
+                "text": "Welcome home."
+              }
+            ],
+            "narration": "Hana smiled through her tears.",
+            "sfx": []
+          }
+        ],
+        "page_turn": "Ends on: Hana smiled through her tears. she said softly."
+      }
+    ]
+  },
+  "director": {
+    "pages": [
+      {
+        "page_number": 1,
+        "layout": "dialogue_5",
+        "panels": [
+          {
+            "panel_number": 1,
+            "shot": "establishing",
+            "angle": "bird's eye",
+            "composition": "Isamu small in the frame, the setting fills the panel"
+          },
+          {
+            "panel_number": 2,
+            "shot": "medium",
+            "angle": "high",
+            "composition": "Hana and Isamu from the waist up, centred"
+          },
+          {
+            "panel_number": 3,
+            "shot": "close-up",
+            "angle": "eye level",
+            "composition": "Hana from the waist up, centred"
+          },
+          {
+            "panel_number": 4,
+            "shot": "medium",
+            "angle": "eye level",
+            "composition": "Hana from the waist up, centred"
+          },
+          {
+            "panel_number": 5,
+            "shot": "wide",
+            "angle": "low",
+            "composition": "Hana full body, motion lines across the panel"
+          }
+        ]
+      },
+      {
+        "page_number": 2,
+        "layout": "dialogue_5",
+        "panels": [
+          {
+            "panel_number": 1,
+            "shot": "establishing",
+            "angle": "high",
+            "composition": "Hana small in the frame, the setting fills the panel"
+          },
+          {
+            "panel_number": 2,
+            "shot": "medium",
+            "angle": "eye level",
+            "composition": "Hana from the waist up, centred"
+          },
+          {
+            "panel_number": 3,
+            "shot": "close-up",
+            "angle": "high",
+            "composition": "Hana from the waist up, centred"
+          },
+          {
+            "panel_number": 4,
+            "shot": "medium",
+            "angle": "eye level",
+            "composition": "Hana from the waist up, centred"
+          },
+          {
+            "panel_number": 5,
+            "shot": "medium",
+            "angle": "high",
+            "composition": "Hana from the waist up, centred"
+          }
+        ]
+      }
+    ]
+  },
+  "rule_fixes": [
+    "beat 6: emotional peak in a new setting — kept the establishing shot",
+    "p1·3: third 'medium' in a row → close-up",
+    "p2·3: third 'medium' in a row → close-up"
+  ],
+  "characters": [
+    {
+      "name": "Hana",
+      "role": "protagonist",
+      "age_range": "late twenties",
+      "body_type": "slim and tall",
+      "description": "Hana is a slim and tall character in their late twenties, with shoulder-length hair with blunt bangs, narrow sharp eyes and a high-collared coat with brass buttons.",
+      "visual_tags": {
+        "hair": "shoulder-length hair with blunt bangs",
+        "eyes": "narrow sharp eyes",
+        "outfit": "a high-collared coat with brass buttons",
+        "accessories": "a wristwatch",
+        "distinguishing_marks": "none"
+      },
+      "personality": "quiet and observant",
+      "expression_range": [
+        "neutral",
+        "happy",
+        "angry",
+        "sad",
+        "surprised"
+      ],
+      "slug": "hana",
+      "turnaround_seed": 99306425,
+      "expression_seed": 1030036972,
+      "sheets": {
+        "turnaround": "characters/hana/turnaround_v1.png",
+        "expressions": "characters/hana/expressions_v1.png",
+        "views": {
+          "front": "characters/hana/front_v1.png",
+          "side": "characters/hana/side_v1.png",
+          "back": "characters/hana/back_v1.png"
+        },
+        "expression_refs": {
+          "neutral": "characters/hana/neutral_v1.png",
+          "happy": "characters/hana/happy_v1.png",
+          "angry": "characters/hana/angry_v1.png",
+          "sad": "characters/hana/sad_v1.png",
+          "surprised": "characters/hana/surprised_v1.png"
+        }
+      },
+      "status": "approved",
+      "approved": true,
+      "version": 1,
+      "reused_from": null
+    },
+    {
+      "name": "Isamu",
+      "role": "supporting character",
+      "age_range": "mid teens",
+      "body_type": "stocky and broad",
+      "description": "Isamu is a stocky and broad character in their mid teens, with shaved sides and a long top braid, large round dark eyes and a long hooded traveling cloak.",
+      "visual_tags": {
+        "hair": "shaved sides and a long top braid",
+        "eyes": "large round dark eyes",
+        "outfit": "a long hooded traveling cloak",
+        "accessories": "a small pendant necklace",
+        "distinguishing_marks": "none"
+      },
+      "personality": "cheerful and impulsive",
+      "expression_range": [
+        "neutral",
+        "happy",
+        "angry",
+        "sad",
+        "surprised"
+      ],
+      "slug": "isamu",
+      "turnaround_seed": 656015800,
+      "expression_seed": 2116078079,
+      "sheets": {
+        "turnaround": "characters/isamu/turnaround_v1.png",
+        "expressions": "characters/isamu/expressions_v1.png",
+        "views": {
+          "front": "characters/isamu/front_v1.png",
+          "side": "characters/isamu/side_v1.png",
+          "back": "characters/isamu/back_v1.png"
+        },
+        "expression_refs": {
+          "neutral": "characters/isamu/neutral_v1.png",
+          "happy": "characters/isamu/happy_v1.png",
+          "angry": "characters/isamu/angry_v1.png",
+          "sad": "characters/isamu/sad_v1.png",
+          "surprised": "characters/isamu/surprised_v1.png"
+        }
+      },
+      "status": "approved",
+      "approved": true,
+      "version": 1,
+      "reused_from": null
+    }
+  ],
+  "renames": {},
+  "prompts": [
+    {
+      "page": 1,
+      "panel": 1,
+      "prompt": "monochrome, greyscale, manga, comic panel, establishing shot, wide view, scenery, detailed background, small figures in distance, bird's eye view, from above, top-down view, solo, (shaved sides and a long top braid, large round dark eyes, a long hooded traveling cloak, a small pendant necklace), Every evening for forty years, Grandpa Isamu had climbed the hundred steps of the old lighthouse to light the lamp, setting: a room, Isamu small in the frame, the setting fills the panel, soft light, peaceful, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 1808854795,
+      "width": 1536,
+      "height": 640,
+      "characters": [
+        "Isamu"
+      ],
+      "references": [
+        "characters/isamu/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Isamu: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 1,
+      "panel": 2,
+      "prompt": "monochrome, greyscale, manga, comic panel, medium shot, upper body, from above, high angle, two people, (shoulder-length hair with blunt bangs, narrow sharp eyes, a high-collared coat with brass buttons, a wristwatch, sad, tears, downcast eyes), (shaved sides and a long top braid, large round dark eyes, a long hooded traveling cloak, a small pendant necklace, sad, tears, downcast eyes), Tonight his granddaughter Hana climbed them alone. The room at the top was quiet, setting: a room, Hana and Isamu from the waist up, centred, rain, quiet atmosphere, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 1808854796,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Hana",
+        "Isamu"
+      ],
+      "references": [
+        "characters/hana/sad_v1.png",
+        "characters/isamu/sad_v1.png"
+      ],
+      "reference_kinds": [
+        "Hana: sad",
+        "Isamu: sad"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 1,
+      "panel": 3,
+      "prompt": "monochrome, greyscale, manga, comic panel, close-up, portrait, face focus, head and shoulders, eye level, solo, (shoulder-length hair with blunt bangs, narrow sharp eyes, a high-collared coat with brass buttons, a wristwatch, calm expression), His reading glasses still lay folded beside the logbook, as if he had only stepped out for tea. Hana opened the logbook, setting: a room, Hana from the waist up, centred, soft light, peaceful, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 1808854797,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Hana"
+      ],
+      "references": [
+        "characters/hana/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Hana: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 1,
+      "panel": 4,
+      "prompt": "monochrome, greyscale, manga, comic panel, medium shot, upper body, eye level, solo, (shoulder-length hair with blunt bangs, narrow sharp eyes, a high-collared coat with brass buttons, a wristwatch, calm expression), On the last page, in his shaky handwriting, was a note addressed to her, setting: a room, Hana from the waist up, centred, soft light, peaceful, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 1808854798,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Hana"
+      ],
+      "references": [
+        "characters/hana/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Hana: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 1,
+      "panel": 5,
+      "prompt": "monochrome, greyscale, manga, comic panel, wide shot, full body, from below, low angle, dramatic perspective, solo, (shoulder-length hair with blunt bangs, narrow sharp eyes, a high-collared coat with brass buttons, a wristwatch, calm expression), \"If you are reading this, the light is yours now. Don't be afraid of the dark, Hana, setting: a room, Hana full body, motion lines across the panel, tense atmosphere, heavy shadows, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 1808854799,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Hana"
+      ],
+      "references": [
+        "characters/hana/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Hana: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 2,
+      "panel": 1,
+      "prompt": "monochrome, greyscale, manga, comic panel, establishing shot, wide view, scenery, detailed background, small figures in distance, from above, high angle, solo, (shoulder-length hair with blunt bangs, narrow sharp eyes, a high-collared coat with brass buttons, a wristwatch), The dark is how the ships find home.\" Her hands trembled. She pressed the book to her chest and cried for the first time since the funeral, setting: a ship deck, Hana small in the frame, the setting fills the panel, tense atmosphere, heavy shadows, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 1808855795,
+      "width": 1536,
+      "height": 640,
+      "characters": [
+        "Hana"
+      ],
+      "references": [
+        "characters/hana/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Hana: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 2,
+      "panel": 2,
+      "prompt": "monochrome, greyscale, manga, comic panel, medium shot, upper body, eye level, solo, (shoulder-length hair with blunt bangs, narrow sharp eyes, a high-collared coat with brass buttons, a wristwatch, calm expression), Outside, the fog rolled in thick and grey, setting: a ship deck, Hana from the waist up, centred, soft light, peaceful, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 1808855796,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Hana"
+      ],
+      "references": [
+        "characters/hana/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Hana: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 2,
+      "panel": 3,
+      "prompt": "monochrome, greyscale, manga, comic panel, close-up, portrait, face focus, head and shoulders, from above, high angle, solo, (shoulder-length hair with blunt bangs, narrow sharp eyes, a high-collared coat with brass buttons, a wristwatch, sad, tears, downcast eyes), Somewhere out at sea, a ship's horn called, low and lost. Hana wiped her eyes, struck a match, and lit the great lamp, setting: a ship deck, Hana from the waist up, centred, rain, quiet atmosphere, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 1808855797,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Hana"
+      ],
+      "references": [
+        "characters/hana/sad_v1.png"
+      ],
+      "reference_kinds": [
+        "Hana: sad"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 2,
+      "panel": 4,
+      "prompt": "monochrome, greyscale, manga, comic panel, medium shot, upper body, eye level, solo, (shoulder-length hair with blunt bangs, narrow sharp eyes, a high-collared coat with brass buttons, a wristwatch, calm expression), The beam swept across the water. The horn called again, closer now, answering the light, setting: a ship deck, Hana from the waist up, centred, soft light, peaceful, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 1808855798,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Hana"
+      ],
+      "references": [
+        "characters/hana/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Hana: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 2,
+      "panel": 5,
+      "prompt": "monochrome, greyscale, manga, comic panel, medium shot, upper body, from above, high angle, solo, (shoulder-length hair with blunt bangs, narrow sharp eyes, a high-collared coat with brass buttons, a wristwatch, sad, tears, downcast eyes), Hana smiled through her tears. she said softly, setting: a ship deck, Hana from the waist up, centred, rain, quiet atmosphere, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 1808855799,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Hana"
+      ],
+      "references": [
+        "characters/hana/sad_v1.png"
+      ],
+      "reference_kinds": [
+        "Hana: sad"
+      ],
+      "ipadapter_weight": 0.7
+    }
+  ],
+  "panels": [
+    {
+      "page": 1,
+      "panel": 1,
+      "image": "panels/p01_01.png",
+      "seconds": 0.04,
+      "workflow": "mock",
+      "consistency": {
+        "Isamu": 0.693
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 1,
+      "panel": 2,
+      "image": "panels/p01_02.png",
+      "seconds": 0.08,
+      "workflow": "mock",
+      "consistency": {
+        "Hana": 0.637,
+        "Isamu": 0.658
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 1,
+      "panel": 3,
+      "image": "panels/p01_03.png",
+      "seconds": 0.03,
+      "workflow": "mock",
+      "consistency": {
+        "Hana": 0.875
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 1,
+      "panel": 4,
+      "image": "panels/p01_04.png",
+      "seconds": 0.02,
+      "workflow": "mock",
+      "consistency": {
+        "Hana": 0.799
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 1,
+      "panel": 5,
+      "image": "panels/p01_05.png",
+      "seconds": 0.07,
+      "workflow": "mock",
+      "consistency": {
+        "Hana": 0.829
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 2,
+      "panel": 1,
+      "image": "panels/p02_01.png",
+      "seconds": 0.09,
+      "workflow": "mock",
+      "consistency": {
+        "Hana": 0.7
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 2,
+      "panel": 2,
+      "image": "panels/p02_02.png",
+      "seconds": 0.03,
+      "workflow": "mock",
+      "consistency": {
+        "Hana": 0.799
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 2,
+      "panel": 3,
+      "image": "panels/p02_03.png",
+      "seconds": 0.05,
+      "workflow": "mock",
+      "consistency": {
+        "Hana": 0.86
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 2,
+      "panel": 4,
+      "image": "panels/p02_04.png",
+      "seconds": 0.02,
+      "workflow": "mock",
+      "consistency": {
+        "Hana": 0.799
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 2,
+      "panel": 5,
+      "image": "panels/p02_05.png",
+      "seconds": 0.11,
+      "workflow": "mock",
+      "consistency": {
+        "Hana": 0.775
+      },
+      "consistency_method": "clip"
+    }
+  ],
+  "outputs": {
+    "rtl": {
+      "pages": [
+        "pages/rtl/page_01.png",
+        "pages/rtl/page_02.png"
+      ],
+      "layout": [
+        {
+          "page": 1,
+          "rtl": true,
+          "layout": "dialogue_5",
+          "panels": [
+            {
+              "panel": 1,
+              "rect": {
+                "x": 64,
+                "y": 64,
+                "w": 1112,
+                "h": 444
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 656,
+                  "y": 79,
+                  "w": 505,
+                  "h": 108
+                },
+                {
+                  "kind": "sfx",
+                  "x": 941,
+                  "y": 441,
+                  "w": 220,
+                  "h": 52
+                }
+              ]
+            },
+            {
+              "panel": 2,
+              "rect": {
+                "x": 631,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 921,
+                  "y": 545,
+                  "w": 240,
+                  "h": 143
+                }
+              ]
+            },
+            {
+              "panel": 3,
+              "rect": {
+                "x": 64,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 334,
+                  "y": 545,
+                  "w": 260,
+                  "h": 133
+                }
+              ]
+            },
+            {
+              "panel": 4,
+              "rect": {
+                "x": 631,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 929,
+                  "y": 1131,
+                  "w": 232,
+                  "h": 158
+                }
+              ]
+            },
+            {
+              "panel": 5,
+              "rect": {
+                "x": 64,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "sfx",
+                  "x": 374,
+                  "y": 1623,
+                  "w": 220,
+                  "h": 52
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "page": 2,
+          "rtl": true,
+          "layout": "dialogue_5",
+          "panels": [
+            {
+              "panel": 1,
+              "rect": {
+                "x": 64,
+                "y": 64,
+                "w": 1112,
+                "h": 444
+              },
+              "balloons": []
+            },
+            {
+              "panel": 2,
+              "rect": {
+                "x": 631,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 923,
+                  "y": 545,
+                  "w": 238,
+                  "h": 108
+                }
+              ]
+            },
+            {
+              "panel": 3,
+              "rect": {
+                "x": 64,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 337,
+                  "y": 545,
+                  "w": 257,
+                  "h": 133
+                }
+              ]
+            },
+            {
+              "panel": 4,
+              "rect": {
+                "x": 631,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 904,
+                  "y": 1131,
+                  "w": 257,
+                  "h": 158
+                },
+                {
+                  "kind": "sfx",
+                  "x": 941,
+                  "y": 1623,
+                  "w": 220,
+                  "h": 52
+                }
+              ]
+            },
+            {
+              "panel": 5,
+              "rect": {
+                "x": 64,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 357,
+                  "y": 1131,
+                  "w": 237,
+                  "h": 78
+                },
+                {
+                  "kind": "speech",
+                  "x": 119,
+                  "y": 1131,
+                  "w": 198,
+                  "h": 100
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "pdf": "manga_rtl.pdf"
+    },
+    "ltr": {
+      "pages": [
+        "pages/ltr/page_01.png",
+        "pages/ltr/page_02.png"
+      ],
+      "layout": [
+        {
+          "page": 1,
+          "rtl": false,
+          "layout": "dialogue_5",
+          "panels": [
+            {
+              "panel": 1,
+              "rect": {
+                "x": 64,
+                "y": 64,
+                "w": 1112,
+                "h": 444
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 79,
+                  "y": 79,
+                  "w": 505,
+                  "h": 108
+                },
+                {
+                  "kind": "sfx",
+                  "x": 79,
+                  "y": 441,
+                  "w": 220,
+                  "h": 52
+                }
+              ]
+            },
+            {
+              "panel": 2,
+              "rect": {
+                "x": 64,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 79,
+                  "y": 545,
+                  "w": 240,
+                  "h": 143
+                }
+              ]
+            },
+            {
+              "panel": 3,
+              "rect": {
+                "x": 631,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 646,
+                  "y": 545,
+                  "w": 260,
+                  "h": 133
+                }
+              ]
+            },
+            {
+              "panel": 4,
+              "rect": {
+                "x": 64,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 79,
+                  "y": 1131,
+                  "w": 232,
+                  "h": 158
+                }
+              ]
+            },
+            {
+              "panel": 5,
+              "rect": {
+                "x": 631,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "sfx",
+                  "x": 646,
+                  "y": 1623,
+                  "w": 220,
+                  "h": 52
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "page": 2,
+          "rtl": false,
+          "layout": "dialogue_5",
+          "panels": [
+            {
+              "panel": 1,
+              "rect": {
+                "x": 64,
+                "y": 64,
+                "w": 1112,
+                "h": 444
+              },
+              "balloons": []
+            },
+            {
+              "panel": 2,
+              "rect": {
+                "x": 64,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 79,
+                  "y": 545,
+                  "w": 238,
+                  "h": 108
+                }
+              ]
+            },
+            {
+              "panel": 3,
+              "rect": {
+                "x": 631,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 646,
+                  "y": 545,
+                  "w": 257,
+                  "h": 133
+                }
+              ]
+            },
+            {
+              "panel": 4,
+              "rect": {
+                "x": 64,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 79,
+                  "y": 1131,
+                  "w": 257,
+                  "h": 158
+                },
+                {
+                  "kind": "sfx",
+                  "x": 79,
+                  "y": 1623,
+                  "w": 220,
+                  "h": 52
+                }
+              ]
+            },
+            {
+              "panel": 5,
+              "rect": {
+                "x": 631,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 646,
+                  "y": 1131,
+                  "w": 237,
+                  "h": 78
+                },
+                {
+                  "kind": "speech",
+                  "x": 923,
+                  "y": 1131,
+                  "w": 198,
+                  "h": 100
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "pdf": "manga_ltr.pdf"
+    }
+  },
+  "trace": [
+    {
+      "agent": "writer",
+      "label": "Beat sheet",
+      "started_at": "2026-10-04T21:45:09+00:00",
+      "duration_s": 0.008,
+      "status": "ok",
+      "attempts": 1,
+      "errors": [],
+      "model": "mock",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "inputs": {
+        "story_words": 170,
+        "max_beats": 10
+      },
+      "output": {
+        "title": "Hana's Story",
+        "logline": "Every evening for forty years, Grandpa Isamu had climbed the hundred steps of the old lighthouse to light the lamp.",
+        "emotional_arc": "calm -> tense -> melancholy",
+        "beats": [
+          {
+            "id": 1,
+            "summary": "Every evening for forty years, Grandpa Isamu had climbed the hundred steps of the old lighthouse to light the lamp.",
+            "emotion": "calm",
+            "intensity": 1,
+            "kind": "setup"
+          },
+          {
+            "id": 2,
+            "summary": "Tonight his granddaughter Hana climbed them alone. The room at the top was quiet.",
+            "emotion": "melancholy",
+            "intensity": 3,
+            "kind": "quiet"
+          },
+          {
+            "id": 3,
+            "summary": "His reading glasses still lay folded beside the logbook, as if he had only stepped out for tea. Hana opened the logbook.",
+            "emotion": "calm",
+            "intensity": 1,
+            "kind": "quiet"
+          },
+          {
+            "id": 4,
+            "summary": "On the last page, in his shaky handwriting, was a note addressed to her.",
+            "emotion": "calm",
+            "intensity": 1,
+            "kind": "quiet"
+          },
+          {
+            "id": 5,
+            "summary": "\"If you are reading this, the light is yours now. Don't be afraid of the dark, Hana.",
+            "emotion": "tense",
+            "intensity": 4,
+            "kind": "action"
+          },
+          {
+            "id": 6,
+            "summary": "The dark is how the ships find home.\" Her hands trembled. She pressed the book to her chest and cried for the first time since the funeral.",
+            "emotion": "tense",
+            "intensity": 5,
+            "kind": "climax"
+          },
+          {
+            "id": 7,
+            "summary": "Outside, the fog rolled in thick and grey.",
+            "emotion": "calm",
+            "intensity": 1,
+            "kind": "resolution"
+          },
+          {
+            "id": 8,
+            "summary": "Somewhere out at sea, a ship's horn called, low and lost. Hana wiped her eyes, struck a match, and lit the great lamp.",
+            "emotion": "melancholy",
+            "intensity": 3,
+            "kind": "resolution"
+          },
+          {
+            "id": 9,
+            "summary": "The beam swept across the water. The horn called again, closer now, answering the light.",
+            "emotion": "calm",
+            "intensity": 1,
+            "kind": "resolution"
+          },
+          {
+            "id": 10,
+            "summary": "Hana smiled through her tears. \"Welcome home,\" she said softly.",
+            "emotion": "melancholy",
+            "intensity": 3,
+            "kind": "resolution"
+          }
+        ],
+        "climax_beat": 6,
+        "characters": [
+          {
+            "name": "Hana",
+            "role": "protagonist",
+            "importance": "main",
+            "summary": "Appears in the story as Hana."
+          },
+          {
+            "name": "Isamu",
+            "role": "supporting character",
+            "importance": "main",
+            "summary": "Appears in the story as Isamu."
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "agent": "writer",
+      "label": "Page plan",
+      "started_at": "2026-10-04T21:45:09+00:00",
+      "duration_s": 0.023,
+      "status": "ok",
+      "attempts": 1,
+      "errors": [],
+      "model": "mock",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "inputs": {
+        "beats": 10,
+        "max_pages": 2,
+        "max_panels_per_page": 6
+      },
+      "output": {
+        "pages": [
+          {
+            "page_number": 1,
+            "panels": [
+              {
+                "panel_number": 1,
+                "beat": 1,
+                "purpose": "Establish the scene",
+                "size": "large",
+                "characters": [
+                  "Isamu"
+                ],
+                "action": "Every evening for forty years, Grandpa Isamu had climbed the hundred steps of the old lighthouse to light the lamp.",
+                "setting": "a room",
+                "emotion": "calm",
+                "dialogue": [],
+                "narration": "Every evening for forty years, Grandpa Isamu had climbed the hundred steps of the old lighthouse to light the lamp.",
+                "sfx": [
+                  "VMMMM"
+                ]
+              },
+              {
+                "panel_number": 2,
+                "beat": 2,
+                "purpose": "Let the emotion land",
+                "size": "medium",
+                "characters": [
+                  "Hana",
+                  "Isamu"
+                ],
+                "action": "Tonight his granddaughter Hana climbed them alone. The room at the top was quiet.",
+                "setting": "a room",
+                "emotion": "melancholy",
+                "dialogue": [],
+                "narration": "Tonight his granddaughter Hana climbed them alone. The room at the top was quiet.",
+                "sfx": []
+              },
+              {
+                "panel_number": 3,
+                "beat": 3,
+                "purpose": "Let the emotion land",
+                "size": "medium",
+                "characters": [
+                  "Hana"
+                ],
+                "action": "His reading glasses still lay folded beside the logbook, as if he had only stepped out for tea. Hana opened the logbook.",
+                "setting": "a room",
+                "emotion": "calm",
+                "dialogue": [],
+                "narration": "His reading glasses still lay folded beside the logbook, as if he had only stepped out for tea. Hana opened the logbook.",
+                "sfx": []
+              },
+              {
+                "panel_number": 4,
+                "beat": 4,
+                "purpose": "Let the emotion land",
+                "size": "medium",
+                "characters": [
+                  "Hana"
+                ],
+                "action": "On the last page, in his shaky handwriting, was a note addressed to her.",
+                "setting": "a room",
+                "emotion": "calm",
+                "dialogue": [],
+                "narration": "On the last page, in his shaky handwriting, was a note addressed to her.",
+                "sfx": []
+              },
+              {
+                "panel_number": 5,
+                "beat": 5,
+                "purpose": "Keep the action moving",
+                "size": "small",
+                "characters": [
+                  "Hana"
+                ],
+                "action": "\"If you are reading this, the light is yours now. Don't be afraid of the dark, Hana.",
+                "setting": "a room",
+                "emotion": "tense",
+                "dialogue": [],
+                "narration": null,
+                "sfx": [
+                  "VMMMM"
+                ]
+              }
+            ],
+            "page_turn": "Ends on: \"If you are reading this, the light is yours now. Don't be afraid of the dark, Hana."
+          },
+          {
+            "page_number": 2,
+            "panels": [
+              {
+                "panel_number": 1,
+                "beat": 6,
+                "purpose": "Deliver the climax",
+                "size": "large",
+                "characters": [
+                  "Hana"
+                ],
+                "action": "The dark is how the ships find home.\" Her hands trembled. She pressed the book to her chest and cried for the first time since the funeral.",
+                "setting": "a ship deck",
+                "emotion": "tense",
+                "dialogue": [],
+                "narration": null,
+                "sfx": []
+              },
+              {
+                "panel_number": 2,
+                "beat": 7,
+                "purpose": "Resolve the story",
+                "size": "medium",
+                "characters": [
+                  "Hana"
+                ],
+                "action": "Outside, the fog rolled in thick and grey.",
+                "setting": "a ship deck",
+                "emotion": "calm",
+                "dialogue": [],
+                "narration": "Outside, the fog rolled in thick and grey.",
+                "sfx": []
+              },
+              {
+                "panel_number": 3,
+                "beat": 8,
+                "purpose": "Resolve the story",
+                "size": "medium",
+                "characters": [
+                  "Hana"
+                ],
+                "action": "Somewhere out at sea, a ship's horn called, low and lost. Hana wiped her eyes, struck a match, and lit the great lamp.",
+                "setting": "a ship deck",
+                "emotion": "melancholy",
+                "dialogue": [],
+                "narration": "Somewhere out at sea, a ship's horn called, low and lost. Hana wiped her eyes, struck a match, and lit the great lamp.",
+                "sfx": []
+              },
+              {
+                "panel_number": 4,
+                "beat": 9,
+                "purpose": "Resolve the story",
+                "size": "medium",
+                "characters": [
+                  "Hana"
+                ],
+                "action": "The beam swept across the water. The horn called again, closer now, answering the light.",
+                "setting": "a ship deck",
+                "emotion": "calm",
+                "dialogue": [],
+                "narration": "The beam swept across the water. The horn called again, closer now, answering the light.",
+                "sfx": [
+                  "VMMMM"
+                ]
+              },
+              {
+                "panel_number": 5,
+                "beat": 10,
+                "purpose": "Resolve the story",
+                "size": "medium",
+                "characters": [
+                  "Hana"
+                ],
+                "action": "Hana smiled through her tears. she said softly.",
+                "setting": "a ship deck",
+                "emotion": "melancholy",
+                "dialogue": [
+                  {
+                    "speaker": "Hana",
+                    "text": "Welcome home."
+                  }
+                ],
+                "narration": "Hana smiled through her tears.",
+                "sfx": []
+              }
+            ],
+            "page_turn": "Ends on: Hana smiled through her tears. she said softly."
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "agent": "director",
+      "label": "Director plan",
+      "started_at": "2026-10-04T21:45:09+00:00",
+      "duration_s": 0.002,
+      "status": "ok",
+      "attempts": 1,
+      "errors": [],
+      "model": "mock",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "inputs": {
+        "pages": 2,
+        "panels": 10,
+        "templates": 10
+      },
+      "output": {
+        "pages": [
+          {
+            "page_number": 1,
+            "layout": "dialogue_5",
+            "panels": [
+              {
+                "panel_number": 1,
+                "shot": "establishing",
+                "angle": "bird's eye",
+                "composition": "Isamu small in the frame, the setting fills the panel"
+              },
+              {
+                "panel_number": 2,
+                "shot": "medium",
+                "angle": "high",
+                "composition": "Hana and Isamu from the waist up, centred"
+              },
+              {
+                "panel_number": 3,
+                "shot": "close-up",
+                "angle": "eye level",
+                "composition": "Hana from the waist up, centred"
+              },
+              {
+                "panel_number": 4,
+                "shot": "medium",
+                "angle": "eye level",
+                "composition": "Hana from the waist up, centred"
+              },
+              {
+                "panel_number": 5,
+                "shot": "wide",
+                "angle": "low",
+                "composition": "Hana full body, motion lines across the panel"
+              }
+            ]
+          },
+          {
+            "page_number": 2,
+            "layout": "dialogue_5",
+            "panels": [
+              {
+                "panel_number": 1,
+                "shot": "establishing",
+                "angle": "high",
+                "composition": "Hana small in the frame, the setting fills the panel"
+              },
+              {
+                "panel_number": 2,
+                "shot": "medium",
+                "angle": "eye level",
+                "composition": "Hana from the waist up, centred"
+              },
+              {
+                "panel_number": 3,
+                "shot": "close-up",
+                "angle": "high",
+                "composition": "Hana from the waist up, centred"
+              },
+              {
+                "panel_number": 4,
+                "shot": "medium",
+                "angle": "eye level",
+                "composition": "Hana from the waist up, centred"
+              },
+              {
+                "panel_number": 5,
+                "shot": "medium",
+                "angle": "high",
+                "composition": "Hana from the waist up, centred"
+              }
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "beat 6: emotional peak in a new setting — kept the establishing shot",
+        "p1·3: third 'medium' in a row → close-up",
+        "p2·3: third 'medium' in a row → close-up"
+      ]
+    },
+    {
+      "agent": "character_designer",
+      "label": "Character bible",
+      "started_at": "2026-10-04T21:45:09+00:00",
+      "duration_s": 0.001,
+      "status": "ok",
+      "attempts": 1,
+      "errors": [],
+      "model": "mock",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "inputs": {
+        "characters": [
+          "Hana",
+          "Isamu"
+        ],
+        "reused": []
+      },
+      "output": [
+        {
+          "name": "Hana",
+          "role": "protagonist",
+          "age_range": "late twenties",
+          "body_type": "slim and tall",
+          "description": "Hana is a slim and tall character in their late twenties, with shoulder-length hair with blunt bangs, narrow sharp eyes and a high-collared coat with brass buttons.",
+          "visual_tags": {
+            "hair": "shoulder-length hair with blunt bangs",
+            "eyes": "narrow sharp eyes",
+            "outfit": "a high-collared coat with brass buttons",
+            "accessories": "a wristwatch",
+            "distinguishing_marks": "none"
+          },
+          "personality": "quiet and observant",
+          "expression_range": [
+            "neutral",
+            "happy",
+            "angry",
+            "sad",
+            "surprised"
+          ]
+        },
+        {
+          "name": "Isamu",
+          "role": "supporting character",
+          "age_range": "mid teens",
+          "body_type": "stocky and broad",
+          "description": "Isamu is a stocky and broad character in their mid teens, with shaved sides and a long top braid, large round dark eyes and a long hooded traveling cloak.",
+          "visual_tags": {
+            "hair": "shaved sides and a long top braid",
+            "eyes": "large round dark eyes",
+            "outfit": "a long hooded traveling cloak",
+            "accessories": "a small pendant necklace",
+            "distinguishing_marks": "none"
+          },
+          "personality": "cheerful and impulsive",
+          "expression_range": [
+            "neutral",
+            "happy",
+            "angry",
+            "sad",
+            "surprised"
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "agent": "studio",
+      "label": "Cast approval",
+      "started_at": "",
+      "duration_s": 0.0,
+      "status": "ok",
+      "attempts": 0,
+      "errors": [],
+      "model": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "inputs": {},
+      "output": [
+        "Hana",
+        "Isamu"
+      ],
+      "notes": [
+        "Auto-approved (unattended run)"
+      ]
+    }
+  ],
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0
+  },
+  "timings": {
+    "writer_beats": 0.02,
+    "writer_pages": 0.029,
+    "director": 0.009,
+    "character_designer": 0.012,
+    "reference_sheets": 0.5,
+    "approval": 0.099,
+    "prompts": 0.008,
+    "panels": 0.595,
+    "consistency": 57.563,
+    "layout": 2.479,
+    "export": 0.401
+  },
+  "warnings": [],
+  "error": "PermissionError: [WinError 5] Access is denied: 'E:\\\\AI Manga Maker\\\\samples\\\\output\\\\drama_last_lighthouse\\\\project.tmp' -> 'E:\\\\AI Manga Maker\\\\samples\\\\output\\\\drama_last_lighthouse\\\\project.json'"
+}

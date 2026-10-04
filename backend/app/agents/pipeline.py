@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import threading
 import time
 from pathlib import Path
 from typing import Any, Callable
@@ -167,13 +168,16 @@ def node_panels(p: MangaProject, ctx: Ctx) -> None:
 
 
 _SCORERS: dict[tuple[str, str], Scorer | None] = {}
+_SCORER_LOCK = threading.Lock()
 
 
 def scorer_for(settings: Settings) -> Scorer | None:
+    """Load the consistency scorer once per process (importing CLIP takes ~30 s on Windows)."""
     key = (settings.consistency_scorer, settings.clip_model)
-    if key not in _SCORERS:  # load CLIP once per process
-        _SCORERS[key] = get_scorer(*key)
-    return _SCORERS[key]
+    with _SCORER_LOCK:
+        if key not in _SCORERS:
+            _SCORERS[key] = get_scorer(*key)
+        return _SCORERS[key]
 
 
 def character_references(p: MangaProject, name: str, job_dir: Path) -> list[Path]:

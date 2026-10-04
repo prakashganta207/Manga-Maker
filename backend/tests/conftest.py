@@ -2,7 +2,9 @@
 
 import os
 
-# Set before app.config is imported, so a developer's real .env can't leak into tests.
+# Remember the real choices (the opt-in integration test uses them), then force mock mode.
+# This runs before app.config is imported, so a developer's real .env can't leak into tests.
+ORIGINAL_PROVIDERS = {k: os.environ.get(k, "auto") for k in ("LLM_PROVIDER", "IMAGE_PROVIDER")}
 os.environ["LLM_PROVIDER"] = "mock"
 os.environ["IMAGE_PROVIDER"] = "mock"
 

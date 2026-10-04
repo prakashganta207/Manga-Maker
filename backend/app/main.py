@@ -16,6 +16,7 @@ Run:  uvicorn app.main:app --reload --port 8000   (docs at /docs)
 from __future__ import annotations
 
 import logging
+import threading
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
@@ -26,7 +27,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .agents.cast_store import CastStore
-from .agents.pipeline import manifest, new_project, run_project, templates_catalogue
+from .agents.pipeline import manifest, new_project, run_project, scorer_for, templates_catalogue
 from .agents.state import MangaProject
 from .config import REPO_DIR, Settings
 from .jobs import Job, JobManager
@@ -94,6 +95,9 @@ def create_app(settings: Settings | None = None, llm: LLMProvider | None = None,
     @asynccontextmanager
     async def lifespan(_: FastAPI):
         manager.start()
+        if settings.consistency_scorer in ("auto", "clip"):
+            # Warm up CLIP in the background so the first job doesn't wait for the import.
+            threading.Thread(target=scorer_for, args=(settings,), name="clip-preload", daemon=True).start()
         yield
         manager.stop()
 

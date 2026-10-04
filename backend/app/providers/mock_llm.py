@@ -28,7 +28,8 @@ Very Wait Was We Well Were What When Where Whether Which While Who Why Will With
 Yes Yesterday Yet You Your Monday Tuesday Wednesday Thursday Friday Saturday Sunday January
 February March April May June July August September October November December God Hey Hi
 Run Stop Look Come Go No Don Help Sorry Three Four Five Years Hours Minutes Everybody Nobody
-Mr Ms Mrs Dr Prof St
+Mr Ms Mrs Dr Prof St Grandpa Grandma Granny Uncle Aunt Mom Dad Mother Father Sister Brother
+Master Captain Sir Lady Lord Teacher Sensei Cat Cafe
 """.split())
 
 _SETTINGS = [
@@ -109,6 +110,9 @@ def find_names(sentences: list[str], limit: int = 3) -> list[str]:
                 continue
             before = sentence[: match.start()].rstrip()
             at_start = before == "" or before.endswith(('"', ".", "!", "?"))
+            # "the Neko Neko Cat Cafe" -> a place, not a person (also skip the repeated word).
+            if re.search(r"\bthe(\s+[A-Z][a-z]+)*$", before):
+                continue
             # Possessive / contraction like "Don't" -> skip ("Don" + "'t").
             if sentence[match.end(): match.end() + 1] == "'" and sentence[match.end() + 1: match.end() + 2] == "t":
                 continue

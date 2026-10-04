@@ -22,6 +22,7 @@ load_dotenv(BACKEND_DIR / ".env", override=False)
 
 # Hugging Face downloads (the CLIP model for consistency scores) stay inside the project.
 os.environ.setdefault("HF_HOME", str(BACKEND_DIR / ".cache" / "huggingface"))
+os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")  # harmless on Windows, just noisy
 
 
 def _env(name: str, default: str = "") -> str:

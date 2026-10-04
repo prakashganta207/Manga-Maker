@@ -2,18 +2,23 @@
 # Then open http://localhost:3000   (API docs: http://localhost:8000/docs)
 #
 # API keys and provider settings come from ./.env (copy .env.example).
-# ComfyUI running on your host machine is reachable from the backend container as
-# http://host.docker.internal:8188  -> set COMFYUI_URL to that in .env.
+# ComfyUI runs on your host (it needs the GPU directly, see SETUP_COMFYUI.md); the backend
+# container reaches it at http://host.docker.internal:8188 -> set COMFYUI_URL to that in .env.
 services:
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      args:
+        WITH_CLIP: "${WITH_CLIP:-0}"   # 1 = real CLIP consistency scores (bigger image)
     env_file:
       - path: .env
         required: false
     environment:
       OUTPUT_DIR: /data/output
+      HF_HOME: /data/hf-cache
     volumes:
-      - manga-output:/data/output
+      - manga-output:/data
+      - ./samples:/samples:ro          # sample stories for the home page
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     extra_hosts:

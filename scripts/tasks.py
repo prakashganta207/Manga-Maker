@@ -5,7 +5,7 @@
     python scripts/tasks.py dev       # backend :8000 + frontend :3000
     python scripts/tasks.py backend   # backend only
     python scripts/tasks.py frontend  # frontend only
-    python scripts/tasks.py sample    # regenerate samples/ output
+    python scripts/tasks.py sample    # run samples/stories/*.txt -> samples/output/
 
 Ports: BACKEND_PORT (default 8000) and FRONTEND_PORT (default 3000) env vars.
 """
@@ -99,9 +99,13 @@ def stop_tree(proc: subprocess.Popen) -> None:
 
 
 def sample() -> None:
-    env = {**os.environ, "LLM_PROVIDER": "mock", "IMAGE_PROVIDER": "mock"}
-    run([python(), "-m", "app.cli", "../samples/rooftop_glow.txt", "--out", "../samples/rooftop_glow_output"],
-        BACKEND, env=env)
+    """Run every story in samples/stories/ end to end (uses whatever providers .env selects;
+    set LLM_PROVIDER=mock IMAGE_PROVIDER=mock to force mock mode)."""
+    for story in sorted((ROOT / "samples" / "stories").glob("*.txt")):
+        out = ROOT / "samples" / "output" / story.stem
+        if out.exists():
+            shutil.rmtree(out)  # fresh run, not a resume
+        run([python(), "-m", "app.cli", story, "--out", out], BACKEND)
 
 
 TASKS = {

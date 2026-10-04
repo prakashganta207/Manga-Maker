@@ -1,0 +1,1768 @@
+{
+  "job_id": "1534dc9ec335",
+  "project_id": "1534dc9ec335",
+  "created_at": "2026-10-04T21:42:39+00:00",
+  "story": "The alarm screamed across the night market as Kenji vaulted onto the rooftops, a small silver box clutched to his chest. Drones swept the alley below, their searchlights slicing through the steam.\n\"Give it back, Kenji!\" Aya shouted, landing on the tiles behind him. She was the fastest courier in the district, and she was gaining.\nKenji leapt the gap between two towers and crashed onto a water tank. Aya followed without slowing down. Her boot struck the metal with a loud clang.\n\"You don't know what's inside!\" he yelled.\nAt the edge of the last roof, Kenji turned and hurled the box toward the river. Aya dove for it and missed by a finger.\nThe box exploded in a column of white light! For a moment the whole city went silent.\nAya stopped, stunned, her hair whipping in the wind. \"What did you do?\" she whispered.\nKenji smiled sadly at the glowing water. \"I set it free,\" he said.",
+  "title": "Kenji's Story",
+  "status": "done",
+  "auto_approve": true,
+  "max_pages": 2,
+  "max_panels_per_page": 6,
+  "providers": {
+    "llm": "mock",
+    "llm_model": "",
+    "image": "mock"
+  },
+  "beat_sheet": {
+    "title": "Kenji's Story",
+    "logline": "The alarm screamed across the night market as Kenji vaulted onto the rooftops, a small silver box clutched to his chest.",
+    "emotional_arc": "dramatic -> dramatic -> melancholy",
+    "beats": [
+      {
+        "id": 1,
+        "summary": "The alarm screamed across the night market as Kenji vaulted onto the rooftops, a small silver box clutched to his chest.",
+        "emotion": "dramatic",
+        "intensity": 4,
+        "kind": "setup"
+      },
+      {
+        "id": 2,
+        "summary": "Drones swept the alley below, their searchlights slicing through the steam. \"Give it back, Kenji!\"",
+        "emotion": "dramatic",
+        "intensity": 5,
+        "kind": "action"
+      },
+      {
+        "id": 3,
+        "summary": "Aya shouted, landing on the tiles behind him. She was the fastest courier in the district, and she was gaining.",
+        "emotion": "dramatic",
+        "intensity": 4,
+        "kind": "action"
+      },
+      {
+        "id": 4,
+        "summary": "Kenji leapt the gap between two towers and crashed onto a water tank.",
+        "emotion": "dramatic",
+        "intensity": 4,
+        "kind": "action"
+      },
+      {
+        "id": 5,
+        "summary": "Aya followed without slowing down. Her boot struck the metal with a loud clang.",
+        "emotion": "calm",
+        "intensity": 1,
+        "kind": "quiet"
+      },
+      {
+        "id": 6,
+        "summary": "\"You don't know what's inside!\" he yelled. At the edge of the last roof, Kenji turned and hurled the box toward the river.",
+        "emotion": "dramatic",
+        "intensity": 5,
+        "kind": "action"
+      },
+      {
+        "id": 7,
+        "summary": "Aya dove for it and missed by a finger.",
+        "emotion": "melancholy",
+        "intensity": 3,
+        "kind": "quiet"
+      },
+      {
+        "id": 8,
+        "summary": "The box exploded in a column of white light! For a moment the whole city went silent.",
+        "emotion": "dramatic",
+        "intensity": 5,
+        "kind": "climax"
+      },
+      {
+        "id": 9,
+        "summary": "Aya stopped, stunned, her hair whipping in the wind. \"What did you do?\" she whispered.",
+        "emotion": "calm",
+        "intensity": 1,
+        "kind": "resolution"
+      },
+      {
+        "id": 10,
+        "summary": "Kenji smiled sadly at the glowing water. \"I set it free,\" he said.",
+        "emotion": "melancholy",
+        "intensity": 3,
+        "kind": "resolution"
+      }
+    ],
+    "climax_beat": 8,
+    "characters": [
+      {
+        "name": "Kenji",
+        "role": "protagonist",
+        "importance": "main",
+        "summary": "Appears in the story as Kenji."
+      },
+      {
+        "name": "Aya",
+        "role": "supporting character",
+        "importance": "main",
+        "summary": "Appears in the story as Aya."
+      }
+    ]
+  },
+  "page_plan": {
+    "pages": [
+      {
+        "page_number": 1,
+        "panels": [
+          {
+            "panel_number": 1,
+            "beat": 1,
+            "purpose": "Establish the scene",
+            "size": "large",
+            "characters": [
+              "Kenji"
+            ],
+            "action": "The alarm screamed across the night market as Kenji vaulted onto the rooftops, a small silver box clutched to his chest.",
+            "setting": "a school rooftop",
+            "emotion": "dramatic",
+            "dialogue": [],
+            "narration": "The alarm screamed across the night market as Kenji vaulted onto the rooftops, a small silver box clutched to his chest.",
+            "sfx": []
+          },
+          {
+            "panel_number": 2,
+            "beat": 2,
+            "purpose": "Keep the action moving",
+            "size": "small",
+            "characters": [
+              "Kenji",
+              "Aya"
+            ],
+            "action": "Drones swept the alley below, their searchlights slicing through the steam. Kenji speaks",
+            "setting": "a school rooftop",
+            "emotion": "dramatic",
+            "dialogue": [
+              {
+                "speaker": "Kenji",
+                "text": "Give it back, Kenji!"
+              }
+            ],
+            "narration": null,
+            "sfx": []
+          },
+          {
+            "panel_number": 3,
+            "beat": 3,
+            "purpose": "Keep the action moving",
+            "size": "small",
+            "characters": [
+              "Aya"
+            ],
+            "action": "Aya shouted, landing on the tiles behind him. She was the fastest courier in the district, and she was gaining.",
+            "setting": "a school rooftop",
+            "emotion": "dramatic",
+            "dialogue": [],
+            "narration": null,
+            "sfx": []
+          },
+          {
+            "panel_number": 4,
+            "beat": 4,
+            "purpose": "Keep the action moving",
+            "size": "small",
+            "characters": [
+              "Kenji"
+            ],
+            "action": "Kenji leapt the gap between two towers and crashed onto a water tank.",
+            "setting": "a school rooftop",
+            "emotion": "dramatic",
+            "dialogue": [],
+            "narration": null,
+            "sfx": [
+              "CRASH"
+            ]
+          },
+          {
+            "panel_number": 5,
+            "beat": 5,
+            "purpose": "Let the emotion land",
+            "size": "medium",
+            "characters": [
+              "Aya"
+            ],
+            "action": "Aya followed without slowing down. Her boot struck the metal with a loud clang.",
+            "setting": "a school rooftop",
+            "emotion": "calm",
+            "dialogue": [],
+            "narration": "Aya followed without slowing down. Her boot struck the metal with a loud clang.",
+            "sfx": []
+          }
+        ],
+        "page_turn": "Ends on: Aya followed without slowing down. Her boot struck the metal with a loud clang."
+      },
+      {
+        "page_number": 2,
+        "panels": [
+          {
+            "panel_number": 1,
+            "beat": 6,
+            "purpose": "Keep the action moving",
+            "size": "small",
+            "characters": [
+              "Aya",
+              "Kenji"
+            ],
+            "action": "he yelled. At the edge of the last roof, Kenji turned and hurled the box toward the river.",
+            "setting": "a narrow alley",
+            "emotion": "dramatic",
+            "dialogue": [
+              {
+                "speaker": "Aya",
+                "text": "You don't know what's inside!"
+              }
+            ],
+            "narration": null,
+            "sfx": []
+          },
+          {
+            "panel_number": 2,
+            "beat": 7,
+            "purpose": "Let the emotion land",
+            "size": "medium",
+            "characters": [
+              "Aya"
+            ],
+            "action": "Aya dove for it and missed by a finger.",
+            "setting": "a narrow alley",
+            "emotion": "melancholy",
+            "dialogue": [],
+            "narration": "Aya dove for it and missed by a finger.",
+            "sfx": []
+          },
+          {
+            "panel_number": 3,
+            "beat": 8,
+            "purpose": "Deliver the climax",
+            "size": "large",
+            "characters": [
+              "Kenji"
+            ],
+            "action": "The box exploded in a column of white light! For a moment the whole city went silent.",
+            "setting": "a narrow alley",
+            "emotion": "dramatic",
+            "dialogue": [],
+            "narration": null,
+            "sfx": [
+              "BOOM"
+            ]
+          },
+          {
+            "panel_number": 4,
+            "beat": 9,
+            "purpose": "Resolve the story",
+            "size": "medium",
+            "characters": [
+              "Aya"
+            ],
+            "action": "Aya stopped, stunned, her hair whipping in the wind. she whispered.",
+            "setting": "a narrow alley",
+            "emotion": "calm",
+            "dialogue": [
+              {
+                "speaker": "Aya",
+                "text": "What did you do?"
+              }
+            ],
+            "narration": "Aya stopped, stunned, her hair whipping in the wind.",
+            "sfx": [
+              "WHOOSH"
+            ]
+          },
+          {
+            "panel_number": 5,
+            "beat": 10,
+            "purpose": "Resolve the story",
+            "size": "medium",
+            "characters": [
+              "Kenji"
+            ],
+            "action": "Kenji smiled sadly at the glowing water. he said.",
+            "setting": "a narrow alley",
+            "emotion": "melancholy",
+            "dialogue": [
+              {
+                "speaker": "Kenji",
+                "text": "I set it free."
+              }
+            ],
+            "narration": "Kenji smiled sadly at the glowing water.",
+            "sfx": [
+              "VMMMM"
+            ]
+          }
+        ],
+        "page_turn": "Ends on: Kenji smiled sadly at the glowing water. he said."
+      }
+    ]
+  },
+  "director": {
+    "pages": [
+      {
+        "page_number": 1,
+        "layout": "dialogue_5",
+        "panels": [
+          {
+            "panel_number": 1,
+            "shot": "establishing",
+            "angle": "high",
+            "composition": "Kenji small in the frame, the setting fills the panel"
+          },
+          {
+            "panel_number": 2,
+            "shot": "extreme close-up",
+            "angle": "low",
+            "composition": "tight on Kenji and Aya's eyes"
+          },
+          {
+            "panel_number": 3,
+            "shot": "wide",
+            "angle": "low",
+            "composition": "Aya full body, motion lines across the panel"
+          },
+          {
+            "panel_number": 4,
+            "shot": "wide",
+            "angle": "low",
+            "composition": "Kenji full body, motion lines across the panel"
+          },
+          {
+            "panel_number": 5,
+            "shot": "medium",
+            "angle": "eye level",
+            "composition": "Aya from the waist up, centred"
+          }
+        ]
+      },
+      {
+        "page_number": 2,
+        "layout": "action_5",
+        "panels": [
+          {
+            "panel_number": 1,
+            "shot": "establishing",
+            "angle": "high",
+            "composition": "Aya and Kenji small in the frame, the setting fills the panel"
+          },
+          {
+            "panel_number": 2,
+            "shot": "medium",
+            "angle": "high",
+            "composition": "Aya from the waist up, centred"
+          },
+          {
+            "panel_number": 3,
+            "shot": "close-up",
+            "angle": "low",
+            "composition": "Kenji's face fills the frame, background dropped to screentone"
+          },
+          {
+            "panel_number": 4,
+            "shot": "medium",
+            "angle": "eye level",
+            "composition": "Aya from the waist up, centred"
+          },
+          {
+            "panel_number": 5,
+            "shot": "medium",
+            "angle": "high",
+            "composition": "Kenji from the waist up, centred"
+          }
+        ]
+      }
+    ]
+  },
+  "rule_fixes": [
+    "beat 6: emotional peak in a new setting — kept the establishing shot"
+  ],
+  "characters": [
+    {
+      "name": "Kenji",
+      "role": "protagonist",
+      "age_range": "late twenties",
+      "body_type": "stocky and broad",
+      "description": "Kenji is a stocky and broad character in their late twenties, with short spiky black hair, wide curious eyes and a sailor-collar uniform and knee socks.",
+      "visual_tags": {
+        "hair": "short spiky black hair",
+        "eyes": "wide curious eyes",
+        "outfit": "a sailor-collar uniform and knee socks",
+        "accessories": "none",
+        "distinguishing_marks": "a bandage on the nose"
+      },
+      "personality": "proud and competitive",
+      "expression_range": [
+        "neutral",
+        "happy",
+        "angry",
+        "sad",
+        "surprised"
+      ],
+      "slug": "kenji",
+      "turnaround_seed": 3876074041,
+      "expression_seed": 3716368611,
+      "sheets": {
+        "turnaround": "characters/kenji/turnaround_v1.png",
+        "expressions": "characters/kenji/expressions_v1.png",
+        "views": {
+          "front": "characters/kenji/front_v1.png",
+          "side": "characters/kenji/side_v1.png",
+          "back": "characters/kenji/back_v1.png"
+        },
+        "expression_refs": {
+          "neutral": "characters/kenji/neutral_v1.png",
+          "happy": "characters/kenji/happy_v1.png",
+          "angry": "characters/kenji/angry_v1.png",
+          "sad": "characters/kenji/sad_v1.png",
+          "surprised": "characters/kenji/surprised_v1.png"
+        }
+      },
+      "status": "approved",
+      "approved": true,
+      "version": 1,
+      "reused_from": null
+    },
+    {
+      "name": "Aya",
+      "role": "supporting character",
+      "age_range": "early twenties",
+      "body_type": "short and wiry",
+      "description": "Aya is a short and wiry character in their early twenties, with long straight silver hair, calm downturned eyes and a patched jacket with rolled sleeves.",
+      "visual_tags": {
+        "hair": "long straight silver hair",
+        "eyes": "calm downturned eyes",
+        "outfit": "a patched jacket with rolled sleeves",
+        "accessories": "a red scarf",
+        "distinguishing_marks": "freckles"
+      },
+      "personality": "cheerful and impulsive",
+      "expression_range": [
+        "neutral",
+        "happy",
+        "angry",
+        "sad",
+        "surprised"
+      ],
+      "slug": "aya",
+      "turnaround_seed": 3260927043,
+      "expression_seed": 3885671695,
+      "sheets": {
+        "turnaround": "characters/aya/turnaround_v1.png",
+        "expressions": "characters/aya/expressions_v1.png",
+        "views": {
+          "front": "characters/aya/front_v1.png",
+          "side": "characters/aya/side_v1.png",
+          "back": "characters/aya/back_v1.png"
+        },
+        "expression_refs": {
+          "neutral": "characters/aya/neutral_v1.png",
+          "happy": "characters/aya/happy_v1.png",
+          "angry": "characters/aya/angry_v1.png",
+          "sad": "characters/aya/sad_v1.png",
+          "surprised": "characters/aya/surprised_v1.png"
+        }
+      },
+      "status": "approved",
+      "approved": true,
+      "version": 1,
+      "reused_from": null
+    }
+  ],
+  "renames": {},
+  "prompts": [
+    {
+      "page": 1,
+      "panel": 1,
+      "prompt": "monochrome, greyscale, manga, comic panel, establishing shot, wide view, scenery, detailed background, small figures in distance, from above, high angle, solo, (short spiky black hair, wide curious eyes, a sailor-collar uniform and knee socks, a bandage on the nose), The alarm screamed across the night market as Kenji vaulted onto the rooftops, a small silver box clutched to his chest, setting: a school rooftop, Kenji small in the frame, the setting fills the panel, speed lines, dynamic pose, intense, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2818839108,
+      "width": 1536,
+      "height": 640,
+      "characters": [
+        "Kenji"
+      ],
+      "references": [
+        "characters/kenji/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Kenji: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 1,
+      "panel": 2,
+      "prompt": "monochrome, greyscale, manga, comic panel, extreme close-up, face focus, eyes in focus, detailed face, from below, low angle, dramatic perspective, two people, (short spiky black hair, wide curious eyes, a sailor-collar uniform and knee socks, a bandage on the nose, calm expression), (long straight silver hair, calm downturned eyes, a patched jacket with rolled sleeves, a red scarf, freckles, calm expression), Drones swept the alley below, their searchlights slicing through the steam. Kenji speaks, setting: a school rooftop, tight on Kenji and Aya's eyes, speed lines, dynamic pose, intense, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2818839109,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Kenji",
+        "Aya"
+      ],
+      "references": [
+        "characters/kenji/neutral_v1.png",
+        "characters/aya/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Kenji: neutral",
+        "Aya: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 1,
+      "panel": 3,
+      "prompt": "monochrome, greyscale, manga, comic panel, wide shot, full body, from below, low angle, dramatic perspective, solo, (long straight silver hair, calm downturned eyes, a patched jacket with rolled sleeves, a red scarf, freckles, calm expression), Aya shouted, landing on the tiles behind him. She was the fastest courier in the district, and she was gaining, setting: a school rooftop, Aya full body, motion lines across the panel, speed lines, dynamic pose, intense, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2818839110,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Aya"
+      ],
+      "references": [
+        "characters/aya/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Aya: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 1,
+      "panel": 4,
+      "prompt": "monochrome, greyscale, manga, comic panel, wide shot, full body, from below, low angle, dramatic perspective, solo, (short spiky black hair, wide curious eyes, a sailor-collar uniform and knee socks, a bandage on the nose, calm expression), Kenji leapt the gap between two towers and crashed onto a water tank, setting: a school rooftop, Kenji full body, motion lines across the panel, speed lines, dynamic pose, intense, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2818839111,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Kenji"
+      ],
+      "references": [
+        "characters/kenji/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Kenji: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 1,
+      "panel": 5,
+      "prompt": "monochrome, greyscale, manga, comic panel, medium shot, upper body, eye level, solo, (long straight silver hair, calm downturned eyes, a patched jacket with rolled sleeves, a red scarf, freckles, calm expression), Aya followed without slowing down. Her boot struck the metal with a loud clang, setting: a school rooftop, Aya from the waist up, centred, soft light, peaceful, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2818839112,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Aya"
+      ],
+      "references": [
+        "characters/aya/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Aya: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 2,
+      "panel": 1,
+      "prompt": "monochrome, greyscale, manga, comic panel, establishing shot, wide view, scenery, detailed background, small figures in distance, from above, high angle, two people, (long straight silver hair, calm downturned eyes, a patched jacket with rolled sleeves, a red scarf, freckles), (short spiky black hair, wide curious eyes, a sailor-collar uniform and knee socks, a bandage on the nose), he yelled. At the edge of the last roof, Kenji turned and hurled the box toward the river, setting: a narrow alley, Aya and Kenji small in the frame, the setting fills the panel, speed lines, dynamic pose, intense, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2818840108,
+      "width": 1280,
+      "height": 832,
+      "characters": [
+        "Aya",
+        "Kenji"
+      ],
+      "references": [
+        "characters/aya/neutral_v1.png",
+        "characters/kenji/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Aya: neutral",
+        "Kenji: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 2,
+      "panel": 2,
+      "prompt": "monochrome, greyscale, manga, comic panel, medium shot, upper body, from above, high angle, solo, (long straight silver hair, calm downturned eyes, a patched jacket with rolled sleeves, a red scarf, freckles, sad, tears, downcast eyes), Aya dove for it and missed by a finger, setting: a narrow alley, Aya from the waist up, centred, rain, quiet atmosphere, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2818840109,
+      "width": 1280,
+      "height": 832,
+      "characters": [
+        "Aya"
+      ],
+      "references": [
+        "characters/aya/sad_v1.png"
+      ],
+      "reference_kinds": [
+        "Aya: sad"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 2,
+      "panel": 3,
+      "prompt": "monochrome, greyscale, manga, comic panel, close-up, portrait, face focus, head and shoulders, from below, low angle, dramatic perspective, solo, (short spiky black hair, wide curious eyes, a sailor-collar uniform and knee socks, a bandage on the nose, calm expression), The box exploded in a column of white light! For a moment the whole city went silent, setting: a narrow alley, Kenji's face fills the frame, background dropped to screentone, speed lines, dynamic pose, intense, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2818840110,
+      "width": 1280,
+      "height": 768,
+      "characters": [
+        "Kenji"
+      ],
+      "references": [
+        "characters/kenji/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Kenji: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 2,
+      "panel": 4,
+      "prompt": "monochrome, greyscale, manga, comic panel, medium shot, upper body, eye level, solo, (long straight silver hair, calm downturned eyes, a patched jacket with rolled sleeves, a red scarf, freckles, calm expression), Aya stopped, stunned, her hair whipping in the wind. she whispered, setting: a narrow alley, Aya from the waist up, centred, soft light, peaceful, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2818840111,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Aya"
+      ],
+      "references": [
+        "characters/aya/neutral_v1.png"
+      ],
+      "reference_kinds": [
+        "Aya: neutral"
+      ],
+      "ipadapter_weight": 0.7
+    },
+    {
+      "page": 2,
+      "panel": 5,
+      "prompt": "monochrome, greyscale, manga, comic panel, medium shot, upper body, from above, high angle, solo, (short spiky black hair, wide curious eyes, a sailor-collar uniform and knee socks, a bandage on the nose, sad, tears, downcast eyes), Kenji smiled sadly at the glowing water. he said, setting: a narrow alley, Kenji from the waist up, centred, rain, quiet atmosphere, ink lineart, screentone shading, high contrast, clean lines, detailed background, masterpiece, best quality",
+      "negative_prompt": "color, colorful, photorealistic, photo, 3d, render, text, letters, speech bubble, caption, signature, watermark, logo, lowres, blurry, jpeg artifacts, bad anatomy, bad hands, extra fingers, missing fingers, extra limbs, deformed, duplicate, cropped head, worst quality, low quality",
+      "seed": 2818840112,
+      "width": 960,
+      "height": 1024,
+      "characters": [
+        "Kenji"
+      ],
+      "references": [
+        "characters/kenji/sad_v1.png"
+      ],
+      "reference_kinds": [
+        "Kenji: sad"
+      ],
+      "ipadapter_weight": 0.7
+    }
+  ],
+  "panels": [
+    {
+      "page": 1,
+      "panel": 1,
+      "image": "panels/p01_01.png",
+      "seconds": 0.05,
+      "workflow": "mock",
+      "consistency": {
+        "Kenji": 0.699
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 1,
+      "panel": 2,
+      "image": "panels/p01_02.png",
+      "seconds": 0.04,
+      "workflow": "mock",
+      "consistency": {
+        "Kenji": 0.827,
+        "Aya": 0.84
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 1,
+      "panel": 3,
+      "image": "panels/p01_03.png",
+      "seconds": 0.05,
+      "workflow": "mock",
+      "consistency": {
+        "Aya": 0.832
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 1,
+      "panel": 4,
+      "image": "panels/p01_04.png",
+      "seconds": 0.04,
+      "workflow": "mock",
+      "consistency": {
+        "Kenji": 0.822
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 1,
+      "panel": 5,
+      "image": "panels/p01_05.png",
+      "seconds": 0.02,
+      "workflow": "mock",
+      "consistency": {
+        "Aya": 0.75
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 2,
+      "panel": 1,
+      "image": "panels/p02_01.png",
+      "seconds": 0.07,
+      "workflow": "mock",
+      "consistency": {
+        "Aya": 0.714,
+        "Kenji": 0.718
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 2,
+      "panel": 2,
+      "image": "panels/p02_02.png",
+      "seconds": 0.05,
+      "workflow": "mock",
+      "consistency": {
+        "Aya": 0.755
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 2,
+      "panel": 3,
+      "image": "panels/p02_03.png",
+      "seconds": 0.04,
+      "workflow": "mock",
+      "consistency": {
+        "Kenji": 0.785
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 2,
+      "panel": 4,
+      "image": "panels/p02_04.png",
+      "seconds": 0.02,
+      "workflow": "mock",
+      "consistency": {
+        "Aya": 0.75
+      },
+      "consistency_method": "clip"
+    },
+    {
+      "page": 2,
+      "panel": 5,
+      "image": "panels/p02_05.png",
+      "seconds": 0.04,
+      "workflow": "mock",
+      "consistency": {
+        "Kenji": 0.715
+      },
+      "consistency_method": "clip"
+    }
+  ],
+  "outputs": {
+    "rtl": {
+      "pages": [
+        "pages/rtl/page_01.png",
+        "pages/rtl/page_02.png"
+      ],
+      "layout": [
+        {
+          "page": 1,
+          "rtl": true,
+          "layout": "dialogue_5",
+          "panels": [
+            {
+              "panel": 1,
+              "rect": {
+                "x": 64,
+                "y": 64,
+                "w": 1112,
+                "h": 444
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 622,
+                  "y": 79,
+                  "w": 539,
+                  "h": 108
+                }
+              ]
+            },
+            {
+              "panel": 2,
+              "rect": {
+                "x": 631,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "shout",
+                  "x": 895,
+                  "y": 545,
+                  "w": 266,
+                  "h": 109
+                }
+              ]
+            },
+            {
+              "panel": 3,
+              "rect": {
+                "x": 64,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": []
+            },
+            {
+              "panel": 4,
+              "rect": {
+                "x": 631,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "sfx",
+                  "x": 982,
+                  "y": 1621,
+                  "w": 179,
+                  "h": 54
+                }
+              ]
+            },
+            {
+              "panel": 5,
+              "rect": {
+                "x": 64,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 336,
+                  "y": 1131,
+                  "w": 258,
+                  "h": 130
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "page": 2,
+          "rtl": true,
+          "layout": "action_5",
+          "panels": [
+            {
+              "panel": 1,
+              "rect": {
+                "x": 631,
+                "y": 64,
+                "w": 545,
+                "h": 347
+              },
+              "balloons": [
+                {
+                  "kind": "shout",
+                  "x": 892,
+                  "y": 79,
+                  "w": 269,
+                  "h": 88
+                }
+              ]
+            },
+            {
+              "panel": 2,
+              "rect": {
+                "x": 64,
+                "y": 64,
+                "w": 545,
+                "h": 347
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 349,
+                  "y": 79,
+                  "w": 245,
+                  "h": 78
+                }
+              ]
+            },
+            {
+              "panel": 3,
+              "rect": {
+                "x": 64,
+                "y": 433,
+                "w": 1112,
+                "h": 661
+              },
+              "balloons": [
+                {
+                  "kind": "sfx",
+                  "x": 997,
+                  "y": 1025,
+                  "w": 164,
+                  "h": 54
+                }
+              ]
+            },
+            {
+              "panel": 4,
+              "rect": {
+                "x": 631,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 934,
+                  "y": 1131,
+                  "w": 227,
+                  "h": 138
+                },
+                {
+                  "kind": "speech",
+                  "x": 646,
+                  "y": 1131,
+                  "w": 266,
+                  "h": 100
+                },
+                {
+                  "kind": "sfx",
+                  "x": 923,
+                  "y": 1621,
+                  "w": 238,
+                  "h": 54
+                }
+              ]
+            },
+            {
+              "panel": 5,
+              "rect": {
+                "x": 64,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 359,
+                  "y": 1131,
+                  "w": 235,
+                  "h": 108
+                },
+                {
+                  "kind": "speech",
+                  "x": 114,
+                  "y": 1131,
+                  "w": 237,
+                  "h": 61
+                },
+                {
+                  "kind": "sfx",
+                  "x": 374,
+                  "y": 1623,
+                  "w": 220,
+                  "h": 52
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "pdf": "manga_rtl.pdf"
+    },
+    "ltr": {
+      "pages": [
+        "pages/ltr/page_01.png",
+        "pages/ltr/page_02.png"
+      ],
+      "layout": [
+        {
+          "page": 1,
+          "rtl": false,
+          "layout": "dialogue_5",
+          "panels": [
+            {
+              "panel": 1,
+              "rect": {
+                "x": 64,
+                "y": 64,
+                "w": 1112,
+                "h": 444
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 79,
+                  "y": 79,
+                  "w": 539,
+                  "h": 108
+                }
+              ]
+            },
+            {
+              "panel": 2,
+              "rect": {
+                "x": 64,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": [
+                {
+                  "kind": "shout",
+                  "x": 79,
+                  "y": 545,
+                  "w": 266,
+                  "h": 109
+                }
+              ]
+            },
+            {
+              "panel": 3,
+              "rect": {
+                "x": 631,
+                "y": 530,
+                "w": 545,
+                "h": 563
+              },
+              "balloons": []
+            },
+            {
+              "panel": 4,
+              "rect": {
+                "x": 64,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "sfx",
+                  "x": 79,
+                  "y": 1621,
+                  "w": 179,
+                  "h": 54
+                }
+              ]
+            },
+            {
+              "panel": 5,
+              "rect": {
+                "x": 631,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 646,
+                  "y": 1131,
+                  "w": 258,
+                  "h": 130
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "page": 2,
+          "rtl": false,
+          "layout": "action_5",
+          "panels": [
+            {
+              "panel": 1,
+              "rect": {
+                "x": 64,
+                "y": 64,
+                "w": 545,
+                "h": 347
+              },
+              "balloons": [
+                {
+                  "kind": "shout",
+                  "x": 79,
+                  "y": 79,
+                  "w": 269,
+                  "h": 88
+                }
+              ]
+            },
+            {
+              "panel": 2,
+              "rect": {
+                "x": 631,
+                "y": 64,
+                "w": 545,
+                "h": 347
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 646,
+                  "y": 79,
+                  "w": 245,
+                  "h": 78
+                }
+              ]
+            },
+            {
+              "panel": 3,
+              "rect": {
+                "x": 64,
+                "y": 433,
+                "w": 1112,
+                "h": 661
+              },
+              "balloons": [
+                {
+                  "kind": "sfx",
+                  "x": 79,
+                  "y": 1025,
+                  "w": 164,
+                  "h": 54
+                }
+              ]
+            },
+            {
+              "panel": 4,
+              "rect": {
+                "x": 64,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 79,
+                  "y": 1131,
+                  "w": 227,
+                  "h": 138
+                },
+                {
+                  "kind": "speech",
+                  "x": 328,
+                  "y": 1131,
+                  "w": 266,
+                  "h": 100
+                },
+                {
+                  "kind": "sfx",
+                  "x": 79,
+                  "y": 1621,
+                  "w": 238,
+                  "h": 54
+                }
+              ]
+            },
+            {
+              "panel": 5,
+              "rect": {
+                "x": 631,
+                "y": 1116,
+                "w": 545,
+                "h": 574
+              },
+              "balloons": [
+                {
+                  "kind": "narration",
+                  "x": 646,
+                  "y": 1131,
+                  "w": 235,
+                  "h": 108
+                },
+                {
+                  "kind": "speech",
+                  "x": 889,
+                  "y": 1131,
+                  "w": 237,
+                  "h": 61
+                },
+                {
+                  "kind": "sfx",
+                  "x": 646,
+                  "y": 1623,
+                  "w": 220,
+                  "h": 52
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "pdf": "manga_ltr.pdf"
+    }
+  },
+  "trace": [
+    {
+      "agent": "writer",
+      "label": "Beat sheet",
+      "started_at": "2026-10-04T21:42:41+00:00",
+      "duration_s": 0.004,
+      "status": "ok",
+      "attempts": 1,
+      "errors": [],
+      "model": "mock",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "inputs": {
+        "story_words": 160,
+        "max_beats": 10
+      },
+      "output": {
+        "title": "Kenji's Story",
+        "logline": "The alarm screamed across the night market as Kenji vaulted onto the rooftops, a small silver box clutched to his chest.",
+        "emotional_arc": "dramatic -> dramatic -> melancholy",
+        "beats": [
+          {
+            "id": 1,
+            "summary": "The alarm screamed across the night market as Kenji vaulted onto the rooftops, a small silver box clutched to his chest.",
+            "emotion": "dramatic",
+            "intensity": 4,
+            "kind": "setup"
+          },
+          {
+            "id": 2,
+            "summary": "Drones swept the alley below, their searchlights slicing through the steam. \"Give it back, Kenji!\"",
+            "emotion": "dramatic",
+            "intensity": 5,
+            "kind": "action"
+          },
+          {
+            "id": 3,
+            "summary": "Aya shouted, landing on the tiles behind him. She was the fastest courier in the district, and she was gaining.",
+            "emotion": "dramatic",
+            "intensity": 4,
+            "kind": "action"
+          },
+          {
+            "id": 4,
+            "summary": "Kenji leapt the gap between two towers and crashed onto a water tank.",
+            "emotion": "dramatic",
+            "intensity": 4,
+            "kind": "action"
+          },
+          {
+            "id": 5,
+            "summary": "Aya followed without slowing down. Her boot struck the metal with a loud clang.",
+            "emotion": "calm",
+            "intensity": 1,
+            "kind": "quiet"
+          },
+          {
+            "id": 6,
+            "summary": "\"You don't know what's inside!\" he yelled. At the edge of the last roof, Kenji turned and hurled the box toward the river.",
+            "emotion": "dramatic",
+            "intensity": 5,
+            "kind": "action"
+          },
+          {
+            "id": 7,
+            "summary": "Aya dove for it and missed by a finger.",
+            "emotion": "melancholy",
+            "intensity": 3,
+            "kind": "quiet"
+          },
+          {
+            "id": 8,
+            "summary": "The box exploded in a column of white light! For a moment the whole city went silent.",
+            "emotion": "dramatic",
+            "intensity": 5,
+            "kind": "climax"
+          },
+          {
+            "id": 9,
+            "summary": "Aya stopped, stunned, her hair whipping in the wind. \"What did you do?\" she whispered.",
+            "emotion": "calm",
+            "intensity": 1,
+            "kind": "resolution"
+          },
+          {
+            "id": 10,
+            "summary": "Kenji smiled sadly at the glowing water. \"I set it free,\" he said.",
+            "emotion": "melancholy",
+            "intensity": 3,
+            "kind": "resolution"
+          }
+        ],
+        "climax_beat": 8,
+        "characters": [
+          {
+            "name": "Kenji",
+            "role": "protagonist",
+            "importance": "main",
+            "summary": "Appears in the story as Kenji."
+          },
+          {
+            "name": "Aya",
+            "role": "supporting character",
+            "importance": "main",
+            "summary": "Appears in the story as Aya."
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "agent": "writer",
+      "label": "Page plan",
+      "started_at": "2026-10-04T21:42:41+00:00",
+      "duration_s": 0.018,
+      "status": "ok",
+      "attempts": 1,
+      "errors": [],
+      "model": "mock",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "inputs": {
+        "beats": 10,
+        "max_pages": 2,
+        "max_panels_per_page": 6
+      },
+      "output": {
+        "pages": [
+          {
+            "page_number": 1,
+            "panels": [
+              {
+                "panel_number": 1,
+                "beat": 1,
+                "purpose": "Establish the scene",
+                "size": "large",
+                "characters": [
+                  "Kenji"
+                ],
+                "action": "The alarm screamed across the night market as Kenji vaulted onto the rooftops, a small silver box clutched to his chest.",
+                "setting": "a school rooftop",
+                "emotion": "dramatic",
+                "dialogue": [],
+                "narration": "The alarm screamed across the night market as Kenji vaulted onto the rooftops, a small silver box clutched to his chest.",
+                "sfx": []
+              },
+              {
+                "panel_number": 2,
+                "beat": 2,
+                "purpose": "Keep the action moving",
+                "size": "small",
+                "characters": [
+                  "Kenji",
+                  "Aya"
+                ],
+                "action": "Drones swept the alley below, their searchlights slicing through the steam. Kenji speaks",
+                "setting": "a school rooftop",
+                "emotion": "dramatic",
+                "dialogue": [
+                  {
+                    "speaker": "Kenji",
+                    "text": "Give it back, Kenji!"
+                  }
+                ],
+                "narration": null,
+                "sfx": []
+              },
+              {
+                "panel_number": 3,
+                "beat": 3,
+                "purpose": "Keep the action moving",
+                "size": "small",
+                "characters": [
+                  "Aya"
+                ],
+                "action": "Aya shouted, landing on the tiles behind him. She was the fastest courier in the district, and she was gaining.",
+                "setting": "a school rooftop",
+                "emotion": "dramatic",
+                "dialogue": [],
+                "narration": null,
+                "sfx": []
+              },
+              {
+                "panel_number": 4,
+                "beat": 4,
+                "purpose": "Keep the action moving",
+                "size": "small",
+                "characters": [
+                  "Kenji"
+                ],
+                "action": "Kenji leapt the gap between two towers and crashed onto a water tank.",
+                "setting": "a school rooftop",
+                "emotion": "dramatic",
+                "dialogue": [],
+                "narration": null,
+                "sfx": [
+                  "CRASH"
+                ]
+              },
+              {
+                "panel_number": 5,
+                "beat": 5,
+                "purpose": "Let the emotion land",
+                "size": "medium",
+                "characters": [
+                  "Aya"
+                ],
+                "action": "Aya followed without slowing down. Her boot struck the metal with a loud clang.",
+                "setting": "a school rooftop",
+                "emotion": "calm",
+                "dialogue": [],
+                "narration": "Aya followed without slowing down. Her boot struck the metal with a loud clang.",
+                "sfx": []
+              }
+            ],
+            "page_turn": "Ends on: Aya followed without slowing down. Her boot struck the metal with a loud clang."
+          },
+          {
+            "page_number": 2,
+            "panels": [
+              {
+                "panel_number": 1,
+                "beat": 6,
+                "purpose": "Keep the action moving",
+                "size": "small",
+                "characters": [
+                  "Aya",
+                  "Kenji"
+                ],
+                "action": "he yelled. At the edge of the last roof, Kenji turned and hurled the box toward the river.",
+                "setting": "a narrow alley",
+                "emotion": "dramatic",
+                "dialogue": [
+                  {
+                    "speaker": "Aya",
+                    "text": "You don't know what's inside!"
+                  }
+                ],
+                "narration": null,
+                "sfx": []
+              },
+              {
+                "panel_number": 2,
+                "beat": 7,
+                "purpose": "Let the emotion land",
+                "size": "medium",
+                "characters": [
+                  "Aya"
+                ],
+                "action": "Aya dove for it and missed by a finger.",
+                "setting": "a narrow alley",
+                "emotion": "melancholy",
+                "dialogue": [],
+                "narration": "Aya dove for it and missed by a finger.",
+                "sfx": []
+              },
+              {
+                "panel_number": 3,
+                "beat": 8,
+                "purpose": "Deliver the climax",
+                "size": "large",
+                "characters": [
+                  "Kenji"
+                ],
+                "action": "The box exploded in a column of white light! For a moment the whole city went silent.",
+                "setting": "a narrow alley",
+                "emotion": "dramatic",
+                "dialogue": [],
+                "narration": null,
+                "sfx": [
+                  "BOOM"
+                ]
+              },
+              {
+                "panel_number": 4,
+                "beat": 9,
+                "purpose": "Resolve the story",
+                "size": "medium",
+                "characters": [
+                  "Aya"
+                ],
+                "action": "Aya stopped, stunned, her hair whipping in the wind. she whispered.",
+                "setting": "a narrow alley",
+                "emotion": "calm",
+                "dialogue": [
+                  {
+                    "speaker": "Aya",
+                    "text": "What did you do?"
+                  }
+                ],
+                "narration": "Aya stopped, stunned, her hair whipping in the wind.",
+                "sfx": [
+                  "WHOOSH"
+                ]
+              },
+              {
+                "panel_number": 5,
+                "beat": 10,
+                "purpose": "Resolve the story",
+                "size": "medium",
+                "characters": [
+                  "Kenji"
+                ],
+                "action": "Kenji smiled sadly at the glowing water. he said.",
+                "setting": "a narrow alley",
+                "emotion": "melancholy",
+                "dialogue": [
+                  {
+                    "speaker": "Kenji",
+                    "text": "I set it free."
+                  }
+                ],
+                "narration": "Kenji smiled sadly at the glowing water.",
+                "sfx": [
+                  "VMMMM"
+                ]
+              }
+            ],
+            "page_turn": "Ends on: Kenji smiled sadly at the glowing water. he said."
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "agent": "director",
+      "label": "Director plan",
+      "started_at": "2026-10-04T21:42:41+00:00",
+      "duration_s": 0.002,
+      "status": "ok",
+      "attempts": 1,
+      "errors": [],
+      "model": "mock",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "inputs": {
+        "pages": 2,
+        "panels": 10,
+        "templates": 10
+      },
+      "output": {
+        "pages": [
+          {
+            "page_number": 1,
+            "layout": "dialogue_5",
+            "panels": [
+              {
+                "panel_number": 1,
+                "shot": "establishing",
+                "angle": "high",
+                "composition": "Kenji small in the frame, the setting fills the panel"
+              },
+              {
+                "panel_number": 2,
+                "shot": "extreme close-up",
+                "angle": "low",
+                "composition": "tight on Kenji and Aya's eyes"
+              },
+              {
+                "panel_number": 3,
+                "shot": "wide",
+                "angle": "low",
+                "composition": "Aya full body, motion lines across the panel"
+              },
+              {
+                "panel_number": 4,
+                "shot": "wide",
+                "angle": "low",
+                "composition": "Kenji full body, motion lines across the panel"
+              },
+              {
+                "panel_number": 5,
+                "shot": "medium",
+                "angle": "eye level",
+                "composition": "Aya from the waist up, centred"
+              }
+            ]
+          },
+          {
+            "page_number": 2,
+            "layout": "action_5",
+            "panels": [
+              {
+                "panel_number": 1,
+                "shot": "establishing",
+                "angle": "high",
+                "composition": "Aya and Kenji small in the frame, the setting fills the panel"
+              },
+              {
+                "panel_number": 2,
+                "shot": "medium",
+                "angle": "high",
+                "composition": "Aya from the waist up, centred"
+              },
+              {
+                "panel_number": 3,
+                "shot": "close-up",
+                "angle": "low",
+                "composition": "Kenji's face fills the frame, background dropped to screentone"
+              },
+              {
+                "panel_number": 4,
+                "shot": "medium",
+                "angle": "eye level",
+                "composition": "Aya from the waist up, centred"
+              },
+              {
+                "panel_number": 5,
+                "shot": "medium",
+                "angle": "high",
+                "composition": "Kenji from the waist up, centred"
+              }
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "beat 6: emotional peak in a new setting — kept the establishing shot"
+      ]
+    },
+    {
+      "agent": "character_designer",
+      "label": "Character bible",
+      "started_at": "2026-10-04T21:42:41+00:00",
+      "duration_s": 0.0,
+      "status": "ok",
+      "attempts": 1,
+      "errors": [],
+      "model": "mock",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "inputs": {
+        "characters": [
+          "Kenji",
+          "Aya"
+        ],
+        "reused": []
+      },
+      "output": [
+        {
+          "name": "Kenji",
+          "role": "protagonist",
+          "age_range": "late twenties",
+          "body_type": "stocky and broad",
+          "description": "Kenji is a stocky and broad character in their late twenties, with short spiky black hair, wide curious eyes and a sailor-collar uniform and knee socks.",
+          "visual_tags": {
+            "hair": "short spiky black hair",
+            "eyes": "wide curious eyes",
+            "outfit": "a sailor-collar uniform and knee socks",
+            "accessories": "none",
+            "distinguishing_marks": "a bandage on the nose"
+          },
+          "personality": "proud and competitive",
+          "expression_range": [
+            "neutral",
+            "happy",
+            "angry",
+            "sad",
+            "surprised"
+          ]
+        },
+        {
+          "name": "Aya",
+          "role": "supporting character",
+          "age_range": "early twenties",
+          "body_type": "short and wiry",
+          "description": "Aya is a short and wiry character in their early twenties, with long straight silver hair, calm downturned eyes and a patched jacket with rolled sleeves.",
+          "visual_tags": {
+            "hair": "long straight silver hair",
+            "eyes": "calm downturned eyes",
+            "outfit": "a patched jacket with rolled sleeves",
+            "accessories": "a red scarf",
+            "distinguishing_marks": "freckles"
+          },
+          "personality": "cheerful and impulsive",
+          "expression_range": [
+            "neutral",
+            "happy",
+            "angry",
+            "sad",
+            "surprised"
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "agent": "studio",
+      "label": "Cast approval",
+      "started_at": "",
+      "duration_s": 0.0,
+      "status": "ok",
+      "attempts": 0,
+      "errors": [],
+      "model": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cost_usd": 0.0,
+      "inputs": {},
+      "output": [
+        "Kenji",
+        "Aya"
+      ],
+      "notes": [
+        "Auto-approved (unattended run)"
+      ]
+    }
+  ],
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_usd": 0.0
+  },
+  "timings": {
+    "writer_beats": 0.008,
+    "writer_pages": 0.022,
+    "director": 0.011,
+    "character_designer": 0.006,
+    "reference_sheets": 0.447,
+    "approval": 0.142,
+    "prompts": 0.008,
+    "panels": 0.485,
+    "consistency": 62.727,
+    "layout": 2.275,
+    "export": 0.731
+  },
+  "warnings": [],
+  "error": null
+}
