@@ -20,7 +20,16 @@ def test_auto_mode_picks_real_providers_when_configured():
     s = Settings(llm_provider="auto", image_provider="auto",
                  anthropic_api_key="test-key", comfyui_url="http://localhost:8188")
     assert resolve_llm_name(s) == "anthropic"
-    assert resolve_image_name(s) == "comfyui"
+    assert resolve_image_name(s, probe=lambda url: True) == "comfyui"
+    assert resolve_image_name(s, probe=lambda url: False) == "mock"
+
+
+def test_llm_priority_order():
+    s = Settings(gemini_api_key="g", openai_base_url="http://x/v1", openai_api_key="o")
+    assert resolve_llm_name(s) == "gemini"
+    s.anthropic_api_key = "a"
+    assert resolve_llm_name(s) == "anthropic"
+    assert resolve_llm_name(Settings(openai_base_url="http://x/v1", openai_api_key="o")) == "openai"
 
 
 def test_describe_never_contains_secrets():
@@ -42,8 +51,8 @@ def test_find_names(story):
 def test_mock_llm_is_deterministic_and_valid(story):
     llm = MockLLMProvider()
     ctx = {"story": story, "panels_per_page": 4, "max_pages": 2}
-    a = llm.generate_json(system="", user="", schema={}, task="manga_script", context=ctx)
-    b = llm.generate_json(system="", user="", schema={}, task="manga_script", context=ctx)
+    a = llm.generate_json(system="", user="", schema={}, task="manga_script", context=ctx).data
+    b = llm.generate_json(system="", user="", schema={}, task="manga_script", context=ctx).data
     assert a == b
     script = MangaScript.model_validate(a)
     assert len(script.pages[0].panels) == 4

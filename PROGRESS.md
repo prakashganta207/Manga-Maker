@@ -1,5 +1,25 @@
 # Progress
 
+## Phase 1 + 2 (agents, character bible, consistency) — in progress
+
+### Done
+- **M0** ComfyUI layer: `app/comfy/client.py` (ping, `/object_info` discovery of nodes,
+  checkpoints, IP-Adapter + CLIP-vision models, upload, run, `/free`), workflow templates in
+  `backend/workflows/` (txt2img, IP-Adapter 1 ref, 2 refs) with typed placeholder injection,
+  rewritten ComfyUI provider (template choice, IP-Adapter fallback, VRAM freeing),
+  `python -m app.tools.comfy_check [--generate]`, `SETUP_COMFYUI.md`,
+  `scripts/download_comfyui_models.py`. 74 tests passing.
+
+### Known issues / measurements
+- ComfyUI is not installed on this machine, so there's **no real test panel yet**. Run
+  `python -m app.tools.comfy_check --generate` (in backend/) after following SETUP_COMFYUI.md;
+  it writes `samples/comfyui_test_panel.png` plus timing and VRAM numbers.
+- GPU detected: RTX 4060 Laptop, 8188 MiB (nvidia-smi, driver 610.88), idle.
+
+---
+
+# Phase 0 progress (original build)
+
 ## Status: all milestones (M1–M7) done. `python scripts/tasks.py test` → 62 passed (mock mode).
 
 ## Done

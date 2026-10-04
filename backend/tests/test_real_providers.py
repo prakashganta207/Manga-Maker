@@ -14,7 +14,6 @@ from app.models import MangaScript
 from app.pipeline.script import generate_script
 from app.providers.anthropic_llm import AnthropicLLMProvider, to_structured_output_schema
 from app.providers.base import ImageRequest, ProviderError
-from app.providers.comfyui_image import ComfyUIImageProvider, default_workflow, fill_placeholders
 from app.providers.hosted_image import HostedImageProvider
 from app.providers.mock_llm import MockLLMProvider
 
@@ -88,100 +87,10 @@ def test_anthropic_requires_key():
         AnthropicLLMProvider(Settings(anthropic_api_key=""))
 
 
-# --------------------------------------------------------------------------- ComfyUI
 def png_bytes(size=(64, 96)):
     buf = io.BytesIO()
     Image.new("RGB", size, "white").save(buf, "PNG")
     return buf.getvalue()
-
-
-def test_fill_placeholders_keeps_types():
-    wf = fill_placeholders(default_workflow("m.safetensors", 20, 6.0),
-                           {"prompt": "a cat", "negative_prompt": "color", "seed": 5, "width": 512, "height": 768})
-    assert wf["5"]["inputs"]["width"] == 512 and wf["3"]["inputs"]["seed"] == 5
-    assert wf["6"]["inputs"]["text"] == "a cat"
-
-
-def test_comfyui_round_trip():
-    seen = {"polls": 0}
-
-    def handler(request: httpx.Request):
-        if request.url.path == "/prompt":
-            seen["workflow"] = json.loads(request.content)["prompt"]
-            return httpx.Response(200, json={"prompt_id": "abc"})
-        if request.url.path == "/history/abc":
-            seen["polls"] += 1
-            if seen["polls"] < 2:
-                return httpx.Response(200, json={})  # still running
-            return httpx.Response(200, json={"abc": {
-                "status": {"completed": True, "status_str": "success"},
-                "outputs": {"9": {"images": [{"filename": "manga_1.png", "subfolder": "", "type": "output"}]}}}})
-        if request.url.path == "/view":
-            assert request.url.params["filename"] == "manga_1.png"
-            return httpx.Response(200, content=png_bytes())
-        return httpx.Response(404)
-
-    settings = Settings(comfyui_url="http://comfy:8188", comfyui_checkpoint="anime.safetensors")
-    provider = ComfyUIImageProvider(settings, client=httpx.Client(transport=httpx.MockTransport(handler)),
-                                    poll_interval=0)
-    image = provider.generate(ImageRequest(prompt="ink drawing", negative_prompt="color",
-                                           width=512, height=768, seed=42))
-    assert image.size == (64, 96)
-    wf = seen["workflow"]
-    assert wf["4"]["inputs"]["ckpt_name"] == "anime.safetensors"
-    assert wf["3"]["inputs"]["seed"] == 42 and wf["5"]["inputs"]["height"] == 768
-    assert wf["6"]["inputs"]["text"] == "ink drawing"
-
-
-def test_comfyui_reports_workflow_errors():
-    def handler(request):
-        if request.url.path == "/prompt":
-            return httpx.Response(200, json={"prompt_id": "p"})
-        return httpx.Response(200, json={"p": {"status": {"status_str": "error", "messages": ["bad ckpt"]},
-                                               "outputs": {}}})
-
-    provider = ComfyUIImageProvider(Settings(comfyui_url="http://c"),
-                                    client=httpx.Client(transport=httpx.MockTransport(handler)), poll_interval=0)
-    with pytest.raises(ProviderError, match="bad ckpt"):
-        provider.generate(ImageRequest(prompt="x"))
-
-
-def test_comfyui_unreachable():
-    def handler(request):
-        raise httpx.ConnectError("refused")
-
-    provider = ComfyUIImageProvider(Settings(comfyui_url="http://c"),
-                                    client=httpx.Client(transport=httpx.MockTransport(handler)))
-    with pytest.raises(ProviderError, match="Cannot reach ComfyUI"):
-        provider.generate(ImageRequest(prompt="x"))
-
-
-def test_comfyui_custom_workflow_uploads_reference(tmp_path):
-    workflow = {"1": {"class_type": "LoadImage", "inputs": {"image": "{{reference_image}}"}},
-                "2": {"class_type": "CLIPTextEncode", "inputs": {"text": "{{prompt}}"}}}
-    wf_file = tmp_path / "wf.json"
-    wf_file.write_text(json.dumps(workflow))
-    ref = tmp_path / "mira.png"
-    ref.write_bytes(png_bytes())
-    seen = {}
-
-    def handler(request):
-        if request.url.path == "/upload/image":
-            return httpx.Response(200, json={"name": "mira.png", "subfolder": ""})
-        if request.url.path == "/prompt":
-            seen["workflow"] = json.loads(request.content)["prompt"]
-            return httpx.Response(200, json={"prompt_id": "p"})
-        if request.url.path == "/history/p":
-            return httpx.Response(200, json={"p": {"status": {"completed": True},
-                                                   "outputs": {"9": {"images": [{"filename": "a.png"}]}}}})
-        return httpx.Response(200, content=png_bytes())
-
-    settings = Settings(comfyui_url="http://c", comfyui_workflow=str(wf_file))
-    provider = ComfyUIImageProvider(settings, client=httpx.Client(transport=httpx.MockTransport(handler)),
-                                    poll_interval=0)
-    provider.generate(ImageRequest(prompt="hello", reference_images=[ref]))
-    assert seen["workflow"]["1"]["inputs"]["image"] == "mira.png"
-    assert seen["workflow"]["2"]["inputs"]["text"] == "hello"
 
 
 # --------------------------------------------------------------------------- Hosted stub

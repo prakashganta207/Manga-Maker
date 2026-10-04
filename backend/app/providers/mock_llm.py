@@ -12,7 +12,7 @@ import re
 from collections import Counter
 from typing import Any
 
-from .base import LLMProvider, ProviderError
+from .base import LLMProvider, LLMResponse, ProviderError
 
 # Capitalised words that are usually NOT names.
 _STOPWORDS = set("""
@@ -156,14 +156,14 @@ class MockLLMProvider(LLMProvider):
     name = "mock"
 
     def generate_json(self, *, system: str, user: str, schema: dict[str, Any],
-                      task: str, context: dict[str, Any]) -> dict[str, Any]:
+                      task: str, context: dict[str, Any]) -> LLMResponse:
         if task != "manga_script":
             raise ProviderError(f"Mock LLM does not know task '{task}'")
-        return self.build_script(
+        return LLMResponse(self.build_script(
             context["story"],
             panels_per_page=int(context.get("panels_per_page", 4)),
             max_pages=int(context.get("max_pages", 2)),
-        )
+        ), model="mock")
 
     # ------------------------------------------------------------------ #
     def build_script(self, story: str, *, panels_per_page: int = 4, max_pages: int = 2) -> dict[str, Any]:

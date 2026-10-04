@@ -51,7 +51,7 @@ def run_pipeline(
     # 1. Story -> script
     report("script", 0.0, f"Writing script with {llm.name} LLM")
     script, warnings = generate_script(
-        story, llm, panels_per_page=settings.panels_per_page, max_pages=settings.max_pages,
+        story, llm, panels_per_page=4, max_pages=settings.max_pages,
         on_attempt=lambda n: report("script", 0.1, f"LLM attempt {n}"),
     )
     (out_dir / "script.json").write_text(script.model_dump_json(indent=2), encoding="utf-8")

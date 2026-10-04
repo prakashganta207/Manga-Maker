@@ -149,7 +149,7 @@ def generate_script(
                 task="manga_script",
                 context={"story": story, "panels_per_page": panels_per_page, "max_pages": max_pages},
             )
-            script = MangaScript.model_validate(_parse(raw))
+            script = MangaScript.model_validate(_parse(getattr(raw, 'data', raw)))
         except (ValidationError, ValueError) as exc:  # json.JSONDecodeError is a ValueError
             errors = _error_list(exc)
             continue

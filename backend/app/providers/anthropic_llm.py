@@ -17,7 +17,7 @@ from typing import Any
 import anthropic
 
 from ..config import Settings
-from .base import LLMProvider, ProviderError
+from .base import LLMProvider, LLMResponse, ProviderError, TokenUsage
 
 # Keywords the structured-output schema validator doesn't accept.
 _UNSUPPORTED_KEYS = {
@@ -76,7 +76,7 @@ class AnthropicLLMProvider(LLMProvider):
         }
 
     def generate_json(self, *, system: str, user: str, schema: dict[str, Any],
-                      task: str, context: dict[str, Any]) -> dict[str, Any]:
+                      task: str, context: dict[str, Any]) -> LLMResponse:
         try:
             response = self.client.beta.messages.create(**self.build_request(system=system, user=user, schema=schema))
         except anthropic.AuthenticationError as exc:
@@ -100,8 +100,10 @@ class AnthropicLLMProvider(LLMProvider):
         text = next((b.text for b in response.content if getattr(b, "type", None) == "text"), None)
         if not text:
             raise ProviderError("Claude returned no text")
+        usage = getattr(response, "usage", None)
+        tokens = TokenUsage(getattr(usage, "input_tokens", 0) or 0, getattr(usage, "output_tokens", 0) or 0)
         try:
-            return json.loads(text)
+            data: dict[str, Any] | str = json.loads(text)
         except json.JSONDecodeError:
-            # Let the script stage's repair loop handle it.
-            return text  # type: ignore[return-value]
+            data = text  # the agent runner's repair loop will ask Claude to fix it
+        return LLMResponse(data=data, usage=tokens, model=self.model)

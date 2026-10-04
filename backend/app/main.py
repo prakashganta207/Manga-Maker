@@ -81,7 +81,7 @@ def create_app(settings: Settings | None = None, llm: LLMProvider | None = None,
     @app.get("/api/health")
     def health() -> dict[str, Any]:
         return {"status": "ok", "providers": {"llm": llm.name, "image": image.name},
-                "panels_per_page": settings.panels_per_page, "max_pages": settings.max_pages}
+                "max_pages": settings.max_pages}
 
     @app.post("/api/jobs", status_code=202)
     def create_job(request: JobRequest) -> dict[str, Any]:

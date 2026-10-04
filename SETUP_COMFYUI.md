@@ -1,0 +1,109 @@
+# Setting up ComfyUI on Windows (RTX 4060 Laptop, 8 GB VRAM)
+
+ComfyUI wasn't installed when this phase was built, so the app ran in **mock image mode**.
+Follow these steps once. Then the app switches to real images automatically: `IMAGE_PROVIDER=auto`
+uses ComfyUI whenever it answers at `COMFYUI_URL`.
+
+Disk space needed: about 15 GB (ComfyUI ≈ 5 GB, models ≈ 10 GB).
+
+## 1. Install ComfyUI (portable build)
+
+1. Install [7-Zip](https://www.7-zip.org/) if you don't have it.
+2. Download `ComfyUI_windows_portable_nvidia.7z` from
+   https://github.com/comfyanonymous/ComfyUI/releases (latest release, "Assets").
+3. Extract it to a short path without spaces, e.g. `C:\ComfyUI_windows_portable`.
+4. Double-click `run_nvidia_gpu.bat`. A browser tab opens at http://127.0.0.1:8188.
+
+Below, `COMFY` means `C:\ComfyUI_windows_portable\ComfyUI`.
+
+## 2. Install the IP-Adapter custom nodes
+
+IP-Adapter lets the model look at a character's reference picture while drawing.
+That is the core of character consistency in this app.
+
+```powershell
+cd C:\ComfyUI_windows_portable\ComfyUI\custom_nodes
+git clone https://github.com/cubiq/ComfyUI_IPAdapter_plus
+```
+
+(No git? Download the repo as ZIP and extract it into `custom_nodes\ComfyUI_IPAdapter_plus`.)
+Restart ComfyUI afterwards.
+
+## 3. Download the models
+
+| What | File | Put it in | Size | License |
+|---|---|---|---|---|
+| Anime-style SDXL checkpoint | `animagine-xl-3.1.safetensors` from https://huggingface.co/cagliostrolab/animagine-xl-3.1 | `COMFY\models\checkpoints\` | 6.9 GB | Fair AI Public License 1.0-SD |
+| IP-Adapter Plus for SDXL | `ip-adapter-plus_sdxl_vit-h.safetensors` from https://huggingface.co/h94/IP-Adapter (folder `sdxl_models`) | `COMFY\models\ipadapter\` (create the folder) | 0.85 GB | Apache-2.0 |
+| CLIP vision encoder (ViT-H) | `models/image_encoder/model.safetensors` from https://huggingface.co/h94/IP-Adapter, **renamed to** `CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors` | `COMFY\models\clip_vision\` | 2.5 GB | MIT (OpenCLIP) |
+
+The IP-Adapter "PLUS" preset looks for exactly these two file names, so keep them as shown.
+
+**Automatic download** (from the project folder, with your ComfyUI path):
+
+```powershell
+backend\.venv\Scripts\python scripts\download_comfyui_models.py --comfyui-dir C:\ComfyUI_windows_portable\ComfyUI
+```
+
+**Manual download** (PowerShell):
+
+```powershell
+$C = "C:\ComfyUI_windows_portable\ComfyUI\models"
+mkdir "$C\ipadapter" -Force
+curl.exe -L -o "$C\checkpoints\animagine-xl-3.1.safetensors" https://huggingface.co/cagliostrolab/animagine-xl-3.1/resolve/main/animagine-xl-3.1.safetensors
+curl.exe -L -o "$C\ipadapter\ip-adapter-plus_sdxl_vit-h.safetensors" https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/ip-adapter-plus_sdxl_vit-h.safetensors
+curl.exe -L -o "$C\clip_vision\CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors" https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors
+```
+
+Restart ComfyUI after adding models.
+
+## 4. Fit in 8 GB of VRAM
+
+- The default `run_nvidia_gpu.bat` usually works for SDXL at 832×1216 on 8 GB.
+- If you see "out of memory": edit `run_nvidia_gpu.bat` and add `--lowvram` after `main.py`
+  (slower, but swaps model parts to system RAM). If that's still not enough, set
+  `IMAGE_BASE_SIZE=896` in `.env`.
+- The app already: loads a single checkpoint, generates panels **one at a time**, and calls
+  ComfyUI's `/free` endpoint between stages (`COMFYUI_FREE_VRAM=true`).
+- Close other GPU-heavy apps (games, Blender, browser video) while generating.
+- The consistency-score CLIP model runs on the **CPU**, so it doesn't compete for VRAM.
+
+## 5. Connect the app
+
+In the project's `.env` (copy `.env.example`):
+
+```ini
+IMAGE_PROVIDER=auto
+COMFYUI_URL=http://127.0.0.1:8188
+COMFYUI_CHECKPOINT=animagine-xl-3.1.safetensors
+```
+
+Check the connection and generate one real test panel:
+
+```powershell
+cd backend
+.venv\Scripts\python -m app.tools.comfy_check            # lists installed nodes and models
+.venv\Scripts\python -m app.tools.comfy_check --generate # writes samples\comfyui_test_panel.png
+```
+
+Then restart the app (`python scripts/tasks.py dev`). The home page badge should say
+`Images: comfyui`.
+
+## 6. Tuning (in `.env`)
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `COMFYUI_STEPS` | 28 | denoising steps; 20 is faster, 30+ rarely helps |
+| `COMFYUI_CFG` | 6.0 | prompt strictness; Animagine likes 5–7 |
+| `COMFYUI_SAMPLER` / `COMFYUI_SCHEDULER` | euler_ancestral / normal | recommended for Animagine XL |
+| `IPADAPTER_WEIGHT` | 0.7 | how strongly the character reference steers the panel. Raise it if characters drift; lower it if every panel copies the reference pose |
+| `IPADAPTER_END_AT` | 0.8 | stop applying the reference for the last 20% of steps, so the prompt controls final details |
+| `IMAGE_BASE_SIZE` | 1008 | ≈ 832×1216 total pixels per panel (SDXL's native size) |
+
+## Troubleshooting
+
+- `comfy_check` says "missing nodes IPAdapterUnifiedLoader": step 2 wasn't done, or ComfyUI
+  needs a restart. Panels still work, just without reference images.
+- "ClipVision model not found": the clip_vision file name must match exactly (step 3).
+- Panels come out in colour: the prompts already say `monochrome, greyscale`, and the app
+  converts to greyscale when laying out pages anyway.

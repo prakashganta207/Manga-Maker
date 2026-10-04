@@ -42,3 +42,27 @@ reasonable option; change freely.
     API-format workflow (e.g. with IP-Adapter) without code changes.
 18. **Sample output is committed** (`samples/rooftop_glow_output/`, ~1.5 MB, mock mode),
     including intermediate panels and reference images so every stage is visible.
+
+## Phase 1 + 2 decisions
+
+19. **ComfyUI was not installed** on the build machine (nothing at :8188, no install found),
+    so per the brief: `SETUP_COMFYUI.md` + mock images for now. The real path is built and
+    tested against a fake ComfyUI server. `IMAGE_PROVIDER=auto` probes `/system_stats` at startup
+    and switches to ComfyUI automatically when it answers.
+20. **Models chosen** (documented, not downloaded — the ComfyUI folder doesn't exist yet):
+    - checkpoint `animagine-xl-3.1.safetensors` (cagliostrolab/animagine-xl-3.1, Fair AI Public
+      License 1.0-SD): a well-known anime SDXL model that handles `monochrome, greyscale, manga`;
+    - `ip-adapter-plus_sdxl_vit-h.safetensors` (h94/IP-Adapter, Apache-2.0) → `models/ipadapter/`;
+    - CLIP vision `CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors` (= h94/IP-Adapter
+      `models/image_encoder/model.safetensors`, MIT) → `models/clip_vision/`.
+    `scripts/download_comfyui_models.py --comfyui-dir ...` downloads all three.
+21. **Workflow templates** live in `backend/workflows/` as API-format JSON with `{{placeholders}}`
+    (exact-match placeholders keep their type, e.g. numbers). IP-Adapter uses the
+    ComfyUI_IPAdapter_plus nodes `IPAdapterUnifiedLoader` (preset "PLUS (high strength)") +
+    `IPAdapterAdvanced`. Required nodes are checked against `/object_info` before queueing;
+    without IP-Adapter the provider falls back to `txt2img` and records a warning.
+22. **8 GB VRAM**: one checkpoint for everything, sequential generation (single worker thread),
+    `POST /free` between stages, default size ≈ 832×1216 (`IMAGE_BASE_SIZE=1008`, max 1536).
+    Sampler defaults follow Animagine's model card (euler_ancestral, 28 steps, CFG 6).
+23. **LLM interface now returns `LLMResponse`** (data + token usage + model) so agents can
+    count tokens and cost.
