@@ -42,6 +42,14 @@
   IP-Adapter refs and consistency badges; story form with sample stories, auto-approve, project
   reuse. Verified in headless Edge (no console errors).
 
+- **M5** Reference sheets (`agents/sheets.py`): per main character a turnaround (front/side/back,
+  1216×832) and an expression sheet (neutral/happy/angry/sad/surprised, 1536×640), each from the
+  fixed seed stored in the bible, cropped into individual references (column split + autocrop).
+  Per-project cast store (`agents/cast_store.py`, `output/projects/<id>/`): approved characters
+  are saved with their images and reused by later chapters (`project_id`): the Character
+  Designer skips them, same tags and seeds. Approval node + gate in the graph (auto-approve, or
+  pause with status awaiting_approval). `GET /api/projects`. 113 tests passing.
+
 ### Known issues / measurements
 - ComfyUI is not installed on this machine, so there's **no real test panel yet**. Run
   `python -m app.tools.comfy_check --generate` (in backend/) after following SETUP_COMFYUI.md;

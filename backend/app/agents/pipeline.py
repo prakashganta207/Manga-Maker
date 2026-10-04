@@ -3,6 +3,9 @@
     writer_beats → writer_pages → director → character_designer → reference_sheets
       → [cast approved?] → prompts → panels → consistency → layout → export
 
+The graph pauses after reference_sheets until every main character is approved (or the
+job is auto-approved); approving the cast re-queues the job and it resumes from disk.
+
 Output folder of a job:
     project.json                 the whole shared state (resume point)
     characters/<slug>/...        turnaround + expression sheets and cropped references
@@ -25,10 +28,13 @@ from ..pipeline.export import export_pdf
 from ..pipeline.layout import LayoutConfig, compose_page, plan_page
 from ..providers import get_image_provider, get_llm_provider
 from ..providers.base import ImageProvider, ImageRequest, LLMProvider
+from .cast_store import CastStore
 from .character_designer import design_characters
 from .director import direct
 from .graph import Ctx, Node, run_graph
 from .prompt_builder import NEGATIVE_PROMPT, build_prompt, image_size_for_aspect, panel_references
+from .sheets import generate_sheets, sheets_present
+from .runner import AgentStep
 from .state import MangaProject, PanelPrompt, PanelResult
 from .writer import plan_pages, write_beat_sheet
 
@@ -65,6 +71,42 @@ def node_director(p: MangaProject, ctx: Ctx) -> None:
 def node_character_designer(p: MangaProject, ctx: Ctx) -> None:
     existing = ctx.extras.get("cast") or {}
     p.add_step(design_characters(p, ctx.llm, ctx.prices, existing=existing))
+
+
+def main_characters(p: MangaProject) -> list:
+    names = {n.lower() for n in p.main_character_names()}
+    return [c for c in p.characters if c.name.lower() in names]
+
+
+def node_reference_sheets(p: MangaProject, ctx: Ctx) -> None:
+    todo = [c for c in main_characters(p) if not sheets_present(c, ctx.job_dir)]
+    for index, character in enumerate(todo, start=1):
+        ctx.progress("sheets", (index - 1) / len(todo), f"Drawing {character.name}'s turnaround + expressions")
+        generate_sheets(character, ctx.image, ctx.job_dir)
+        p.save(ctx.job_dir)
+    ctx.image.free_memory()  # unload models before the next stage
+
+
+def approve_all(p: MangaProject) -> None:
+    for character in p.characters:
+        character.approved = True
+        character.status = "approved"
+
+
+def node_approval(p: MangaProject, ctx: Ctx) -> None:
+    """Human-in-the-loop checkpoint. Auto-approve (unattended runs) approves the whole cast;
+    otherwise this node does nothing and the gate after it pauses the graph."""
+    if p.auto_approve:
+        approve_all(p)
+        p.trace.append(AgentStep(agent="studio", label="Cast approval", status="ok",
+                                 notes=["Auto-approved (unattended run)"],
+                                 output=[c.name for c in p.characters]))
+    if p.all_approved():
+        CastStore(ctx.settings.output_dir).save(p, ctx.job_dir)  # reusable in later chapters
+
+
+def cast_approved(p: MangaProject) -> bool:
+    return p.all_approved()
 
 
 def node_prompts(p: MangaProject, ctx: Ctx) -> None:
@@ -163,6 +205,9 @@ def build_nodes(job_dir: Path) -> list[Node]:
         Node("director", "director", "Director: layouts and shots", node_director, lambda p: p.director is not None),
         Node("character_designer", "characters", "Character Designer: bible", node_character_designer,
              lambda p: bool(p.characters)),
+        Node("reference_sheets", "sheets", "Reference sheets", node_reference_sheets,
+             lambda p: all(sheets_present(c, job_dir) for c in main_characters(p))),
+        Node("approval", "approval", "Cast approval", node_approval, cast_approved),
         Node("prompts", "prompts", "Prompt builder", node_prompts, lambda p: bool(p.prompts)),
         Node("panels", "panels", "Drawing panels", node_panels,
              lambda p: bool(p.prompts) and len(p.panels) == len(p.prompts)
@@ -192,16 +237,23 @@ def run_project(project: MangaProject, *, settings: Settings, job_dir: Path, llm
     project.providers = {"llm": llm.name, "llm_model": getattr(llm, "model", ""), "image": image.name}
     project.status = "running"
     project.error = None
+    extras = dict(extras or {})
+    if project.project_id != project.job_id and "cast" not in extras:
+        # A new chapter of an earlier project: reuse its approved cast (images included).
+        extras["cast"] = CastStore(settings.output_dir).install(project.project_id, job_dir)
     ctx = Ctx(settings=settings, llm=llm, image=image, job_dir=job_dir,
-              progress=progress or (lambda s, f, m: None), extras=extras or {})
+              progress=progress or (lambda s, f, m: None), extras=extras)
     project.save(job_dir)
     try:
-        project = run_graph(project, build_nodes(job_dir), ctx)
+        # The conditional edge after "approval" stops the run until the cast is approved.
+        project = run_graph(project, build_nodes(job_dir), ctx, gate_after="approval", gate=cast_approved)
     except Exception as exc:
         project.status = "failed"
         project.error = f"{type(exc).__name__}: {exc}"
         project.save(job_dir)
         raise
+    if project.status != "done":
+        project.status = "awaiting_approval" if not project.all_approved() else project.status
     project.save(job_dir)
     return project
 

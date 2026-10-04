@@ -96,3 +96,14 @@ reasonable option; change freely.
     character; reference sheets and approval only for "main" characters.
 33. **The old one-shot `script` pipeline was removed** (models.py, pipeline/script.py, …): the
     agent graph replaces it everywhere (API, CLI, tests).
+34. **Reference sheets = one wide image, cropped into equal columns** (3 views / 5 expressions)
+    with a white-margin autocrop. Drawing all views in one image keeps them mutually consistent.
+    Limitation: the model doesn't always respect exact columns; the crops are then imperfect but
+    still useful IP-Adapter references (the full sheet is kept too). Sizes 1216×832 and 1536×640
+    are standard SDXL resolutions (~1 MP) that fit in 8 GB.
+35. **Sheets + approval only for "main" characters** (Writer's `importance`); supporting
+    characters rely on their fixed text tags.
+36. **Cast persistence**: only approved characters are saved to `output/projects/<project_id>/`.
+    A job's `project_id` defaults to its job id; passing an earlier id reuses that cast.
+37. **Approval is a graph node + conditional edge** (built in M5 because cast persistence
+    depends on it). Auto-approve marks every character approved and logs a "studio" step.

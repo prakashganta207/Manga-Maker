@@ -25,6 +25,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from .agents.cast_store import CastStore
 from .agents.pipeline import manifest, new_project, run_project, templates_catalogue
 from .agents.state import MangaProject
 from .config import REPO_DIR, Settings
@@ -85,7 +86,7 @@ def create_app(settings: Settings | None = None, llm: LLMProvider | None = None,
             project = new_project(job.story, job.id, settings, project_id=job.options.get("project_id"),
                                   auto_approve=job.options.get("auto_approve"))
         project = run_project(project, settings=settings, job_dir=directory, llm=llm, image=image,
-                              progress=progress, extras=app.state.extras_for(project))
+                              progress=progress)
         return manifest(project)
 
     manager = JobManager(settings.output_dir, runner)
@@ -100,7 +101,6 @@ def create_app(settings: Settings | None = None, llm: LLMProvider | None = None,
     app.state.manager = manager
     app.state.settings = settings
     app.state.llm, app.state.image = llm, image
-    app.state.extras_for = lambda project: {}
     # Local dev tool: allow any origin (no cookies/credentials are used).
     app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
@@ -157,7 +157,8 @@ def create_app(settings: Settings | None = None, llm: LLMProvider | None = None,
 
     @app.get("/api/projects")
     def projects() -> list[dict]:
-        return []  # filled in when the cast store exists
+        """Projects with a saved cast (to start a new chapter with the same characters)."""
+        return CastStore(settings.output_dir).list()
 
     from .routes_cast import register_cast_routes  # noqa: E402 — needs the objects above
     register_cast_routes(app)
