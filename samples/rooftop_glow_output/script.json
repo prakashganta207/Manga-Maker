@@ -1,0 +1,90 @@
+{
+  "title": "Mira's Story",
+  "characters": [
+    {
+      "name": "Mira",
+      "role": "protagonist",
+      "hair": "long straight silver hair",
+      "outfit": "a baggy hoodie and cargo pants",
+      "features": "tired eyes with dark circles, lanky"
+    },
+    {
+      "name": "Kaito",
+      "role": "supporting character",
+      "hair": "short spiky black hair",
+      "outfit": "a work apron over a plain shirt",
+      "features": "an old wristwatch, gentle smile"
+    }
+  ],
+  "pages": [
+    {
+      "page_number": 1,
+      "panels": [
+        {
+          "panel_number": 1,
+          "characters": [
+            "Mira"
+          ],
+          "action": "Mira climbed the stairs to the school rooftop. The wind tugged at her scarf.",
+          "setting": "a school rooftop",
+          "shot": "wide",
+          "mood": "calm",
+          "dialogue": [],
+          "narration": "Mira climbed the stairs to the school rooftop. The wind tugged at her scarf."
+        },
+        {
+          "panel_number": 2,
+          "characters": [
+            "Kaito"
+          ],
+          "action": "Below, the city lights flickered on one by one. Kaito was already there, leaning on the fence.",
+          "setting": "a city",
+          "shot": "medium",
+          "mood": "calm",
+          "dialogue": [],
+          "narration": "Below, the city lights flickered on one by one. Kaito was already there, leaning on the fence."
+        },
+        {
+          "panel_number": 3,
+          "characters": [
+            "Mira",
+            "Kaito"
+          ],
+          "action": "Kaito said quietly. Mira answered with a small smile.",
+          "setting": "a city",
+          "shot": "close-up",
+          "mood": "cheerful",
+          "dialogue": [
+            {
+              "speaker": "Kaito",
+              "text": "You came."
+            },
+            {
+              "speaker": "Mira",
+              "text": "I promised."
+            }
+          ],
+          "narration": null
+        },
+        {
+          "panel_number": 4,
+          "characters": [
+            "Mira",
+            "Kaito"
+          ],
+          "action": "Suddenly a strange glow rose from the river. They ran to the edge and stared. Mira whispered.",
+          "setting": "a riverbank",
+          "shot": "medium",
+          "mood": "mysterious",
+          "dialogue": [
+            {
+              "speaker": "Mira",
+              "text": "What is that?"
+            }
+          ],
+          "narration": "Suddenly a strange glow rose from the river. They ran to the edge and stared."
+        }
+      ]
+    }
+  ]
+}

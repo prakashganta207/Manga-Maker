@@ -34,3 +34,11 @@ reasonable option; change freely.
     layout slot (sides snapped to multiples of 64), then cover-fitted into the slot.
 15. **Determinism**: the job seed is derived from the story text, so the same story gives the
     same images with the same provider and settings.
+16. **Claude settings**: `claude-opus-5-5`, structured outputs via `output_config.format`,
+    effort `medium` (plenty for a short script), adaptive thinking (default), server-side
+    refusal fallbacks on (`fallbacks: "default"`). Unsupported schema keywords (lengths,
+    ranges, array sizes) are stripped before sending; Pydantic still enforces them.
+17. **ComfyUI workflows** use `{{placeholder}}` strings so users can drop in their own
+    API-format workflow (e.g. with IP-Adapter) without code changes.
+18. **Sample output is committed** (`samples/rooftop_glow_output/`, ~1.5 MB, mock mode),
+    including intermediate panels and reference images so every stage is visible.

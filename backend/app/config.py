@@ -52,6 +52,7 @@ class Settings:
     comfyui_steps: int = 25
     comfyui_cfg: float = 6.5
     comfyui_timeout: int = 600
+    comfyui_workflow: str = ""
 
     hosted_image_api_url: str = ""
     hosted_image_api_key: str = ""
@@ -78,6 +79,7 @@ class Settings:
             comfyui_steps=_env_int("COMFYUI_STEPS", 25),
             comfyui_cfg=_env_float("COMFYUI_CFG", 6.5),
             comfyui_timeout=_env_int("COMFYUI_TIMEOUT", 600),
+            comfyui_workflow=_env("COMFYUI_WORKFLOW"),
             hosted_image_api_url=_env("HOSTED_IMAGE_API_URL"),
             hosted_image_api_key=_env("HOSTED_IMAGE_API_KEY"),
             image_base_size=max(256, min(2048, _env_int("IMAGE_BASE_SIZE", 832))),

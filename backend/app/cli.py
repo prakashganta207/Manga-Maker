@@ -30,7 +30,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  {fraction:4.0%}  {message}")
 
     manifest = run_pipeline(story, settings=settings, out_dir=args.out, progress=progress)
-    print(f"\nDone: '{manifest['title']}' — {manifest['page_count']} page(s) in {args.out}")
+    print(f"\nDone: '{manifest['title']}' - {manifest['page_count']} page(s) in {args.out}")
     for warning in manifest["warnings"]:
         print(f"Warning: {warning}")
     return 0
