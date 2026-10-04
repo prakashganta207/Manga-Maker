@@ -117,36 +117,53 @@ class MockImageProvider(ImageProvider):
 
         if request.kind == "character_ref":
             return self._character_ref(img, draw, meta)
+        if request.kind == "turnaround":
+            return self._turnaround(img, draw, meta)
+        if request.kind == "expressions":
+            return self._expressions(img, draw, meta)
 
         shot = meta.get("shot", "medium")
+        angle = meta.get("angle", "eye level")
         names: list[str] = meta.get("characters") or []
-        mood = meta.get("mood", "calm")
+        mood = str(meta.get("mood", "calm")).lower()
 
-        # Background: screentone sky/ground depending on shot
-        if shot == "wide":
-            horizon = int(h * 0.62)
+        # Background: screentone sky/ground depending on shot and angle
+        if shot in ("wide", "establishing"):
+            horizon = int(h * (0.35 if angle in ("high", "bird's eye") else 0.75 if angle == "low" else 0.62))
             _screentone(draw, (0, horizon, w, h), spacing=9, radius=2)
             draw.line((0, horizon, w, horizon), fill=INK, width=3)
-        elif mood in ("tense", "mysterious", "melancholy"):
+            if shot == "establishing":  # a few buildings on the horizon
+                for k in range(7):
+                    bx = int(w * (k + 0.2) / 7)
+                    bh = int(h * (0.08 + 0.12 * ((request.seed >> k) % 3) / 2))
+                    draw.rectangle((bx, horizon - bh, bx + w // 10, horizon), fill=PAPER, outline=INK, width=2)
+        elif any(m in mood for m in ("tense", "mysterious", "melancholy", "sad", "fear")):
             _screentone(draw, (0, 0, w, h), spacing=8, radius=2)
         else:
             _screentone(draw, (0, 0, w, int(h * 0.3)), spacing=10, radius=1)
-        if mood == "dramatic":
+        if "dramatic" in mood or angle == "low":
             _speed_lines(draw, w, h, rng)
 
         # Figures — placed at the same x positions the bubble tails will target
         count = len(names)
         for i, name in enumerate(names):
             cx = w * character_x_fraction(i, count)
-            if shot == "wide":
+            if shot == "establishing":
+                _figure(draw, cx, h * 0.8, h * 0.2, name, "full")
+            elif shot == "wide":
                 _figure(draw, cx, h * 0.85, h * 0.45, name, "full")
-            elif shot == "medium":
+            elif shot in ("medium", "over-the-shoulder"):
                 _figure(draw, cx, h, h * 0.8, name, "half")
+            elif shot == "extreme close-up":
+                _figure(draw, cx, h * 1.25, h * (1.3 if count == 1 else 0.8), name, "head")
             else:
                 _figure(draw, cx, h, h * (0.95 if count == 1 else 0.55), name, "head")
+        if shot == "over-the-shoulder":  # dark shoulder + head of the listener in the foreground
+            draw.ellipse((-w * 0.15, h * 0.35, w * 0.35, h * 1.2), fill=INK)
+            draw.ellipse((w * 0.02, h * 0.2, w * 0.3, h * 0.55), fill=INK)
 
-        # Label (bottom-left): shot + characters, so you can check the script at a glance
-        label = safe_text(f"{shot.upper()} · {', '.join(names) or 'no characters'}")
+        # Label (bottom-left): shot + angle + characters, so you can check the director's plan
+        label = safe_text(f"{shot.upper()} / {angle} · {', '.join(names) or 'no characters'}")
         font = load_font(max(12, min(w, h) // 32))
         bbox = draw.textbbox((10, h - 10), label, font=font, anchor="ld")
         draw.rectangle((bbox[0] - 6, bbox[1] - 4, bbox[2] + 6, bbox[3] + 4), fill=PAPER, outline=INK, width=2)
@@ -165,4 +182,62 @@ class MockImageProvider(ImageProvider):
         for line in meta.get("description_lines", [])[:3]:
             draw.text((w / 2, y), safe_text(line[:60]), fill=INK, font=small, anchor="mt")
             y += small.size * 1.3
+        return img
+
+    # ------------------------------------------------------------------ character sheets
+    def _turnaround(self, img: Image.Image, draw: ImageDraw.ImageDraw, meta: dict) -> Image.Image:
+        """Three equal columns: front, side, back (the pipeline crops them apart)."""
+        w, h = img.size
+        name = meta.get("name", "Character")
+        col = w / 3
+        _screentone(draw, (0, int(h * 0.9), w, h), spacing=9, radius=2)
+        for k, view in enumerate(("front", "side", "back")):
+            cx = col * k + col / 2
+            _figure(draw, cx, h * 0.9, h * 0.72, name, "full", show_name=False)
+            head_r = h * 0.72 * 0.13
+            head_cy = h * 0.9 - h * 0.72 + head_r
+            if view == "side":  # profile: cover the far eye, add a nose
+                draw.ellipse((cx - head_r * 0.9, head_cy - head_r * 0.1, cx, head_cy + head_r * 0.6), fill=PAPER)
+                draw.polygon([(cx + head_r, head_cy + head_r * 0.1), (cx + head_r * 1.25, head_cy + head_r * 0.35),
+                              (cx + head_r * 0.95, head_cy + head_r * 0.45)], fill=PAPER, outline=INK)
+            elif view == "back":  # all hair, no face
+                draw.ellipse((cx - head_r, head_cy - head_r, cx + head_r, head_cy + head_r), fill=INK)
+            font = load_font(max(12, int(col / 12)))
+            draw.text((cx, h * 0.05), view.upper(), fill=INK, font=font, anchor="mt")
+        return img
+
+    def _expressions(self, img: Image.Image, draw: ImageDraw.ImageDraw, meta: dict) -> Image.Image:
+        """Five equal columns of faces: neutral, happy, angry, sad, surprised."""
+        w, h = img.size
+        name = meta.get("name", "Character")
+        expressions = meta.get("expressions") or ["neutral", "happy", "angry", "sad", "surprised"]
+        col = w / len(expressions)
+        for k, expression in enumerate(expressions):
+            cx, cy = col * k + col / 2, h * 0.56
+            r = min(col, h) * 0.34
+            # Head with the character's hair cap (same shape as in panels) and eyes.
+            seed = _name_seed(name)
+            head = (cx - r, cy - r, cx + r, cy + r)
+            draw.ellipse(head, fill=PAPER, outline=INK, width=4)
+            draw.chord(head, 185 + (seed % 15), 355 - (seed % 15), fill=INK)
+            for ex in (cx - r * 0.38, cx + r * 0.38):
+                draw.ellipse((ex - r * 0.09, cy + r * 0.05, ex + r * 0.09, cy + r * 0.3), fill=INK)
+            cy = cy - r * 0.05  # features below are placed relative to this
+            mouth_y = cy + r * 0.55
+            if expression == "happy":
+                draw.arc((cx - r * 0.35, mouth_y - r * 0.25, cx + r * 0.35, mouth_y + r * 0.2), 10, 170, fill=INK, width=4)
+            elif expression == "sad":
+                draw.arc((cx - r * 0.3, mouth_y, cx + r * 0.3, mouth_y + r * 0.35), 200, 340, fill=INK, width=4)
+                draw.line((cx - r * 0.42, cy + r * 0.4, cx - r * 0.42, cy + r * 0.65), fill=INK, width=3)  # tear
+            elif expression == "angry":
+                draw.line((cx - r * 0.3, mouth_y + r * 0.1, cx + r * 0.3, mouth_y + r * 0.1), fill=INK, width=5)
+                for side in (-1, 1):  # slanted brows
+                    draw.line((cx + side * r * 0.15, cy + r * 0.05, cx + side * r * 0.6, cy - r * 0.12), fill=PAPER, width=10)
+                    draw.line((cx + side * r * 0.15, cy + r * 0.05, cx + side * r * 0.6, cy - r * 0.12), fill=INK, width=6)
+            elif expression == "surprised":
+                draw.ellipse((cx - r * 0.12, mouth_y - r * 0.05, cx + r * 0.12, mouth_y + r * 0.25), outline=INK, width=4)
+            else:
+                draw.line((cx - r * 0.2, mouth_y + r * 0.1, cx + r * 0.2, mouth_y + r * 0.1), fill=INK, width=3)
+            font = load_font(max(12, int(col / 10)))
+            draw.text((cx, h * 0.06), expression.upper(), fill=INK, font=font, anchor="mt")
         return img

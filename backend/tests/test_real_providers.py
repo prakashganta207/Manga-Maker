@@ -10,17 +10,18 @@ import pytest
 from PIL import Image
 
 from app.config import Settings
-from app.models import MangaScript
-from app.pipeline.script import generate_script
+from app.agents.schemas import BeatSheet
+from app.agents.state import MangaProject
+from app.agents.writer import write_beat_sheet
 from app.providers.anthropic_llm import AnthropicLLMProvider, to_structured_output_schema
 from app.providers.base import ImageRequest, ProviderError
 from app.providers.hosted_image import HostedImageProvider
-from app.providers.mock_llm import MockLLMProvider
+from app.providers.mock_agents import build_beat_sheet
 
 
 # --------------------------------------------------------------------------- Anthropic
 def test_schema_conversion_strips_unsupported_and_closes_objects():
-    schema = to_structured_output_schema(MangaScript.model_json_schema())
+    schema = to_structured_output_schema(BeatSheet.model_json_schema())
     text = json.dumps(schema)
     for key in ("minLength", "maxLength", "minItems", "maxItems", "minimum"):
         assert f'"{key}"' not in text
@@ -46,16 +47,20 @@ def fake_client(*responses):
 
 def text_response(text, stop_reason="end_turn"):
     return SimpleNamespace(stop_reason=stop_reason, stop_details=None,
+                           usage=SimpleNamespace(input_tokens=1200, output_tokens=800),
                            content=[SimpleNamespace(type="thinking", thinking=""),
                                     SimpleNamespace(type="text", text=text)])
 
 
 def test_anthropic_provider_request_and_parse(story):
-    script = MockLLMProvider().build_script(story)
-    client, messages = fake_client(text_response(json.dumps(script)))
+    sheet = build_beat_sheet(story)
+    client, messages = fake_client(text_response(json.dumps(sheet)))
     provider = AnthropicLLMProvider(Settings(anthropic_api_key="x"), client=client)
-    result, _ = generate_script(story, provider)
-    assert result.title == script["title"]
+    project = MangaProject(job_id="j", project_id="p", story=story)
+    step = write_beat_sheet(project, provider)
+    assert project.beat_sheet.title == sheet["title"]
+    assert step.input_tokens == 1200 and step.output_tokens == 800
+    assert step.cost_usd == round((1200 * 4 + 800 * 20) / 1e6, 6)
     call = messages.calls[0]
     assert call["model"] == "claude-opus-5-5"
     assert call["output_config"]["format"]["type"] == "json_schema"
@@ -65,11 +70,11 @@ def test_anthropic_provider_request_and_parse(story):
 
 
 def test_anthropic_invalid_answer_triggers_repair(story):
-    script = MockLLMProvider().build_script(story)
-    broken = dict(script, pages=[])
-    client, messages = fake_client(text_response(json.dumps(broken)), text_response(json.dumps(script)))
+    sheet = build_beat_sheet(story)
+    broken = dict(sheet, beats=[])
+    client, messages = fake_client(text_response(json.dumps(broken)), text_response(json.dumps(sheet)))
     provider = AnthropicLLMProvider(Settings(anthropic_api_key="x"), client=client)
-    generate_script(story, provider)
+    write_beat_sheet(MangaProject(job_id="j", project_id="p", story=story), provider)
     assert len(messages.calls) == 2
     assert "rejected by the validator" in messages.calls[1]["messages"][0]["content"]
 

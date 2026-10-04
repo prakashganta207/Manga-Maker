@@ -1,4 +1,4 @@
-"""Mock LLM: builds a deterministic manga script from the story's sentences.
+"""Mock LLM: answers every agent task deterministically from the story's sentences.
 
 No AI here — just simple text rules — so the whole app works offline, for free,
 and gives the same output for the same story every time (great for tests).
@@ -7,7 +7,6 @@ and gives the same output for the same story every time (great for tests).
 from __future__ import annotations
 
 import hashlib
-import math
 import re
 from collections import Counter
 from typing import Any
@@ -62,10 +61,6 @@ _OUTFIT = ["a dark school uniform with a striped tie", "a long hooded traveling 
            "a work apron over a plain shirt", "a sailor-collar uniform and knee socks",
            "a patched jacket with rolled sleeves", "a high-collared coat with brass buttons",
            "a light kimono-style top with a sash", "a baggy hoodie and cargo pants"]
-_FEATURES = ["sharp determined eyes, slim build", "round glasses, freckles, small build",
-             "a scar across the left cheek, tall", "large expressive eyes, cheerful face",
-             "tired eyes with dark circles, lanky", "a small mole under one eye, calm expression",
-             "thick eyebrows, broad shoulders", "an old wristwatch, gentle smile"]
 
 _PRONOUNS = re.compile(r"\b(he|she|they|him|her|them|his|their)\b", re.IGNORECASE)
 
@@ -137,11 +132,14 @@ def _truncate(text: str, limit: int) -> str:
 
 
 def _setting_for(text: str) -> str | None:
+    """The setting keyword that appears FIRST in the text (plurals count: "rooftops")."""
     lower = text.lower()
+    best: tuple[int, str] | None = None
     for keyword, setting in _SETTINGS:
-        if re.search(rf"\b{re.escape(keyword)}\b", lower):
-            return setting
-    return None
+        match = re.search(rf"\b{re.escape(keyword)}s?\b", lower)
+        if match and (best is None or match.start() < best[0]):
+            best = (match.start(), setting)
+    return best[1] if best else None
 
 
 def _mood_for(text: str) -> str:
@@ -171,107 +169,4 @@ class MockLLMProvider(LLMProvider):
             return LLMResponse(mock_agents.build_character_bible(context["beat_sheet"]), model="mock")
         if task == "director":
             return LLMResponse(mock_agents.build_director_plan(context), model="mock")
-        if task != "manga_script":
-            raise ProviderError(f"Mock LLM does not know task '{task}'")
-        return LLMResponse(self.build_script(
-            context["story"],
-            panels_per_page=int(context.get("panels_per_page", 4)),
-            max_pages=int(context.get("max_pages", 2)),
-        ), model="mock")
-
-    # ------------------------------------------------------------------ #
-    def build_script(self, story: str, *, panels_per_page: int = 4, max_pages: int = 2) -> dict[str, Any]:
-        sentences = split_sentences(story)
-        if not sentences:
-            raise ProviderError("Story is empty")
-
-        # Need at least one sentence per panel: split long sentences at commas if short.
-        if len(sentences) < panels_per_page:
-            expanded: list[str] = []
-            for s in sentences:
-                # Don't split sentences with dialogue: the quote would lose its speaker.
-                pieces = [p.strip() for p in re.split(r",\s+", s) if p.strip()] if '"' not in s else [s]
-                expanded.extend(pieces if len(pieces) > 1 else [s])
-            sentences = expanded
-
-        names = find_names(sentences) or ["Hero"]
-        characters = [
-            {
-                "name": name,
-                "role": "protagonist" if i == 0 else "supporting character",
-                "hair": _HAIR[_stable_index(name, len(_HAIR), "hair")],
-                "outfit": _OUTFIT[_stable_index(name, len(_OUTFIT), "outfit")],
-                "features": _FEATURES[_stable_index(name, len(_FEATURES), "features")],
-            }
-            for i, name in enumerate(names)
-        ]
-
-        # Up to three sentences per panel before starting a new page, capped by max_pages.
-        pages_needed = math.ceil(len(sentences) / (panels_per_page * 3))
-        page_count = max(1, min(max_pages, pages_needed))
-        total_panels = min(page_count * panels_per_page, len(sentences))
-        page_count = math.ceil(total_panels / panels_per_page)
-
-        chunks = [
-            sentences[math.floor(i * len(sentences) / total_panels): math.floor((i + 1) * len(sentences) / total_panels)]
-            for i in range(total_panels)
-        ]
-
-        shot_cycle = ["wide", "medium", "close-up", "medium", "wide", "close-up"]
-        last_setting = _setting_for(story) or "a quiet street"
-        last_chars: list[str] = [names[0]]
-        panels: list[dict[str, Any]] = []
-
-        for index, chunk in enumerate(chunks):
-            text = " ".join(chunk)
-            setting = _setting_for(text) or last_setting
-            last_setting = setting
-
-            present = [n for n in names if re.search(rf"\b{re.escape(n)}\b", text)]
-            if re.search(r"\b(they|them|their|together|both)\b", text, re.IGNORECASE):
-                present = list(names)  # plural pronoun -> everyone in the scene
-            elif not present and _PRONOUNS.search(text):
-                present = list(last_chars)
-            if not present:
-                present = [names[0]]
-            last_chars = present
-
-            dialogue: list[dict[str, str]] = []
-            actions: list[str] = []
-            prose: list[str] = []  # sentences without dialogue -> usable as narration
-            for sentence in chunk:
-                quotes, rest = split_quotes(sentence)
-                if rest:
-                    actions.append(rest)
-                if rest and not quotes:
-                    prose.append(rest)
-                if quotes:
-                    named = [n for n in names if re.search(rf"\b{re.escape(n)}\b", rest)]
-                    speaker = named[0] if named else present[0]
-                    for q in quotes:
-                        if len(dialogue) < 2:
-                            # '"You came," she said' -> "You came."
-                            line = re.sub(r"[,;:]$", ".", q.strip())
-                            dialogue.append({"speaker": speaker, "text": _truncate(line, 120)})
-
-            action = _truncate(" ".join(actions), 300) if actions else f"{present[0]} speaks"
-            shot = shot_cycle[index % len(shot_cycle)]
-            narration = _truncate(" ".join(prose), 110 if dialogue else 140) if prose else None
-
-            panels.append({
-                "panel_number": index % panels_per_page + 1,
-                "characters": present,
-                "action": action,
-                "setting": setting,
-                "shot": shot,
-                "mood": _mood_for(text),
-                "dialogue": dialogue,
-                "narration": narration,
-            })
-
-        pages = [
-            {"page_number": p + 1, "panels": panels[p * panels_per_page:(p + 1) * panels_per_page]}
-            for p in range(page_count)
-        ]
-        title = f"{names[0]}'s Story" if names[0] != "Hero" else "A Short Story"
-        return {"title": title, "characters": characters, "pages": pages}
+        raise ProviderError(f"Mock LLM does not know task '{task}'")

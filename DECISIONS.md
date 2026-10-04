@@ -83,3 +83,16 @@ reasonable option; change freely.
 29. **Pacing rules fixed in code (not by re-asking the LLM)**: a splash panel that shares a page
     becomes large; only one large panel per page (the most intense beat keeps it); a page with
     a single panel becomes a splash. Each fix is noted on the agent step.
+30. **10 layout templates** (the brief asked for 8–10), covering 1–6 panels per page. Slots are
+    fractions of the inner page; size classes come from slot area (≥0.99 splash, ≥0.38 large,
+    ≥0.14 medium, else small). The Director (or the mock, via `best_template`) must pick a
+    template whose slot count equals the page's panel count — checked in code.
+31. **Rule priority in the Director**: establishing shot on setting change wins over a close-up
+    on an emotional peak (a single panel can't be both); the conflict is noted in the trace.
+    The variety fix only changes panels that aren't locked by the other two rules (peak panels
+    may swap between close-up and extreme close-up).
+32. **Character Designer runs before the reference sheets** and was built in M3 (not M5) so the
+    graph could run end to end from M3 on. Bible entries are made for every beat-sheet
+    character; reference sheets and approval only for "main" characters.
+33. **The old one-shot `script` pipeline was removed** (models.py, pipeline/script.py, …): the
+    agent graph replaces it everywhere (API, CLI, tests).

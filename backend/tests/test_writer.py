@@ -5,7 +5,7 @@ import json
 import pytest
 
 from app.agents.graph import Ctx, Node, run_graph
-from app.agents.schemas import BeatSheet, PagePlan
+from app.agents.schemas import PagePlan
 from app.agents.state import MangaProject
 from app.agents.writer import check_page_plan, normalise_page_plan, plan_pages, write_beat_sheet
 from app.providers.base import LLMResponse

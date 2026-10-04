@@ -176,10 +176,17 @@ def build_page_plan(story: str, beat_sheet: dict, max_pages: int = 2, max_panels
             end = len(panels)
         else:
             target = start + math.ceil((len(panels) - start) / remaining_pages)
-            candidates = [e for e in (target - 1, target) if start < e < len(panels) and e - start <= max_panels]
+            per_page = min(5, max_panels)  # 5 or fewer panels keeps big slots available
+            candidates = [e for e in (target - 1, target, target + 1)
+                          if start < e < len(panels) and e - start <= per_page
+                          and len(panels) - e <= (remaining_pages - 1) * per_page]
             end = max(candidates, key=lambda e: (intensity[panels[e - 1]["beat"]], e)) if candidates else target
         chunk = panels[start:end][:max_panels]
         start = end
+        # The mock treats each page as one scene: one setting per page (the first one detected).
+        page_setting = chunk[0]["setting"]
+        for x in chunk:
+            x["setting"] = page_setting
         # One large panel per page (the most intense), single-panel page = splash.
         larges = [x for x in chunk if x["size"] == "large"]
         if len(larges) > 1:
@@ -210,14 +217,27 @@ _PERSONALITY = ["determined but secretly anxious", "cheerful and impulsive", "qu
                 "sarcastic with a kind heart", "gentle and patient", "proud and competitive"]
 
 
+def _distinct(options: list[str], name: str, salt: str, used: set[str]) -> str:
+    """Deterministic pick that avoids options already given to another character."""
+    start = _stable_index(name, len(options), salt)
+    for k in range(len(options)):
+        choice = options[(start + k) % len(options)]
+        if choice not in used:
+            used.add(choice)
+            return choice
+    return options[start]
+
+
 def build_character_bible(beat_sheet: dict) -> dict[str, Any]:
     characters = []
+    used_hair: set[str] = set()
+    used_outfit: set[str] = set()
     for c in beat_sheet["characters"]:
         name = c["name"]
         tags = {
-            "hair": _HAIR[_stable_index(name, len(_HAIR), "hair")],
+            "hair": _distinct(_HAIR, name, "hair", used_hair),
             "eyes": _EYES[_stable_index(name, len(_EYES), "eyes")],
-            "outfit": _OUTFIT[_stable_index(name, len(_OUTFIT), "outfit")],
+            "outfit": _distinct(_OUTFIT, name, "outfit", used_outfit),
             "accessories": _ACCESSORIES[_stable_index(name, len(_ACCESSORIES), "acc")],
             "distinguishing_marks": _MARKS[_stable_index(name, len(_MARKS), "marks")],
         }
@@ -232,3 +252,45 @@ def build_character_bible(beat_sheet: dict) -> dict[str, Any]:
             "expression_range": ["neutral", "happy", "angry", "sad", "surprised"],
         })
     return {"characters": characters}
+
+
+# --------------------------------------------------------------------------- director
+def build_director_plan(context: dict) -> dict[str, Any]:
+    from ..agents.director import is_peak, setting_key
+    from ..agents.schemas import BeatSheet, PagePlan
+    from ..pipeline.templates import best_template
+
+    sheet = BeatSheet.model_validate(context["beat_sheet"])
+    plan = PagePlan.model_validate(context["page_plan"])
+    previous_setting = None
+    pages = []
+    for page in plan.pages:
+        template = best_template([p.size for p in page.panels])
+        panels = []
+        for panel in page.panels:
+            beat = sheet.beat(panel.beat)
+            intensity = beat.intensity if beat else 2
+            key = setting_key(panel.setting)
+            if key != previous_setting:
+                shot, angle = "establishing", "bird's eye" if intensity <= 2 else "high"
+            elif is_peak(panel, sheet):
+                shot, angle = ("extreme close-up" if panel.size == "small" else "close-up"), \
+                    ("low" if intensity >= 4 else "eye level")
+            elif panel.dialogue and len(panel.characters) >= 2:
+                shot, angle = "over-the-shoulder", "eye level"
+            elif beat and beat.kind == "action":
+                shot, angle = "wide", "low"
+            else:
+                shot, angle = "medium", "high" if panel.emotion in ("melancholy", "sad") else "eye level"
+            previous_setting = key
+            who = " and ".join(panel.characters) or "the scene"
+            focus = {"establishing": f"{who} small in the frame, the setting fills the panel",
+                     "close-up": f"{who}'s face fills the frame, background dropped to screentone",
+                     "extreme close-up": f"tight on {who}'s eyes",
+                     "over-the-shoulder": f"over one shoulder toward {who}, speaker in the foreground",
+                     "wide": f"{who} full body, motion lines across the panel",
+                     "medium": f"{who} from the waist up, centred"}[shot]
+            panels.append({"panel_number": panel.panel_number, "shot": shot, "angle": angle,
+                           "composition": focus[:200]})
+        pages.append({"page_number": page.page_number, "layout": template.id, "panels": panels})
+    return {"pages": pages}

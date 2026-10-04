@@ -24,6 +24,16 @@
   LangGraph graph (`agents/graph.py`) with skip-if-done nodes (resume) and an approval gate.
   Mock writer in `providers/mock_agents.py`. 102 tests passing.
 
+- **M3** Director agent (`agents/director.py`: layout per page + shot/angle/composition per panel,
+  code-enforced rules: establishing on setting change, close-up on emotional peaks, max 2 identical
+  shots in a row), library of 10 layout templates (`pipeline/templates.py`: splash, two tiers,
+  three tiers, big top, classic 4, four-koma, tall vertical, action burst, conversation, 6-grid),
+  template-driven layout + SFX lettering, prompt builder (`agents/prompt_builder.py`: shot/angle/
+  expression tags, exact character tags, negative prompt, emotion-matched reference choice),
+  Character Designer (text bible, moved forward from M5 so the graph could run end to end), full
+  pipeline nodes (`agents/pipeline.py`), job queue/API/CLI switched to the agent graph, old one-shot
+  script pipeline removed. 3 sample stories in `samples/stories/`. 107 tests passing.
+
 ### Known issues / measurements
 - ComfyUI is not installed on this machine, so there's **no real test panel yet**. Run
   `python -m app.tools.comfy_check --generate` (in backend/) after following SETUP_COMFYUI.md;

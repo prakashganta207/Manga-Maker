@@ -26,6 +26,7 @@ def settings(tmp_path) -> Settings:
     s.llm_provider = "mock"
     s.image_provider = "mock"
     s.output_dir = tmp_path / "output"
+    s.image_base_size = 512  # small mock images keep the tests fast
     return s
 
 

@@ -10,6 +10,7 @@ Placement rules:
   sides, then the bottom.
 - Balloons don't overlap each other; if nothing fits, the font shrinks.
 - Speech tails point toward the speaker's position in the panel.
+- Sound effects (SFX) are big outlined letters, placed bottom-first, also outside the centre.
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ from PIL import ImageDraw
 
 from ..fonts import load_font, safe_text
 from ..geometry import Rect, character_x_fraction
-from ..models import Panel
+from ..agents.schemas import PlannedPanel
 
 INK = 0
 PAPER = 255
@@ -29,11 +30,12 @@ LINE_W = 3
 EDGE_PAD = 10        # distance from panel border
 BALLOON_GAP = 8      # min gap between balloons
 MIN_FONT = 14
+SHOUT_MOODS = ("dramatic", "tense", "angry", "anger", "rage", "furious", "shock", "panic", "fear", "excited")
 
 
 @dataclass
 class Balloon:
-    kind: str                      # "speech" | "shout" | "narration"
+    kind: str                      # "speech" | "shout" | "narration" | "sfx"
     lines: list[str]
     font_size: int
     box: Rect                      # outer bounding box of the shape (tail not included)
@@ -107,8 +109,12 @@ def _candidates(area: Rect, bw: int, bh: int, rtl: bool) -> list[tuple[int, int]
     return [(x, y) for y in ys for x in xs]
 
 
-def _find_spot(area: Rect, bw: int, bh: int, keep_out: Rect, placed: list[Rect], rtl: bool) -> Rect | None:
-    for x, y in _candidates(area, bw, bh, rtl):
+def _find_spot(area: Rect, bw: int, bh: int, keep_out: Rect, placed: list[Rect], rtl: bool,
+               bottom_first: bool = False) -> Rect | None:
+    candidates = _candidates(area, bw, bh, rtl)
+    if bottom_first:
+        candidates = list(reversed(candidates))
+    for x, y in candidates:
         box = Rect(x, y, bw, bh)
         if box.intersects(keep_out):
             continue
@@ -118,7 +124,7 @@ def _find_spot(area: Rect, bw: int, bh: int, keep_out: Rect, placed: list[Rect],
     return None
 
 
-def plan_balloons(panel: Panel, rect: Rect, *, font_size: int = 26, font_path: str = "",
+def plan_balloons(panel: PlannedPanel, rect: Rect, *, font_size: int = 26, font_path: str = "",
                   rtl: bool = False, draw: ImageDraw.ImageDraw | None = None) -> list[Balloon]:
     """Decide what goes where (no drawing). `rect` is the panel's inner area."""
     if draw is None:
@@ -128,8 +134,9 @@ def plan_balloons(panel: Panel, rect: Rect, *, font_size: int = 26, font_path: s
     items: list[tuple[str, str, str | None]] = []  # (kind, text, speaker)
     if panel.narration:
         items.append(("narration", safe_text(panel.narration, font_path), None))
+    mood = (getattr(panel, "emotion", None) or getattr(panel, "mood", "") or "").lower()
     for line in panel.dialogue:
-        shout = line.text.rstrip().endswith("!") and panel.mood.lower() in ("dramatic", "tense")
+        shout = line.text.rstrip().endswith("!") and any(m in mood for m in SHOUT_MOODS)
         items.append(("shout" if shout else "speech", safe_text(line.text, font_path).upper(), line.speaker))
 
     area = rect.inset(EDGE_PAD)
@@ -165,6 +172,20 @@ def plan_balloons(panel: Panel, rect: Rect, *, font_size: int = 26, font_path: s
         balloon.meta["speaker"] = speaker
         placed.append(balloon.box)
         balloons.append(balloon)
+
+    for sfx in getattr(panel, "sfx", []) or []:
+        text = safe_text(sfx, font_path).upper()
+        size = int(font_size * 1.9)
+        while True:
+            font = load_font(size, font_path)
+            left, top, right, bottom = draw.textbbox((0, 0), text, font=font, stroke_width=5)
+            box = _find_spot(area, right - left + 8, bottom - top + 8, keep_out, placed, not rtl, bottom_first=True)
+            if box or size <= 20:
+                break
+            size -= 4
+        if box:  # no room -> skip the sound effect rather than cover the art
+            balloons.append(Balloon("sfx", [text], size, box))
+            placed.append(box)
     return balloons
 
 
@@ -206,6 +227,11 @@ def draw_balloons(draw: ImageDraw.ImageDraw, balloons: list[Balloon], panel: Rec
     for balloon in balloons:
         box = balloon.box
         font = load_font(balloon.font_size, font_path)
+        if balloon.kind == "sfx":
+            # Heavy black letters with a thick white outline, like hand-drawn sound effects.
+            draw.text((box.x + box.w / 2, box.y + box.h / 2), balloon.lines[0], fill=INK, font=font,
+                      anchor="mm", stroke_width=5, stroke_fill=PAPER)
+            continue
         if balloon.kind == "narration":
             draw.rectangle(box.box, fill=PAPER, outline=INK, width=LINE_W)
         elif balloon.kind == "shout":
@@ -226,7 +252,7 @@ def draw_balloons(draw: ImageDraw.ImageDraw, balloons: list[Balloon], panel: Rec
             y += line_h
 
 
-def letter_panel(draw: ImageDraw.ImageDraw, panel: Panel, rect: Rect, *, font_size: int = 26,
+def letter_panel(draw: ImageDraw.ImageDraw, panel: PlannedPanel, rect: Rect, *, font_size: int = 26,
                  font_path: str = "", rtl: bool = False, debug_keep_out: bool = False) -> list[Balloon]:
     """Plan and draw all text for one panel. Returns the balloons (for tests/debug)."""
     balloons = plan_balloons(panel, rect, font_size=font_size, font_path=font_path, rtl=rtl, draw=draw)

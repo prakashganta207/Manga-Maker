@@ -1,7 +1,7 @@
 from PIL import Image
 
 from app.config import Settings
-from app.models import MangaScript
+from app.agents.schemas import BeatSheet, CharacterBibleDraft, DirectorPlan, PagePlan
 from app.providers import ImageRequest
 from app.providers.factory import get_image_provider, get_llm_provider, resolve_image_name, resolve_llm_name
 from app.providers.mock_image import MockImageProvider
@@ -48,17 +48,34 @@ def test_find_names(story):
     assert names[:2] == ["Mira", "Kaito"]
 
 
-def test_mock_llm_is_deterministic_and_valid(story):
+def test_mock_llm_answers_every_agent_task_deterministically(story):
     llm = MockLLMProvider()
-    ctx = {"story": story, "panels_per_page": 4, "max_pages": 2}
-    a = llm.generate_json(system="", user="", schema={}, task="manga_script", context=ctx).data
-    b = llm.generate_json(system="", user="", schema={}, task="manga_script", context=ctx).data
-    assert a == b
-    script = MangaScript.model_validate(a)
-    assert len(script.pages[0].panels) == 4
-    assert {c.name for c in script.characters} >= {"Mira", "Kaito"}
-    speakers = {line.speaker for _, p in script.all_panels() for line in p.dialogue}
-    assert "Kaito" in speakers and "Mira" in speakers
+
+    def ask(task, **ctx):
+        a = llm.generate_json(system="", user="", schema={}, task=task, context=ctx).data
+        b = llm.generate_json(system="", user="", schema={}, task=task, context=ctx).data
+        assert a == b
+        return a
+
+    sheet = BeatSheet.model_validate(ask("beat_sheet", story=story))
+    assert {c.name for c in sheet.characters} >= {"Mira", "Kaito"}
+    plan = PagePlan.model_validate(ask("page_plan", story=story, beat_sheet=sheet.model_dump(mode="json")))
+    speakers = {line.speaker for _, p in plan.all_panels() for line in p.dialogue}
+    assert {"Kaito", "Mira"} <= speakers
+    DirectorPlan.model_validate(ask("director", page_plan=plan.model_dump(mode="json"),
+                                    beat_sheet=sheet.model_dump(mode="json")))
+    bible = CharacterBibleDraft.model_validate(ask("character_bible", beat_sheet=sheet.model_dump(mode="json")))
+    assert [c.name for c in bible.characters] == [c.name for c in sheet.characters]
+
+
+def test_mock_image_draws_character_sheets():
+    provider = MockImageProvider()
+    sheet = provider.generate(ImageRequest(prompt="x", width=600, height=400, kind="turnaround",
+                                           metadata={"name": "Mira"}))
+    faces = provider.generate(ImageRequest(prompt="x", width=1000, height=400, kind="expressions",
+                                           metadata={"name": "Mira"}))
+    assert sheet.size == (600, 400) and faces.size == (1000, 400)
+    assert sheet.getextrema()[0] == 0 and faces.getextrema()[0] == 0
 
 
 def test_mock_image_size_and_determinism():
