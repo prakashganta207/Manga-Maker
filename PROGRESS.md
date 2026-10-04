@@ -34,10 +34,21 @@
   pipeline nodes (`agents/pipeline.py`), job queue/API/CLI switched to the agent graph, old one-shot
   script pipeline removed. 3 sample stories in `samples/stories/`. 107 tests passing.
 
+- **M4** Frontend Agent timeline (`components/AgentTimeline.tsx`): summary strip (steps, time,
+  tokens, cost, model), clickable step list with retries/notes, per-agent views (beat sheet with
+  intensity chart, page plan cards with sizes/dialogue/SFX, Director plan with RTL layout
+  thumbnails + shot/angle chips + rule fixes, character bible), raw JSON, pipeline timing bars.
+  Job page tabs (Progress / Agent timeline / Cast / Read); Reader panel gallery with prompts, seeds,
+  IP-Adapter refs and consistency badges; story form with sample stories, auto-approve, project
+  reuse. Verified in headless Edge (no console errors).
+
 ### Known issues / measurements
 - ComfyUI is not installed on this machine, so there's **no real test panel yet**. Run
   `python -m app.tools.comfy_check --generate` (in backend/) after following SETUP_COMFYUI.md;
   it writes `samples/comfyui_test_panel.png` plus timing and VRAM numbers.
+- Ports on this machine: 8000 (another uvicorn app), 3000 (Grafana), 3200 (Grafana Tempo) are
+  taken, and an orphaned socket from a killed process still holds 8100. The UI was tested on
+  **8300/3300**: `BACKEND_PORT=8300 FRONTEND_PORT=3300 python scripts/tasks.py dev`.
 - GPU detected: RTX 4060 Laptop, 8188 MiB (nvidia-smi, driver 610.88), idle.
 
 ---

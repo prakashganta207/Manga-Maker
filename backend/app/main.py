@@ -155,6 +155,10 @@ def create_app(settings: Settings | None = None, llm: LLMProvider | None = None,
         return [{"id": p.stem, "title": p.stem.replace("_", " ").title(), "story": p.read_text(encoding="utf-8")}
                 for p in sorted(SAMPLES_DIR.glob("*.txt"))]
 
+    @app.get("/api/projects")
+    def projects() -> list[dict]:
+        return []  # filled in when the cast store exists
+
     from .routes_cast import register_cast_routes  # noqa: E402 — needs the objects above
     register_cast_routes(app)
 
