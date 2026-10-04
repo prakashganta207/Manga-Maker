@@ -81,7 +81,21 @@ def dev() -> None:
         pass
     finally:
         for p in procs:
-            p.terminate()
+            stop_tree(p)
+
+
+def stop_tree(proc: subprocess.Popen) -> None:
+    """Stop a process AND its children (uvicorn --reload / next dev spawn workers).
+
+    On Windows, terminate() only kills the direct child, leaving workers that keep the
+    port open and serve stale code — so kill the whole tree with taskkill /T.
+    """
+    if proc.poll() is not None:
+        return
+    if os.name == "nt":
+        subprocess.run(["taskkill", "/T", "/F", "/PID", str(proc.pid)], capture_output=True)
+    else:
+        proc.terminate()
 
 
 def sample() -> None:

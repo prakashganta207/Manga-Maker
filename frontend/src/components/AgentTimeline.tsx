@@ -8,6 +8,7 @@ const AGENT_STYLE: Record<string, { name: string; badge: string; icon: string }>
   writer: { name: "Writer", badge: "bg-ink text-paper", icon: "✎" },
   director: { name: "Director", badge: "bg-white text-ink border-2 border-ink", icon: "🎬" },
   character_designer: { name: "Character Designer", badge: "bg-tone text-ink", icon: "☺" },
+  studio: { name: "Studio", badge: "bg-amber-100 text-ink border border-amber-700", icon: "✓" },
 };
 
 const NODE_LABELS: Record<string, string> = {

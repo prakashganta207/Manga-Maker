@@ -50,6 +50,15 @@
   Designer skips them, same tags and seeds. Approval node + gate in the graph (auto-approve, or
   pause with status awaiting_approval). `GET /api/projects`. 113 tests passing.
 
+- **M6** Cast approval: endpoints (`routes_cast.py`) to approve one/all, regenerate a sheet with a
+  new reproducible seed (queued on the single GPU worker, version-numbered files), edit description
+  and visual tags (needs re-approval). Approving the last main character re-queues the job; it
+  resumes from project.json at the approval gate. Cast page (`components/CastView.tsx`): bible,
+  turnaround + expression sheets with crops and seeds, New seed / Edit / Approve buttons,
+  'Approve all & draw panels'. Auto-approve per job or via AUTO_APPROVE. Verified in headless Edge.
+  Fixed: `tasks.py dev` now kills the whole process tree on Windows (orphaned uvicorn reload
+  workers were holding ports and serving stale code).
+
 ### Known issues / measurements
 - ComfyUI is not installed on this machine, so there's **no real test panel yet**. Run
   `python -m app.tools.comfy_check --generate` (in backend/) after following SETUP_COMFYUI.md;

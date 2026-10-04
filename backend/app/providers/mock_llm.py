@@ -28,6 +28,7 @@ Very Wait Was We Well Were What When Where Whether Which While Who Why Will With
 Yes Yesterday Yet You Your Monday Tuesday Wednesday Thursday Friday Saturday Sunday January
 February March April May June July August September October November December God Hey Hi
 Run Stop Look Come Go No Don Help Sorry Three Four Five Years Hours Minutes Everybody Nobody
+Mr Ms Mrs Dr Prof St
 """.split())
 
 _SETTINGS = [
@@ -80,7 +81,10 @@ def split_sentences(text: str) -> list[str]:
     text = normalise_text(text)
     if not text:
         return []
+    # Protect honorifics ("Ms. Tanabe") so they don't end a sentence.
+    text = re.sub(r"\b(Mr|Ms|Mrs|Dr|Prof|St)\.\s", lambda m: m.group(1) + "․ ", text)
     raw = re.findall(r'[^.!?]*[.!?]+"?(?=\s|$)|[^.!?]+$', text)
+    raw = [r.replace("․", ".") for r in raw]
     sentences: list[str] = []
     for part in (p.strip() for p in raw):
         if not part:

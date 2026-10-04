@@ -244,7 +244,8 @@ export function jobFileUrl(project: { files_base: string }, relative: string, ve
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
-    headers: { "Content-Type": "application/json", ...(init?.headers || {}) },
+    // Only send Content-Type with a body: on GETs it would trigger a CORS preflight per poll.
+    headers: { ...(init?.body ? { "Content-Type": "application/json" } : {}), ...(init?.headers || {}) },
     cache: "no-store",
   });
   if (!response.ok) {
