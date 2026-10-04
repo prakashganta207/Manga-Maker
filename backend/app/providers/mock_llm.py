@@ -157,6 +157,20 @@ class MockLLMProvider(LLMProvider):
 
     def generate_json(self, *, system: str, user: str, schema: dict[str, Any],
                       task: str, context: dict[str, Any]) -> LLMResponse:
+        # Agent tasks are built by mock_agents (imported here to avoid a circular import).
+        from . import mock_agents
+
+        if task == "beat_sheet":
+            return LLMResponse(mock_agents.build_beat_sheet(context["story"], int(context.get("max_beats", 12))),
+                               model="mock")
+        if task == "page_plan":
+            return LLMResponse(mock_agents.build_page_plan(
+                context["story"], context["beat_sheet"], int(context.get("max_pages", 2)),
+                int(context.get("max_panels", 6))), model="mock")
+        if task == "character_bible":
+            return LLMResponse(mock_agents.build_character_bible(context["beat_sheet"]), model="mock")
+        if task == "director":
+            return LLMResponse(mock_agents.build_director_plan(context), model="mock")
         if task != "manga_script":
             raise ProviderError(f"Mock LLM does not know task '{task}'")
         return LLMResponse(self.build_script(

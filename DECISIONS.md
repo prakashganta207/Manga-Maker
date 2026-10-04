@@ -75,3 +75,11 @@ reasonable option; change freely.
 26. **Cost counter**: a built-in USD-per-MTok table for common models; unknown models count as
     $0 unless `LLM_INPUT_PRICE_PER_MTOK` / `LLM_OUTPUT_PRICE_PER_MTOK` are set. Each agent step
     logs tokens and cost; job totals live in the job state.
+27. **LangGraph 1.2** is used for the agent pipeline (it installed fine on Python 3.14). The graph
+    state is `{"project": MangaProject}`; every node saves `project.json` and skips itself when
+    its output already exists, which gives resume-after-pause/crash for free.
+28. **Beat budget**: pass 1 may use at most `max_pages × min(5, MAX_PANELS_PER_PAGE)` beats,
+    because every beat must get at least one panel in pass 2.
+29. **Pacing rules fixed in code (not by re-asking the LLM)**: a splash panel that shares a page
+    becomes large; only one large panel per page (the most intense beat keeps it); a page with
+    a single panel becomes a splash. Each fix is noted on the agent step.

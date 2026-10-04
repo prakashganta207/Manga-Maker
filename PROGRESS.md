@@ -16,6 +16,14 @@
   structured output, Pydantic validation, 2 retries with error feedback, `AgentStep` trace
   record), cost table (`agents/cost.py`), copyright name guard. 92 tests passing.
 
+- **M2** Writer agent (`agents/writer.py`): pass 1 beat sheet (beats, intensity, kinds, climax,
+  characters; checks that names come from the story, beats capped by page budget), pass 2 page
+  plan (purpose, size, characters, action, setting, emotion, dialogue, narration, SFX; checks
+  beat coverage/order, speakers, page limits; code fixes for splash/large rules). Shared state
+  `MangaProject` (`agents/state.py`) saved atomically as project.json after every node.
+  LangGraph graph (`agents/graph.py`) with skip-if-done nodes (resume) and an approval gate.
+  Mock writer in `providers/mock_agents.py`. 102 tests passing.
+
 ### Known issues / measurements
 - ComfyUI is not installed on this machine, so there's **no real test panel yet**. Run
   `python -m app.tools.comfy_check --generate` (in backend/) after following SETUP_COMFYUI.md;
