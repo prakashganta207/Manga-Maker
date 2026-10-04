@@ -27,6 +27,7 @@ def settings(tmp_path) -> Settings:
     s.image_provider = "mock"
     s.output_dir = tmp_path / "output"
     s.image_base_size = 512  # small mock images keep the tests fast
+    s.consistency_scorer = "simple"  # no CLIP download/load in unit tests
     return s
 
 

@@ -1,0 +1,5 @@
+# Optional: real CLIP consistency scores (runs on CPU; ~1.2 GB model download on first use).
+# Without these, CONSISTENCY_SCORER=auto falls back to a simple pixel-based score.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+transformers>=4.40

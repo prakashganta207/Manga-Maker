@@ -28,6 +28,7 @@ from ..pipeline.export import export_pdf
 from ..pipeline.layout import LayoutConfig, compose_page, plan_page
 from ..providers import get_image_provider, get_llm_provider
 from ..providers.base import ImageProvider, ImageRequest, LLMProvider
+from ..vision.consistency import Scorer, get_scorer
 from .cast_store import CastStore
 from .character_designer import design_characters
 from .director import direct
@@ -165,6 +166,45 @@ def node_panels(p: MangaProject, ctx: Ctx) -> None:
     ctx.image.free_memory()  # unload models before the next stage
 
 
+_SCORERS: dict[tuple[str, str], Scorer | None] = {}
+
+
+def scorer_for(settings: Settings) -> Scorer | None:
+    key = (settings.consistency_scorer, settings.clip_model)
+    if key not in _SCORERS:  # load CLIP once per process
+        _SCORERS[key] = get_scorer(*key)
+    return _SCORERS[key]
+
+
+def character_references(p: MangaProject, name: str, job_dir: Path) -> list[Path]:
+    entry = p.character(name)
+    if entry is None:
+        return []
+    rels = [*entry.sheets.views.values(), *entry.sheets.expression_refs.values()]
+    return [job_dir / r for r in rels if (job_dir / r).exists()]
+
+
+def node_consistency(p: MangaProject, ctx: Ctx) -> None:
+    """Score every panel against the references of the characters in it (CLIP similarity)."""
+    scorer = scorer_for(ctx.settings)
+    prompts = {(x.page, x.panel): x for x in p.prompts}
+    for index, result in enumerate(p.panels, start=1):
+        if scorer is None:
+            result.consistency, result.consistency_method = {}, "off"
+            continue
+        scores = {}
+        for name in prompts[(result.page, result.panel)].characters:
+            score = scorer.score(ctx.job_dir / result.image, character_references(p, name, ctx.job_dir))
+            if score is not None:
+                scores[name] = round(score, 3)
+        result.consistency, result.consistency_method = scores, scorer.method
+        ctx.progress("consistency", index / len(p.panels), f"Scored page {result.page} panel {result.panel}")
+    if scorer is None:
+        p.warn("Consistency scoring is off (CONSISTENCY_SCORER=off)")
+    elif scorer.method == "simple":
+        p.warn("Consistency scores use the simple pixel fallback (install torch + transformers for CLIP)")
+
+
 def node_layout(p: MangaProject, ctx: Ctx) -> None:
     assert p.page_plan and p.director
     cfg = layout_config(ctx.settings)
@@ -212,6 +252,8 @@ def build_nodes(job_dir: Path) -> list[Node]:
         Node("panels", "panels", "Drawing panels", node_panels,
              lambda p: bool(p.prompts) and len(p.panels) == len(p.prompts)
              and all((job_dir / r.image).exists() for r in p.panels)),
+        Node("consistency", "consistency", "Consistency score", node_consistency,
+             lambda p: bool(p.panels) and all(r.consistency_method for r in p.panels)),
         Node("layout", "layout", "Layout and lettering", node_layout,
              lambda p: bool(p.outputs) and all(_exists(p, job_dir, pg) for d in DIRECTIONS
                                                 for pg in p.outputs.get(d, {}).get("pages", []))),

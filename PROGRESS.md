@@ -59,6 +59,14 @@
   Fixed: `tasks.py dev` now kills the whole process tree on Windows (orphaned uvicorn reload
   workers were holding ports and serving stale code).
 
+- **M7** IP-Adapter panels: prompts carry the emotion-matched expression crop (or front view) of up
+  to 2 characters; the ComfyUI provider picks ipadapter_1ref / ipadapter_2ref (reduced weight for
+  2) with configurable weight; verified end to end against a fake ComfyUI (sheets via txt2img,
+  /free between stages). Consistency score (`vision/consistency.py`): CLIP ViT-B/32 embeddings on
+  CPU, cosine similarity per character, stored per panel and shown in the Reader gallery; simple
+  fallback without torch. Measured on this laptop (CPU): first CLIP load ~106 s incl. download,
+  then ~1 s per comparison; same mock character 0.84 vs unrelated scenery 0.54.
+
 ### Known issues / measurements
 - ComfyUI is not installed on this machine, so there's **no real test panel yet**. Run
   `python -m app.tools.comfy_check --generate` (in backend/) after following SETUP_COMFYUI.md;

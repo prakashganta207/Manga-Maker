@@ -107,3 +107,21 @@ reasonable option; change freely.
     A job's `project_id` defaults to its job id; passing an earlier id reuses that cast.
 37. **Approval is a graph node + conditional edge** (built in M5 because cast persistence
     depends on it). Auto-approve marks every character approved and logs a "studio" step.
+38. **IP-Adapter defaults**: weight 0.7, `end_at` 0.8, preset "PLUS (high strength)". 0.7 keeps
+    the face/outfit while leaving room for the prompt's pose and expression; stopping at 80% of
+    the steps lets the prompt finish the details. Configurable via `IPADAPTER_WEIGHT` /
+    `IPADAPTER_END_AT`.
+39. **Reference choice per panel**: the character's expression crop matching the panel emotion
+    (happy/angry/sad/surprised/neutral via keyword mapping), else the front view.
+40. **Two characters in one panel (limitation)**: both references go through two chained
+    `IPAdapterAdvanced` nodes at reduced weight (0.65 × weight each), applied to the *whole*
+    image. Features can blend between the two characters. The proper fix is regional
+    conditioning (IPAdapter `attn_mask` per character region + regional prompts); it wasn't
+    built because no ComfyUI install was available to verify which regional nodes exist.
+    Panels with 3+ characters use the first two references only.
+41. **Consistency score = CLIP ViT-B/32 image-embedding cosine similarity** between the panel
+    and each of the character's reference crops (best match). It runs on the **CPU** so it never
+    takes VRAM from SDXL; the model is cached in `backend/.cache/huggingface` (inside the
+    project). torch + transformers are optional (`requirements-ai.txt`); without them a
+    clearly-labelled "simple" pixel score is used. Unit tests use the simple scorer; one test
+    runs real CLIP when the model is cached. Rough reading: ≥0.85 same look, <0.70 drifted.
