@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 
 from PIL import ImageDraw
 
-from ..fonts import load_font
+from ..fonts import load_font, safe_text
 from ..geometry import Rect, character_x_fraction
 from ..models import Panel
 
@@ -127,10 +127,10 @@ def plan_balloons(panel: Panel, rect: Rect, *, font_size: int = 26, font_path: s
 
     items: list[tuple[str, str, str | None]] = []  # (kind, text, speaker)
     if panel.narration:
-        items.append(("narration", panel.narration, None))
+        items.append(("narration", safe_text(panel.narration, font_path), None))
     for line in panel.dialogue:
         shout = line.text.rstrip().endswith("!") and panel.mood.lower() in ("dramatic", "tense")
-        items.append(("shout" if shout else "speech", line.text.upper(), line.speaker))
+        items.append(("shout" if shout else "speech", safe_text(line.text, font_path).upper(), line.speaker))
 
     area = rect.inset(EDGE_PAD)
     keep_out = keep_out_zone(rect)

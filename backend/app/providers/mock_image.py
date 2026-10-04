@@ -13,7 +13,7 @@ import random
 
 from PIL import Image, ImageDraw
 
-from ..fonts import load_font
+from ..fonts import load_font, safe_text
 from ..geometry import character_x_fraction
 from .base import ImageProvider, ImageRequest
 
@@ -45,7 +45,8 @@ def _speed_lines(draw: ImageDraw.ImageDraw, w: int, h: int, rng: random.Random) 
         draw.line((x0, y0, x1, y1), fill=INK, width=rng.choice([1, 1, 2]))
 
 
-def _figure(draw: ImageDraw.ImageDraw, cx: float, ground: float, height: float, name: str, crop: str) -> None:
+def _figure(draw: ImageDraw.ImageDraw, cx: float, ground: float, height: float, name: str, crop: str,
+            show_name: bool = True) -> None:
     """A simple ink figure. crop: 'full' (wide), 'half' (medium), 'head' (close-up)."""
     s = _name_seed(name)
     head_r = height * (0.13 if crop == "full" else 0.2 if crop == "half" else 0.42)
@@ -94,6 +95,9 @@ def _figure(draw: ImageDraw.ImageDraw, cx: float, ground: float, height: float, 
         draw.ellipse((ex - eye_r * 0.7, eye_y - eye_r, ex + eye_r * 0.7, eye_y + eye_r), fill=INK)
     # Name tag under the figure (placeholder only)
     font = load_font(max(12, int(head_r * (0.5 if crop != "head" else 0.25))))
+    name = safe_text(name)
+    if not show_name:
+        return
     if crop == "head":
         draw.text((cx, ground - 8), name, fill=INK, font=font, anchor="md", stroke_width=3, stroke_fill=PAPER)
     else:
@@ -139,10 +143,10 @@ class MockImageProvider(ImageProvider):
             elif shot == "medium":
                 _figure(draw, cx, h, h * 0.8, name, "half")
             else:
-                _figure(draw, cx, h, h * (0.95 if count == 1 else 0.7), name, "head")
+                _figure(draw, cx, h, h * (0.95 if count == 1 else 0.55), name, "head")
 
         # Label (bottom-left): shot + characters, so you can check the script at a glance
-        label = f"{shot.upper()} · {', '.join(names) or 'no characters'}"
+        label = safe_text(f"{shot.upper()} · {', '.join(names) or 'no characters'}")
         font = load_font(max(12, min(w, h) // 32))
         bbox = draw.textbbox((10, h - 10), label, font=font, anchor="ld")
         draw.rectangle((bbox[0] - 6, bbox[1] - 4, bbox[2] + 6, bbox[3] + 4), fill=PAPER, outline=INK, width=2)
@@ -153,12 +157,12 @@ class MockImageProvider(ImageProvider):
         w, h = img.size
         name = meta.get("name", "Character")
         _screentone(draw, (0, int(h * 0.9), w, h), spacing=9, radius=2)
-        _figure(draw, w * 0.5, h * 0.9, h * 0.7, name, "full")
+        _figure(draw, w * 0.5, h * 0.92, h * 0.6, name, "full", show_name=False)
         font = load_font(max(14, w // 18))
-        draw.text((w / 2, 16), f"{name} — reference", fill=INK, font=font, anchor="mt")
+        draw.text((w / 2, 16), safe_text(f"{name} - reference"), fill=INK, font=font, anchor="mt")
         small = load_font(max(11, w // 34))
         y = 16 + font.size * 1.5
         for line in meta.get("description_lines", [])[:3]:
-            draw.text((w / 2, y), line[:60], fill=INK, font=small, anchor="mt")
+            draw.text((w / 2, y), safe_text(line[:60]), fill=INK, font=small, anchor="mt")
             y += small.size * 1.3
         return img

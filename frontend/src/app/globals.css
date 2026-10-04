@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #111111;
+  --color-paper: #fbfaf7;
+  --color-tone: #d9d6cf;
+  --font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  /* faint screentone dots, like printed manga paper */
+  background-image: radial-gradient(rgb(0 0 0 / 0.06) 1px, transparent 1.2px);
+  background-size: 10px 10px;
+}
+
+.panel {
+  border: 3px solid var(--color-ink);
+  background: var(--color-paper);
+  box-shadow: 6px 6px 0 var(--color-ink);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 2px solid var(--color-ink);
+  padding: 0.5rem 1rem;
+  font-weight: 700;
+  background: var(--color-paper);
+  transition: transform 0.05s ease;
+}
+.btn:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--color-ink);
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}

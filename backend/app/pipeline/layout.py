@@ -15,7 +15,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageOps
 
-from ..fonts import load_font
+from ..fonts import load_font, safe_text
 from ..geometry import Rect
 from ..models import MangaScript, Page
 from .lettering import letter_panel
@@ -125,6 +125,6 @@ def compose_page(
     draw.text((cfg.width / 2, cfg.height - cfg.margin / 2), str(page.page_number),
               fill=0, font=small, anchor="mm")
     if title and page.page_number == 1:
-        draw.text((cfg.width / 2, cfg.margin / 2), title.upper(), fill=0,
+        draw.text((cfg.width / 2, cfg.margin / 2), safe_text(title, cfg.font_path).upper(), fill=0,
                   font=load_font(cfg.font_size, cfg.font_path), anchor="mm")
     return canvas, info

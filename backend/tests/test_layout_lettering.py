@@ -126,3 +126,9 @@ def test_compose_page_draws_panels_and_returns_boxes():
         # panel art was pasted (grey 200 somewhere in the middle)
         assert img.getpixel((rect.x + rect.w // 2, rect.y + rect.h // 2)) == 200
         assert len(p["balloons"]) == 1
+
+
+def test_safe_text_for_bundled_font():
+    from app.fonts import safe_text
+    assert safe_text("Café — naïve") == "Cafe - naive"
+    assert safe_text("Café", font_path="custom.ttf") == "Café"

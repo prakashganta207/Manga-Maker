@@ -6,6 +6,8 @@
     python scripts/tasks.py backend   # backend only
     python scripts/tasks.py frontend  # frontend only
     python scripts/tasks.py sample    # regenerate samples/ output
+
+Ports: BACKEND_PORT (default 8000) and FRONTEND_PORT (default 3000) env vars.
 """
 
 from __future__ import annotations
@@ -22,6 +24,8 @@ FRONTEND = ROOT / "frontend"
 VENV = BACKEND / ".venv"
 VENV_PY = VENV / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
 NPM = "npm.cmd" if os.name == "nt" else "npm"
+BACKEND_PORT = os.environ.get("BACKEND_PORT", "8000")
+FRONTEND_PORT = os.environ.get("FRONTEND_PORT", "3000")
 
 
 def run(cmd: list[str], cwd: Path, env: dict | None = None) -> None:
@@ -51,17 +55,25 @@ def test() -> None:
 
 
 def backend_cmd() -> list:
-    return [python(), "-m", "uvicorn", "app.main:app", "--reload", "--port", "8000"]
+    return [python(), "-m", "uvicorn", "app.main:app", "--reload", "--port", BACKEND_PORT]
 
 
 def frontend_cmd() -> list:
-    return [NPM, "run", "dev"]
+    return [NPM, "run", "dev", "--", "-p", FRONTEND_PORT]
+
+
+def frontend_env() -> dict:
+    # Point the browser at the backend port unless NEXT_PUBLIC_API_URL is already set.
+    env = dict(os.environ)
+    env.setdefault("NEXT_PUBLIC_API_URL", f"http://localhost:{BACKEND_PORT}")
+    return env
 
 
 def dev() -> None:
     procs = [subprocess.Popen([str(c) for c in backend_cmd()], cwd=BACKEND),
-             subprocess.Popen(frontend_cmd(), cwd=FRONTEND)]
-    print("Backend: http://localhost:8000/docs   Frontend: http://localhost:3000   (Ctrl+C to stop)")
+             subprocess.Popen(frontend_cmd(), cwd=FRONTEND, env=frontend_env())]
+    print(f"Backend: http://localhost:{BACKEND_PORT}/docs   "
+          f"Frontend: http://localhost:{FRONTEND_PORT}   (Ctrl+C to stop)")
     try:
         for p in procs:
             p.wait()
@@ -83,7 +95,7 @@ TASKS = {
     "test": test,
     "dev": dev,
     "backend": lambda: run(backend_cmd(), BACKEND),
-    "frontend": lambda: run(frontend_cmd(), FRONTEND),
+    "frontend": lambda: run(frontend_cmd(), FRONTEND, env=frontend_env()),
     "sample": sample,
 }
 
