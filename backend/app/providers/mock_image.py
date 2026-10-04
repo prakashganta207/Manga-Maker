@@ -76,8 +76,9 @@ def _figure(draw: ImageDraw.ImageDraw, cx: float, ground: float, height: float, 
     head = (cx - head_r, head_cy - head_r, cx + head_r, head_cy + head_r)
     draw.ellipse(head, fill=PAPER, outline=INK, width=line_w)
     # Hair: solid black cap, shape varies per character (consistent across panels)
-    hair_start = 180 - (s % 40)
-    hair_end = 360 + (s % 40)
+    # Chord across the top of the head; angles vary per character but keep the eyes visible.
+    hair_start = 185 + (s % 15)
+    hair_end = 355 - (s % 15)
     draw.chord(head, hair_start, hair_end, fill=INK)
     if s % 3 == 0:  # spikes
         for k in range(5):
@@ -93,9 +94,11 @@ def _figure(draw: ImageDraw.ImageDraw, cx: float, ground: float, height: float, 
         draw.ellipse((ex - eye_r * 0.7, eye_y - eye_r, ex + eye_r * 0.7, eye_y + eye_r), fill=INK)
     # Name tag under the figure (placeholder only)
     font = load_font(max(12, int(head_r * (0.5 if crop != "head" else 0.25))))
-    tag_y = min(ground - 4, head_cy + head_r + 4) if crop == "head" else head_cy - head_r - font.size * 1.6
-    draw.text((cx, tag_y), name, fill=INK, font=font, anchor="mt",
-              stroke_width=3, stroke_fill=PAPER)
+    if crop == "head":
+        draw.text((cx, ground - 8), name, fill=INK, font=font, anchor="md", stroke_width=3, stroke_fill=PAPER)
+    else:
+        draw.text((cx, head_cy - head_r - 6), name, fill=INK, font=font, anchor="md",
+                  stroke_width=3, stroke_fill=PAPER)
 
 
 class MockImageProvider(ImageProvider):

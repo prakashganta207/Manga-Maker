@@ -91,7 +91,9 @@ def split_sentences(text: str) -> list[str]:
         if not part:
             continue
         # '"Run!" shouted Ken.' splits after "Run!" — glue the lowercase tail back on.
-        if sentences and (part[0].islower() or part[0] in ",;"):
+        # Same for a short speech tag after a quote: '"What?" Mira whispered.'
+        short_tag = sentences and sentences[-1].endswith('"') and '"' not in part and len(part.split()) <= 4
+        if sentences and (part[0].islower() or part[0] in ",;" or short_tag):
             sentences[-1] = f"{sentences[-1]} {part}"
         else:
             sentences.append(part)
@@ -190,8 +192,8 @@ class MockLLMProvider(LLMProvider):
             for i, name in enumerate(names)
         ]
 
-        # Two sentences per panel on average, capped by max_pages.
-        pages_needed = math.ceil(len(sentences) / (panels_per_page * 2))
+        # Up to three sentences per panel before starting a new page, capped by max_pages.
+        pages_needed = math.ceil(len(sentences) / (panels_per_page * 3))
         page_count = max(1, min(max_pages, pages_needed))
         total_panels = min(page_count * panels_per_page, len(sentences))
         page_count = math.ceil(total_panels / panels_per_page)
@@ -212,7 +214,9 @@ class MockLLMProvider(LLMProvider):
             last_setting = setting
 
             present = [n for n in names if re.search(rf"\b{re.escape(n)}\b", text)]
-            if not present and _PRONOUNS.search(text):
+            if re.search(r"\b(they|them|their|together|both)\b", text, re.IGNORECASE):
+                present = list(names)  # plural pronoun -> everyone in the scene
+            elif not present and _PRONOUNS.search(text):
                 present = list(last_chars)
             if not present:
                 present = [names[0]]
@@ -220,23 +224,25 @@ class MockLLMProvider(LLMProvider):
 
             dialogue: list[dict[str, str]] = []
             actions: list[str] = []
+            prose: list[str] = []  # sentences without dialogue -> usable as narration
             for sentence in chunk:
                 quotes, rest = split_quotes(sentence)
                 if rest:
                     actions.append(rest)
+                if rest and not quotes:
+                    prose.append(rest)
                 if quotes:
                     named = [n for n in names if re.search(rf"\b{re.escape(n)}\b", rest)]
                     speaker = named[0] if named else present[0]
                     for q in quotes:
                         if len(dialogue) < 2:
-                            dialogue.append({"speaker": speaker, "text": _truncate(q, 120)})
+                            # '"You came," she said' -> "You came."
+                            line = re.sub(r"[,;:]$", ".", q.strip())
+                            dialogue.append({"speaker": speaker, "text": _truncate(line, 120)})
 
             action = _truncate(" ".join(actions), 300) if actions else f"{present[0]} speaks"
             shot = shot_cycle[index % len(shot_cycle)]
-            if dialogue and len(present) == 1 and index % panels_per_page != 0:
-                shot = "close-up"
-            first_on_page = index % panels_per_page == 0
-            narration = _truncate(" ".join(actions), 140) if actions and (not dialogue or first_on_page) else None
+            narration = _truncate(" ".join(prose), 110 if dialogue else 140) if prose else None
 
             panels.append({
                 "panel_number": index % panels_per_page + 1,
@@ -253,6 +259,5 @@ class MockLLMProvider(LLMProvider):
             {"page_number": p + 1, "panels": panels[p * panels_per_page:(p + 1) * panels_per_page]}
             for p in range(page_count)
         ]
-        title_words = re.sub(r'["]', "", sentences[0]).split()[:5]
-        title = " ".join(title_words).rstrip(".,!?;:") or "Untitled"
+        title = f"{names[0]}'s Story" if names[0] != "Hero" else "A Short Story"
         return {"title": title, "characters": characters, "pages": pages}
