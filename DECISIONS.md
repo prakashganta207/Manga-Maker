@@ -66,3 +66,12 @@ reasonable option; change freely.
     Sampler defaults follow Animagine's model card (euler_ancestral, 28 steps, CFG 6).
 23. **LLM interface now returns `LLMResponse`** (data + token usage + model) so agents can
     count tokens and cost.
+24. **Gemini and OpenAI-compatible providers use plain REST via httpx** (no extra SDKs).
+    Gemini uses `responseJsonSchema`; if the API rejects the schema it retries once with the
+    schema in the prompt. OpenAI-compatible endpoints use `response_format: json_object`
+    (the most widely supported mode) plus the schema in the system prompt.
+25. **Retries**: max 2 retries (3 attempts) per agent, as specified. Provider errors (auth,
+    rate limit, network) are not retried by the agent runner (the SDKs retry transport errors).
+26. **Cost counter**: a built-in USD-per-MTok table for common models; unknown models count as
+    $0 unless `LLM_INPUT_PRICE_PER_MTOK` / `LLM_OUTPUT_PRICE_PER_MTOK` are set. Each agent step
+    logs tokens and cost; job totals live in the job state.

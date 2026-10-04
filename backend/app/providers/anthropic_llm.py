@@ -10,7 +10,6 @@ anything that fails ("repair loop").
 
 from __future__ import annotations
 
-import copy
 import json
 from typing import Any
 
@@ -18,14 +17,7 @@ import anthropic
 
 from ..config import Settings
 from .base import LLMProvider, LLMResponse, ProviderError, TokenUsage
-
-# Keywords the structured-output schema validator doesn't accept.
-_UNSUPPORTED_KEYS = {
-    "minLength", "maxLength", "pattern",
-    "minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "multipleOf",
-    "minItems", "maxItems", "uniqueItems",
-    "default",
-}
+from .schema_utils import strip_unsupported
 
 
 def to_structured_output_schema(schema: dict[str, Any]) -> dict[str, Any]:
@@ -34,17 +26,7 @@ def to_structured_output_schema(schema: dict[str, Any]) -> dict[str, Any]:
     - removes unsupported constraint keywords (validated client-side by Pydantic instead)
     - sets `additionalProperties: false` on every object (required by the API)
     """
-    def clean(node: Any) -> Any:
-        if isinstance(node, dict):
-            out = {k: clean(v) for k, v in node.items() if k not in _UNSUPPORTED_KEYS}
-            if out.get("type") == "object" or "properties" in out:
-                out["additionalProperties"] = False
-            return out
-        if isinstance(node, list):
-            return [clean(v) for v in node]
-        return node
-
-    return clean(copy.deepcopy(schema))
+    return strip_unsupported(schema, close_objects=True)
 
 
 class AnthropicLLMProvider(LLMProvider):

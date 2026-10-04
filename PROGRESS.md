@@ -10,6 +10,12 @@
   `python -m app.tools.comfy_check [--generate]`, `SETUP_COMFYUI.md`,
   `scripts/download_comfyui_models.py`. 74 tests passing.
 
+- **M1** LLM providers in priority order Anthropic → Gemini (REST, JSON-schema mode with
+  fallback) → OpenAI-compatible (JSON mode + schema in prompt) → mock. `LLMResponse` carries
+  token usage. Agent schemas (`agents/schemas.py`), generic agent runner (`agents/runner.py`:
+  structured output, Pydantic validation, 2 retries with error feedback, `AgentStep` trace
+  record), cost table (`agents/cost.py`), copyright name guard. 92 tests passing.
+
 ### Known issues / measurements
 - ComfyUI is not installed on this machine, so there's **no real test panel yet**. Run
   `python -m app.tools.comfy_check --generate` (in backend/) after following SETUP_COMFYUI.md;
