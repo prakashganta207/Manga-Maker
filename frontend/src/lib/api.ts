@@ -300,6 +300,66 @@ export interface MangaProject {
   files_base: string;
 }
 
+// ----------------------------------------------------------------------------- editor (Phase 4)
+export type BubbleKind = "speech" | "thought" | "shout" | "narration" | "sfx";
+
+/** One editable lettering layer. x/y/w/h/tail are fractions (0..1) of the panel's inner rectangle. */
+export interface Bubble {
+  id: string;
+  panel: number;
+  kind: BubbleKind;
+  text: string;
+  speaker: string | null;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  tail: [number, number] | null;
+  font_size: number;
+  vertical: boolean;
+  order: number;
+}
+
+export interface PageLettering {
+  page: number;
+  bubbles: Bubble[];
+  source: "auto" | "edited";
+}
+
+export interface Box {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export interface EditorPanel {
+  panel: number;
+  rect: Box;
+  inner: Box;
+  image: string | null;
+  status: string | null;
+  characters: string[];
+  action: string;
+  emotion: string;
+  dialogue: DialogueLine[];
+  narration: string | null;
+  sfx: string[];
+}
+
+export interface EditorPage {
+  page: number;
+  direction: Direction;
+  width: number;
+  height: number;
+  border: number;
+  layout: string;
+  panels: EditorPanel[];
+  lettering: PageLettering | null;
+  rendered: string | null;
+  files_base: string;
+}
+
 export interface LayoutTemplate {
   id: string;
   name: string;
@@ -361,6 +421,16 @@ export const api = {
   layouts: () => request<LayoutTemplate[]>("/api/layouts"),
   samples: () => request<SampleStory[]>("/api/samples"),
   projects: () => request<ProjectInfo[]>("/api/projects"),
+  // Editor (Phase 4)
+  editorPage: (id: string, page: number, direction: Direction) =>
+    request<EditorPage>(`/api/jobs/${encodeURIComponent(id)}/pages/${page}/editor?direction=${direction}`),
+  saveLettering: (id: string, page: number, bubbles: Bubble[], label?: string) =>
+    request<EditorPage>(`/api/jobs/${encodeURIComponent(id)}/pages/${page}/lettering`, {
+      method: "PUT",
+      body: JSON.stringify({ bubbles, ...(label ? { label } : {}) }),
+    }),
+  resetLettering: (id: string, page: number) =>
+    request<EditorPage>(`/api/jobs/${encodeURIComponent(id)}/pages/${page}/lettering/reset`, { method: "POST" }),
   // Cast approval
   approveCharacter: (id: string, name: string, approved = true) =>
     request<MangaProject>(`/api/jobs/${encodeURIComponent(id)}/characters/${encodeURIComponent(name)}/approve`, {

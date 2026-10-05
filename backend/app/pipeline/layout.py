@@ -15,9 +15,11 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageOps
 
 from ..agents.schemas import PlannedPage
+from ..agents.state import PageLettering
 from ..fonts import load_font, safe_text
 from ..geometry import Rect
 from . import templates
+from .bubbles import render_lettering
 from .lettering import letter_panel
 
 
@@ -67,8 +69,12 @@ def compose_page(
     rtl: bool = True,
     title: str | None = None,
     debug_keep_out: bool = False,
+    lettering: "PageLettering | None" = None,
 ) -> tuple[Image.Image, dict]:
-    """Build a finished page. Returns (image, info with panel and balloon boxes)."""
+    """Build a finished page. Returns (image, info with panel and balloon boxes).
+
+    With `lettering` (the stored, editable bubble layers) the text comes from there;
+    without it, bubbles are planned on the fly (older callers, tests)."""
     cfg = cfg or LayoutConfig()
     canvas = Image.new("L", (cfg.width, cfg.height), 255)
     draw = ImageDraw.Draw(canvas)
@@ -82,9 +88,16 @@ def compose_page(
         if source is not None:
             img = Image.open(source) if isinstance(source, (str, Path)) else source
             canvas.paste(fit_image(img, rect.w, rect.h), (rect.x, rect.y))
-        inner = rect.inset(cfg.border)
-        balloons = letter_panel(draw, panel, inner, font_size=cfg.font_size, font_path=cfg.font_path,
-                                rtl=rtl, debug_keep_out=debug_keep_out)
+    inner = {panel.panel_number: rect.inset(cfg.border) for panel, rect in zip(page.panels, rects)}
+    if lettering is not None:
+        drawn = render_lettering(draw, lettering, inner, cfg.font_path)
+        by_panel = {n: [b for b in drawn if b.meta["panel"] == n] for n in inner}
+    for panel, rect in zip(page.panels, rects):
+        if lettering is None:
+            balloons = letter_panel(draw, panel, inner[panel.panel_number], font_size=cfg.font_size,
+                                    font_path=cfg.font_path, rtl=rtl, debug_keep_out=debug_keep_out)
+        else:
+            balloons = by_panel[panel.panel_number]
         draw.rectangle(rect.box, outline=0, width=cfg.border)  # border last, crisp on top
         info["panels"].append({"panel": panel.panel_number, "rect": rect.to_dict(),
                                "balloons": [{"kind": b.kind, **b.box.to_dict()} for b in balloons]})

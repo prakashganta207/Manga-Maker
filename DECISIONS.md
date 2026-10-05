@@ -157,3 +157,20 @@ reasonable option; change freely.
 47. **Mock Editor**: measures what code can (greyscale or not, CLIP similarity) and simulates a flawed
     drawing for ~35% of (seed, prompt) pairs, with a matching fix. A redraw changes seed/prompt, so the
     loop's accept / retry / needs-review paths all happen offline and deterministically.
+48. **Lettering is stored as editable layers** (`MangaProject.lettering`, one `PageLettering` per page,
+    `Bubble` = kind, text, speaker, box, tail tip, font size, vertical flag, order). Positions are
+    fractions of the panel's inner rectangle, so a bubble stays on the same spot of the artwork in both
+    reading directions; the tail tip is stored exactly (the canvas and the renderer draw the same tail).
+    Pages are always rendered from the layers, so user edits win; layers are planned once (automatic
+    placement) and "Auto-place" re-plans a page. Older projects get layers planned on the fly.
+49. **Canvas library: react-konva** (declarative React components over Konva). react-konva 19.3 needs
+    React 19.3; the project pins React 19.2.8, so react-konva **19.2.7** is used instead of forcing peers.
+    The canvas is loaded with `next/dynamic(..., { ssr: false })` (Konva needs `window`).
+50. **Edits only on finished jobs, one at a time**: quick edits (bubbles) run inside the request under a
+    lock and re-render the page + PDFs (~1 s); slow edits (redraws, inpainting) are queued on the single
+    GPU worker and show progress through the existing job status API (`busy` label + polling). No
+    WebSocket/SSE: polling already exists and is enough for one user.
+51. **Jobs are reloaded from disk at startup** (`output/*/project.json`), so finished mangas stay readable
+    and editable after a restart (in-flight jobs come back as "failed: interrupted").
+52. **Local undo/redo in the editor** covers unsaved bubble edits (Ctrl+Z / Ctrl+Y); saved changes go to
+    the server-side version history (M7).

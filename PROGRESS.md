@@ -48,14 +48,24 @@ Cost per page (budget counters): mock LLM → $0. With a real vision Editor, est
   `output/*/project.json` at startup (finished mangas survive a server restart). Verified in
   headless Edge against the real ComfyUI run; tsc + eslint clean.
 
+- **M4 Canvas editor + bubble editing**: lettering stored as layers (`pipeline/bubbles.py`), pages
+  rendered from them (thought bubbles added), editor API (`routes_editor.py`: page geometry, save →
+  re-render page + PDFs, auto-place), "✎ Edit" tab with a react-konva canvas (`components/editor/`):
+  panel art cover-fitted like the renderer, drag / resize / tail handle / double-click to edit,
+  5 bubble types, speaker, max font size with auto-fit, vertical text, add/delete, local undo/redo,
+  rendered-page preview. Browser smoke test `scripts/ui_smoke.py` (Playwright + installed Edge):
+  select, drag, edit, save → stored, no console errors. 9 tests.
+
 ### Next
-- Phase 4: M4 canvas editor + bubble editing.
+- M5 panel instructions (Panel Revision agent).
 
 ### Known issues
 - No LLM key on this machine: the Editor runs as the mock (it can't see real flaws such as the
   duplicated heads two-reference IP-Adapter sometimes draws). Real providers are tested with fakes.
 - Windows Application Control blocks newly installed DLLs on first load (allowed on the next load).
   If ComfyUI fails to start right after installing packages, start it again.
+- `uvicorn --reload` hangs on Windows while the browser keeps connections open (old worker keeps
+  serving). Restart the backend instead of relying on reload during development.
 - Only ~1.3 GB of the 16 GB system RAM was free while ComfyUI ran (checkpoint offloading); close other
   apps for long runs.
 

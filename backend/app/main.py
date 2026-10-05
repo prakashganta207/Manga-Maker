@@ -196,6 +196,8 @@ def create_app(settings: Settings | None = None, llm: LLMProvider | None = None,
 
     from .routes_cast import register_cast_routes  # noqa: E402 — needs the objects above
     register_cast_routes(app)
+    from .routes_editor import register_editor_routes  # noqa: E402
+    register_editor_routes(app)
 
     app.mount("/files", StaticFiles(directory=settings.output_dir), name="files")
     return app

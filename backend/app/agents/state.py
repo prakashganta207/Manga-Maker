@@ -12,9 +12,9 @@ import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from .runner import AgentStep
 from .schemas import BeatSheet, CharacterDesign, DirectorPlan, EditorFix, EditorReview, PagePlan
@@ -134,6 +134,42 @@ class PanelResult(BaseModel):
         self.consistency_method = attempt.consistency_method
 
 
+BubbleKind = Literal["speech", "thought", "shout", "narration", "sfx"]
+
+
+class Bubble(BaseModel):
+    """One editable lettering layer (speech bubble, narration box or sound effect).
+
+    Position and tail are fractions (0..1) of the panel's inner rectangle, so a bubble stays
+    on the same spot of the artwork in both reading directions and after re-layouts.
+    """
+
+    id: str
+    panel: int
+    kind: BubbleKind = "speech"
+    text: str = ""
+    speaker: str | None = None
+    x: float = 0.05
+    y: float = 0.05
+    w: float = 0.4
+    h: float = 0.2
+    tail: tuple[float, float] | None = None   # tail tip (panel fractions); None = no tail
+    font_size: int = 26
+    vertical: bool = False                    # vertical (top-to-bottom) text, manga style
+    order: int = 0                            # reading order within the page
+
+    @field_validator("x", "y", "w", "h")
+    @classmethod
+    def clamp(cls, v: float) -> float:
+        return max(0.0, min(1.0, float(v)))
+
+
+class PageLettering(BaseModel):
+    page: int
+    bubbles: list[Bubble] = Field(default_factory=list)
+    source: str = "auto"                      # auto (planned by code/Letterer) | edited (changed by you)
+
+
 class Usage(BaseModel):
     input_tokens: int = 0
     output_tokens: int = 0
@@ -171,6 +207,7 @@ class MangaProject(BaseModel):
     renames: dict[str, str] = Field(default_factory=dict)
     prompts: list[PanelPrompt] = Field(default_factory=list)
     panels: list[PanelResult] = Field(default_factory=list)
+    lettering: list[PageLettering] = Field(default_factory=list)
     outputs: dict[str, Any] = Field(default_factory=dict)
 
     trace: list[AgentStep] = Field(default_factory=list)
@@ -209,6 +246,9 @@ class MangaProject(BaseModel):
     def all_approved(self) -> bool:
         main = {n.lower() for n in self.main_character_names()}
         return all(c.approved for c in self.characters if c.name.lower() in main)
+
+    def page_lettering(self, page: int) -> PageLettering | None:
+        return next((pl for pl in self.lettering if pl.page == page), None)
 
     def panel_result(self, page: int, panel: int) -> PanelResult | None:
         return next((p for p in self.panels if p.page == page and p.panel == panel), None)

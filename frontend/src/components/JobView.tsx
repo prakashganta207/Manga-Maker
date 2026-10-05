@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api, type Job, type LayoutTemplate, type MangaProject, type Stage } from "@/lib/api";
 import AgentTimeline from "./AgentTimeline";
 import CastView from "./CastView";
+import EditorView from "./editor/EditorView";
 import Reader from "./Reader";
 
 const POLL_MS = 1000;
@@ -22,7 +23,7 @@ const STAGE_LABELS: Record<string, string> = {
   export: "Export PNG + PDF",
 };
 
-export type Tab = "progress" | "agents" | "quality" | "cast" | "read";
+export type Tab = "progress" | "agents" | "quality" | "cast" | "read" | "edit";
 
 export default function JobView({ id, initialTab }: { id: string; initialTab?: Tab }) {
   const [job, setJob] = useState<Job | null>(null);
@@ -91,6 +92,7 @@ export default function JobView({ id, initialTab }: { id: string; initialTab?: T
       badge: job.status === "awaiting_approval" ? "!" : undefined,
     },
     { id: "read", label: "Read", enabled: job.status === "done" && !!job.result },
+    { id: "edit", label: "✎ Edit", enabled: job.status === "done" && !!project?.page_plan },
   ];
 
   return (
@@ -135,6 +137,7 @@ export default function JobView({ id, initialTab }: { id: string; initialTab?: T
       )}
       {current === "cast" && project && <CastView job={job} project={project} onChange={refreshProject} />}
       {current === "read" && job.result && <Reader jobId={job.id} result={job.result} project={project} />}
+      {current === "edit" && project && <EditorView job={job} project={project} onChanged={refreshProject} />}
     </div>
   );
 }

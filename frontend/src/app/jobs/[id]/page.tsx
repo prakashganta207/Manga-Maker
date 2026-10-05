@@ -1,6 +1,6 @@
 import JobView, { type Tab } from "@/components/JobView";
 
-const TABS: Tab[] = ["progress", "agents", "quality", "cast", "read"];
+const TABS: Tab[] = ["progress", "agents", "quality", "cast", "read", "edit"];
 
 export default async function JobPage(props: PageProps<"/jobs/[id]">) {
   const { id } = await props.params;

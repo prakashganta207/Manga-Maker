@@ -170,6 +170,7 @@ def plan_balloons(panel: PlannedPanel, rect: Rect, *, font_size: int = 26, font_
                 balloon.tail_target = (rect.x + rect.w * character_x_fraction(i, len(names)),
                                        rect.y + rect.h * 0.55)
         balloon.meta["speaker"] = speaker
+        balloon.meta["text"] = text
         placed.append(balloon.box)
         balloons.append(balloon)
 
@@ -184,7 +185,7 @@ def plan_balloons(panel: PlannedPanel, rect: Rect, *, font_size: int = 26, font_
                 break
             size -= 4
         if box:  # no room -> skip the sound effect rather than cover the art
-            balloons.append(Balloon("sfx", [text], size, box))
+            balloons.append(Balloon("sfx", [text], size, box, meta={"text": text}))
             placed.append(box)
     return balloons
 
@@ -196,21 +197,49 @@ def _ellipse_edge(cx: float, cy: float, a: float, b: float, angle: float) -> tup
     return cx + dx * t, cy + dy * t
 
 
-def _draw_tail(draw: ImageDraw.ImageDraw, box: Rect, target: tuple[float, float], panel: Rect) -> None:
+def tail_tip(box: Rect, target: tuple[float, float], panel: Rect) -> tuple[float, float]:
+    """A short tail toward `target` (the speaker): stops well before it, stays inside the panel."""
+    cx, cy = box.x + box.w / 2, box.y + box.h / 2
+    angle = math.atan2(target[1] - cy, target[0] - cx)
+    edge = _ellipse_edge(cx, cy, box.w / 2, box.h / 2, angle)
+    length = min(math.dist(edge, target) * 0.6, panel.h * 0.12, 70)
+    tip = (edge[0] + math.cos(angle) * length, edge[1] + math.sin(angle) * length)
+    return (min(max(tip[0], panel.x + 4), panel.right - 4), min(max(tip[1], panel.y + 4), panel.bottom - 4))
+
+
+def _draw_tail(draw: ImageDraw.ImageDraw, box: Rect, target: tuple[float, float], panel: Rect,
+               exact: bool = False) -> None:
+    """Tail from the balloon toward `target`. exact=True: `target` IS the tip (stored/edited bubbles)."""
     cx, cy = box.x + box.w / 2, box.y + box.h / 2
     a, b = box.w / 2, box.h / 2
     angle = math.atan2(target[1] - cy, target[0] - cx)
     spread = 0.22
     base1 = _ellipse_edge(cx, cy, a * 0.9, b * 0.9, angle - spread)
     base2 = _ellipse_edge(cx, cy, a * 0.9, b * 0.9, angle + spread)
-    edge = _ellipse_edge(cx, cy, a, b, angle)
-    length = min(math.dist(edge, target) * 0.6, panel.h * 0.12, 70)
-    tip = (edge[0] + math.cos(angle) * length, edge[1] + math.sin(angle) * length)
-    tip = (min(max(tip[0], panel.x + 4), panel.right - 4), min(max(tip[1], panel.y + 4), panel.bottom - 4))
+    tip = target if exact else tail_tip(box, target, panel)
     # White fill covers the ellipse outline at the tail's base, so they look joined.
     draw.polygon([base1, tip, base2], fill=PAPER)
     draw.line([base1, tip], fill=INK, width=LINE_W)
     draw.line([base2, tip], fill=INK, width=LINE_W)
+
+
+def _draw_thought(draw: ImageDraw.ImageDraw, box: Rect, target: tuple[float, float] | None, panel: Rect) -> None:
+    """A cloud: bumps around an ellipse, plus a trail of shrinking circles toward the thinker."""
+    cx, cy, a, b = box.x + box.w / 2, box.y + box.h / 2, box.w / 2, box.h / 2
+    bumps = max(10, int((a + b) / 14))
+    r = min(a, b) * 0.28
+    for k in range(bumps):
+        angle = 2 * math.pi * k / bumps
+        x, y = cx + math.cos(angle) * (a - r * 0.6), cy + math.sin(angle) * (b - r * 0.6)
+        draw.ellipse((x - r, y - r, x + r, y + r), fill=PAPER, outline=INK, width=LINE_W)
+    draw.ellipse((cx - a + r * 0.9, cy - b + r * 0.9, cx + a - r * 0.9, cy + b - r * 0.9), fill=PAPER)
+    if target:
+        angle = math.atan2(target[1] - cy, target[0] - cx)
+        edge = _ellipse_edge(cx, cy, a, b, angle)
+        for step, radius in ((0.25, 9), (0.5, 6), (0.75, 4)):
+            x = edge[0] + (target[0] - edge[0]) * step * 0.8
+            y = edge[1] + (target[1] - edge[1]) * step * 0.8
+            draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=PAPER, outline=INK, width=2)
 
 
 def _shout_polygon(box: Rect, spikes: int = 18) -> list[tuple[float, float]]:
@@ -223,7 +252,8 @@ def _shout_polygon(box: Rect, spikes: int = 18) -> list[tuple[float, float]]:
     return points
 
 
-def draw_balloons(draw: ImageDraw.ImageDraw, balloons: list[Balloon], panel: Rect, font_path: str = "") -> None:
+def draw_balloons(draw: ImageDraw.ImageDraw, balloons: list[Balloon], panel: Rect, font_path: str = "",
+                  exact_tails: bool = False) -> None:
     for balloon in balloons:
         box = balloon.box
         font = load_font(balloon.font_size, font_path)
@@ -234,12 +264,14 @@ def draw_balloons(draw: ImageDraw.ImageDraw, balloons: list[Balloon], panel: Rec
             continue
         if balloon.kind == "narration":
             draw.rectangle(box.box, fill=PAPER, outline=INK, width=LINE_W)
+        elif balloon.kind == "thought":
+            _draw_thought(draw, box, balloon.tail_target, panel)
         elif balloon.kind == "shout":
             draw.polygon(_shout_polygon(box), fill=PAPER, outline=INK, width=LINE_W)
         else:
             draw.ellipse(box.box, fill=PAPER, outline=INK, width=LINE_W)
-        if balloon.tail_target:
-            _draw_tail(draw, box, balloon.tail_target, panel)
+        if balloon.tail_target and balloon.kind in ("speech", "shout"):
+            _draw_tail(draw, box, balloon.tail_target, panel, exact=exact_tails)
 
         line_h = int(font.size * 1.18)
         block_h = line_h * len(balloon.lines)

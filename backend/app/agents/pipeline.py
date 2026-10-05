@@ -26,6 +26,7 @@ from typing import Any, Callable
 from ..config import Settings
 from ..pipeline import templates
 from ..pipeline.export import export_pdf
+from ..pipeline.bubbles import plan_lettering
 from ..pipeline.layout import LayoutConfig, compose_page, plan_page
 from ..providers import get_image_provider, get_llm_provider
 from ..providers.base import ImageProvider, ImageRequest, LLMProvider
@@ -213,32 +214,61 @@ def node_consistency(p: MangaProject, ctx: Ctx) -> None:
         p.warn("Consistency scores use the simple pixel fallback (install torch + transformers for CLIP)")
 
 
-def node_layout(p: MangaProject, ctx: Ctx) -> None:
+def ensure_lettering(p: MangaProject, settings: Settings) -> None:
+    """Plan the editable bubble layers for pages that don't have them yet (edited pages are kept)."""
     assert p.page_plan and p.director
-    cfg = layout_config(ctx.settings)
-    outputs: dict[str, Any] = {}
+    cfg = layout_config(settings)
+    for planned, directed in zip(p.page_plan.pages, p.director.pages):
+        if p.page_lettering(planned.page_number) is None:
+            inner = [r.inset(cfg.border) for r in plan_page(directed.layout, cfg, rtl=True)]
+            p.lettering.append(plan_lettering(planned, inner, font_size=cfg.font_size, font_path=cfg.font_path))
+    p.lettering.sort(key=lambda pl: pl.page)
+
+
+def render_pages(p: MangaProject, settings: Settings, job_dir: Path, pages: list[int] | None = None) -> None:
+    """(Re-)render lettered pages in both reading directions from the stored layers."""
+    assert p.page_plan and p.director
+    cfg = layout_config(settings)
+    ensure_lettering(p, settings)
+    outputs: dict[str, Any] = p.outputs or {}
     for direction in DIRECTIONS:
-        out_dir = ctx.job_dir / "pages" / direction
+        out_dir = job_dir / "pages" / direction
         out_dir.mkdir(parents=True, exist_ok=True)
-        pages, infos = [], []
-        for planned, directed in zip(p.page_plan.pages, p.director.pages):
-            images = {r.panel: ctx.job_dir / r.image for r in p.panels if r.page == planned.page_number}
-            img, info = compose_page(planned, directed.layout, images, cfg, rtl=(direction == "rtl"), title=p.title)
+        entry = outputs.setdefault(direction, {"pages": [], "layout": []})
+        paths, infos = list(entry.get("pages", [])), list(entry.get("layout", []))
+        for index, (planned, directed) in enumerate(zip(p.page_plan.pages, p.director.pages)):
+            if pages is not None and planned.page_number not in pages and index < len(paths):
+                continue
+            images = {r.panel: job_dir / r.image for r in p.panels if r.page == planned.page_number}
+            img, info = compose_page(planned, directed.layout, images, cfg, rtl=(direction == "rtl"), title=p.title,
+                                     lettering=p.page_lettering(planned.page_number))
             path = out_dir / f"page_{planned.page_number:02d}.png"
             img.save(path, optimize=True)
-            pages.append(path.relative_to(ctx.job_dir).as_posix())
-            infos.append(info)
-        outputs[direction] = {"pages": pages, "layout": infos}
+            rel = path.relative_to(job_dir).as_posix()
+            if index < len(paths):
+                paths[index], infos[index] = rel, info
+            else:
+                paths.append(rel)
+                infos.append(info)
+        entry["pages"], entry["layout"] = paths, infos
     p.outputs = outputs
 
 
-def node_export(p: MangaProject, ctx: Ctx) -> None:
+def export_documents(p: MangaProject, job_dir: Path) -> None:
     from PIL import Image
     for direction in DIRECTIONS:
         out = p.outputs[direction]
-        images = [Image.open(ctx.job_dir / page) for page in out["pages"]]
-        pdf = export_pdf(images, ctx.job_dir / f"manga_{direction}.pdf")
-        out["pdf"] = pdf.relative_to(ctx.job_dir).as_posix()
+        images = [Image.open(job_dir / page) for page in out["pages"]]
+        pdf = export_pdf(images, job_dir / f"manga_{direction}.pdf")
+        out["pdf"] = pdf.relative_to(job_dir).as_posix()
+
+
+def node_layout(p: MangaProject, ctx: Ctx) -> None:
+    render_pages(p, ctx.settings, ctx.job_dir)
+
+
+def node_export(p: MangaProject, ctx: Ctx) -> None:
+    export_documents(p, ctx.job_dir)
     p.status = "done"
 
 
