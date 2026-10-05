@@ -200,3 +200,83 @@ class CharacterDesign(BaseModel):
 
 class CharacterBibleDraft(BaseModel):
     characters: list[CharacterDesign] = Field(min_length=1, max_length=8)
+
+
+# ----------------------------------------------------------------------------- Editor (Phase 3)
+# The Editor is a *vision* LLM: it looks at a finished panel next to the Director's spec and the
+# character references, and grades it like a manga editor would. Each criterion is scored 1-5:
+#   5 = perfect, 4 = good, 3 = acceptable with flaws, 2 = clearly wrong, 1 = completely wrong.
+EDITOR_CRITERIA: dict[str, str] = {
+    "script_action": "the picture shows the action described in the panel spec",
+    "characters": "the right characters are in the panel (nobody missing, nobody extra)",
+    "people_count": "the number of people matches the spec (0 for scenery panels)",
+    "character_likeness": "each character's hair, face, outfit and accessories match their reference images",
+    "shot_angle": "the shot type (close-up, wide...) and camera angle (low, high...) match the spec",
+    "emotion": "faces and body language show the panel's emotion",
+    "anatomy": "hands, faces and limbs are well formed (no extra fingers, melted faces, broken limbs)",
+    "manga_style": "black-and-white manga look: ink lines, screentone, no colour, no photo/3D look, no text",
+    "bubble_space": "the composition leaves calm areas (sky, wall, background) where speech bubbles can go",
+}
+
+
+class EditorScores(BaseModel):
+    script_action: int = Field(ge=1, le=5, description=EDITOR_CRITERIA["script_action"])
+    characters: int = Field(ge=1, le=5, description=EDITOR_CRITERIA["characters"])
+    people_count: int = Field(ge=1, le=5, description=EDITOR_CRITERIA["people_count"])
+    character_likeness: int = Field(ge=1, le=5, description=EDITOR_CRITERIA["character_likeness"])
+    shot_angle: int = Field(ge=1, le=5, description=EDITOR_CRITERIA["shot_angle"])
+    emotion: int = Field(ge=1, le=5, description=EDITOR_CRITERIA["emotion"])
+    anatomy: int = Field(ge=1, le=5, description=EDITOR_CRITERIA["anatomy"])
+    manga_style: int = Field(ge=1, le=5, description=EDITOR_CRITERIA["manga_style"])
+    bubble_space: int = Field(ge=1, le=5, description=EDITOR_CRITERIA["bubble_space"])
+
+    def as_dict(self) -> dict[str, int]:
+        return {k: getattr(self, k) for k in EDITOR_CRITERIA}
+
+
+class EditorFix(BaseModel):
+    """A concrete, machine-applicable fix for the next attempt."""
+
+    prompt_add: list[str] = Field(default_factory=list, max_length=8,
+                                  description="Short image-prompt tags to ADD, e.g. 'from below', 'clenched fists'")
+    prompt_remove: list[str] = Field(default_factory=list, max_length=8,
+                                     description="Tags currently in the prompt that caused the problem")
+    negative_add: list[str] = Field(default_factory=list, max_length=8,
+                                    description="Tags to add to the negative prompt, e.g. 'extra fingers', 'color'")
+    ipadapter_weight: float | None = Field(default=None, ge=0.0, le=1.2,
+                                           description="New character-reference strength (0.3-1.0), or null to keep")
+    new_seed: bool = Field(default=False, description="True to start from different random noise")
+
+    @field_validator("prompt_add", "prompt_remove", "negative_add")
+    @classmethod
+    def clean_tags(cls, v: list[str]) -> list[str]:
+        tags = [" ".join(t.replace(",", " ").split())[:60] for t in v]
+        return [t for t in tags if t]
+
+    def is_empty(self) -> bool:
+        return not (self.prompt_add or self.prompt_remove or self.negative_add or self.new_seed
+                    or self.ipadapter_weight is not None)
+
+
+class EditorReview(BaseModel):
+    scores: EditorScores
+    verdict: Literal["pass", "fail"]
+    problems: list[str] = Field(default_factory=list, max_length=8,
+                                description="Specific problems you can see, e.g. 'Aya has short hair; reference shows twin tails'")
+    fix: EditorFix = Field(default_factory=EditorFix)
+    reasoning: str = Field(min_length=1, max_length=800, description="Two to four sentences explaining the scores")
+
+    @field_validator("verdict", mode="before")
+    @classmethod
+    def norm_verdict(cls, v: object) -> object:
+        return v.strip().lower() if isinstance(v, str) else v
+
+    @model_validator(mode="after")
+    def check(self) -> "EditorReview":
+        if self.verdict == "fail":
+            if not self.problems:
+                raise ValueError("a failing review must list the problems")
+            if self.fix.is_empty():
+                raise ValueError("a failing review must give a concrete fix (prompt/negative changes, "
+                                 "ipadapter_weight or new_seed)")
+        return self

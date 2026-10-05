@@ -1,0 +1,27 @@
+{
+  "node_count": 1071,
+  "checkpoints": [
+    "animagine-xl-3.1.safetensors"
+  ],
+  "ipadapter_nodes": [
+    "IPAdapterAdvanced",
+    "IPAdapterUnifiedLoader"
+  ],
+  "ipadapter_models": [
+    "ip-adapter-plus_sdxl_vit-h.safetensors"
+  ],
+  "clip_vision_models": [
+    "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors"
+  ],
+  "ipadapter_ready": true,
+  "checkpoint": "animagine-xl-3.1.safetensors",
+  "size": [
+    832,
+    1216
+  ],
+  "seconds": 31.0,
+  "vram_free_after_gb": [
+    2.51
+  ],
+  "prompt": "monochrome, greyscale, manga panel, medium shot, eye level, 1girl, short black hair, school uniform, determined expression, standing on a rooftop at dusk, city skyline, wind, ink lines, screentone shading, high contrast, detailed linework"
+}

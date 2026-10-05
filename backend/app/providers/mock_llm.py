@@ -11,7 +11,7 @@ import re
 from collections import Counter
 from typing import Any
 
-from .base import LLMProvider, LLMResponse, ProviderError
+from .base import ImageInput, LLMProvider, LLMResponse, ProviderError
 
 # Capitalised words that are usually NOT names.
 _STOPWORDS = set("""
@@ -162,7 +162,7 @@ class MockLLMProvider(LLMProvider):
     name = "mock"
 
     def generate_json(self, *, system: str, user: str, schema: dict[str, Any],
-                      task: str, context: dict[str, Any]) -> LLMResponse:
+                      task: str, context: dict[str, Any], images: list[ImageInput] | None = None) -> LLMResponse:
         # Agent tasks are built by mock_agents (imported here to avoid a circular import).
         from . import mock_agents
 
@@ -177,4 +177,6 @@ class MockLLMProvider(LLMProvider):
             return LLMResponse(mock_agents.build_character_bible(context["beat_sheet"]), model="mock")
         if task == "director":
             return LLMResponse(mock_agents.build_director_plan(context), model="mock")
+        if task == "editor_review":
+            return LLMResponse(mock_agents.build_editor_review(context), model="mock")
         raise ProviderError(f"Mock LLM does not know task '{task}'")

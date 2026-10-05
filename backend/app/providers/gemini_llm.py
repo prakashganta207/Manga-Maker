@@ -13,7 +13,7 @@ from typing import Any
 import httpx
 
 from ..config import Settings
-from .base import LLMProvider, LLMResponse, ProviderError, TokenUsage
+from .base import ImageInput, LLMProvider, LLMResponse, ProviderError, TokenUsage, encode_image
 from .schema_utils import inline_refs, strip_unsupported
 
 API = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
@@ -37,19 +37,30 @@ class GeminiLLMProvider(LLMProvider):
         except httpx.HTTPError as exc:
             raise ProviderError(f"Could not reach the Gemini API: {exc}") from exc
 
+    @staticmethod
+    def image_parts(images: list[ImageInput] | None) -> list[dict[str, Any]]:
+        """Vision input: each image as a labelled inline_data part (base64)."""
+        parts: list[dict[str, Any]] = []
+        for number, image in enumerate(images or [], start=1):
+            media_type, data = encode_image(image.path)
+            parts.append({"text": f"Image {number}: {image.label or image.path.name}"})
+            parts.append({"inline_data": {"mime_type": media_type, "data": data}})
+        return parts
+
     def generate_json(self, *, system: str, user: str, schema: dict[str, Any],
-                      task: str, context: dict[str, Any]) -> LLMResponse:
+                      task: str, context: dict[str, Any], images: list[ImageInput] | None = None) -> LLMResponse:
         clean_schema = inline_refs(strip_unsupported(schema, close_objects=False))
         body = {
             "systemInstruction": {"parts": [{"text": system}]},
-            "contents": [{"role": "user", "parts": [{"text": user}]}],
+            # The question text is the LAST part (the fallback below rewrites it).
+            "contents": [{"role": "user", "parts": [*self.image_parts(images), {"text": user}]}],
             "generationConfig": {"responseMimeType": "application/json", "responseJsonSchema": clean_schema},
         }
         response = self._post(body)
         if response.status_code == 400:
             # Fallback: plain JSON mode with the schema in the prompt.
             body["generationConfig"] = {"responseMimeType": "application/json"}
-            body["contents"][0]["parts"][0]["text"] = (
+            body["contents"][0]["parts"][-1]["text"] = (
                 f"{user}\n\nAnswer with JSON matching this JSON Schema:\n{json.dumps(clean_schema)}")
             response = self._post(body)
         if response.status_code in (401, 403):

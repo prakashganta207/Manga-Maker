@@ -125,3 +125,35 @@ reasonable option; change freely.
     project). torch + transformers are optional (`requirements-ai.txt`); without them a
     clearly-labelled "simple" pixel score is used. Unit tests use the simple scorer; one test
     runs real CLIP when the model is cached. Rough reading: ≥0.85 same look, <0.70 drifted.
+
+## Phase 3–5 decisions
+
+42. **ComfyUI installed inside the project** (`comfyui/`, git-ignored): `git clone` of ComfyUI +
+    ComfyUI_IPAdapter_plus + comfyui_controlnet_aux, its own Python 3.14 venv with torch 2.14.1+cu130
+    (the only Python on this machine is 3.14, and the brief forbids touching files outside the project).
+    Windows Application Control blocked several freshly installed DLLs (torch CUDA, regex, comfy_kitchen)
+    on their *first* load and allowed them on the next one (a reputation check); nothing was disabled or
+    bypassed. Models downloaded with `scripts/download_comfyui_models.py` (~27 MB/s, ~10 minutes):
+    animagine-xl-3.1 (Fair AI Public License 1.0-SD), ip-adapter-plus_sdxl_vit-h (Apache-2.0),
+    CLIP-ViT-H-14 image encoder (MIT), xinsir controlnet-union-sdxl-1.0 (Apache-2.0, new in Phase 5).
+43. **Vision input is part of the LLM interface**: `generate_json(..., images=[ImageInput])`. Each provider
+    sends labelled images in its own format (Claude: base64 image blocks before the text; Gemini:
+    inline_data parts; OpenAI-compatible: `image_url` data URLs). Images are shrunk to 768 px JPEG first
+    (Claude bills ≈ w×h/750 tokens per image; 768 px is enough to judge a panel). The runner only passes
+    `images` when there are some, so text-only fakes and providers keep working.
+44. **Editor output** (`EditorReview`): 9 criteria scored 1–5 (script action, characters, people count,
+    likeness, shot/angle, emotion, anatomy, manga style, bubble space), verdict, ≤8 problems, a
+    machine-applicable `EditorFix` (prompt tags to add/remove, negative additions, IP-Adapter weight,
+    new seed) and reasoning. A failing review without problems or without a concrete fix is rejected by
+    the validator and sent back for a retry (same repair loop as the other agents).
+45. **Score combination** (`agents/quality.py`): editor = mean((s−1)/4); clip = weakest character's CLIP
+    similarity rescaled from [0.60, 0.90] to [0, 1]; combined = 0.7·editor + 0.3·clip (editor only when
+    there is no CLIP score). Pass = combined ≥ 0.65 **and** no criterion ≤ 2 **and** Editor verdict "pass".
+    All five numbers are `.env` settings. 0.65 ≈ "mostly 4s with a decent likeness"; the min-criterion
+    rule stops a good average hiding one deal-breaker (a broken hand).
+46. **Applying fixes**: added tags are inserted right after the character groups with ComfyUI emphasis
+    `(tag:1.15)`; removals never touch a character's bible tags (consistency rule); the IP-Adapter weight
+    is clamped to 0.3–1.0; when a fix changes nothing else, a new (reproducible) seed is used.
+47. **Mock Editor**: measures what code can (greyscale or not, CLIP similarity) and simulates a flawed
+    drawing for ~35% of (seed, prompt) pairs, with a matching fix. A redraw changes seed/prompt, so the
+    loop's accept / retry / needs-review paths all happen offline and deterministically.

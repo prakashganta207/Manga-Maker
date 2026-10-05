@@ -16,7 +16,7 @@ from typing import Any
 import anthropic
 
 from ..config import Settings
-from .base import LLMProvider, LLMResponse, ProviderError, TokenUsage
+from .base import ImageInput, LLMProvider, LLMResponse, ProviderError, TokenUsage, encode_image
 from .schema_utils import strip_unsupported
 
 
@@ -39,12 +39,27 @@ class AnthropicLLMProvider(LLMProvider):
         self.client = client or anthropic.Anthropic(api_key=settings.anthropic_api_key, timeout=300)
         self.model = settings.anthropic_model
 
-    def build_request(self, *, system: str, user: str, schema: dict[str, Any]) -> dict[str, Any]:
+    @staticmethod
+    def user_content(user: str, images: list[ImageInput] | None) -> str | list[dict[str, Any]]:
+        """Plain text, or (for vision) labelled image blocks followed by the text.
+        Claude reads images best when they come before the question about them."""
+        if not images:
+            return user
+        blocks: list[dict[str, Any]] = []
+        for number, image in enumerate(images, start=1):
+            media_type, data = encode_image(image.path)
+            blocks.append({"type": "text", "text": f"Image {number}: {image.label or image.path.name}"})
+            blocks.append({"type": "image", "source": {"type": "base64", "media_type": media_type, "data": data}})
+        blocks.append({"type": "text", "text": user})
+        return blocks
+
+    def build_request(self, *, system: str, user: str, schema: dict[str, Any],
+                      images: list[ImageInput] | None = None) -> dict[str, Any]:
         return {
             "model": self.model,
             "max_tokens": 16000,
             "system": system,
-            "messages": [{"role": "user", "content": user}],
+            "messages": [{"role": "user", "content": self.user_content(user, images)}],
             # Structured output: the answer must be JSON matching this schema.
             # Effort "medium" is plenty for a short script (thinking stays adaptive).
             "output_config": {
@@ -58,9 +73,10 @@ class AnthropicLLMProvider(LLMProvider):
         }
 
     def generate_json(self, *, system: str, user: str, schema: dict[str, Any],
-                      task: str, context: dict[str, Any]) -> LLMResponse:
+                      task: str, context: dict[str, Any], images: list[ImageInput] | None = None) -> LLMResponse:
         try:
-            response = self.client.beta.messages.create(**self.build_request(system=system, user=user, schema=schema))
+            response = self.client.beta.messages.create(
+                **self.build_request(system=system, user=user, schema=schema, images=images))
         except anthropic.AuthenticationError as exc:
             raise ProviderError("Anthropic rejected the API key (check ANTHROPIC_API_KEY)") from exc
         except anthropic.NotFoundError as exc:

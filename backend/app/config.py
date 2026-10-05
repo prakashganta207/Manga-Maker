@@ -100,6 +100,23 @@ class Settings:
     consistency_scorer: str = "auto"
     clip_model: str = "openai/clip-vit-base-patch32"
 
+    # --- Phase 3: Editor agent + redraw loop (see app/agents/quality.py) ---
+    editor_enabled: bool = True
+    editor_max_attempts: int = 3          # attempts per panel, first drawing included
+    # A panel passes when combined score >= quality_threshold AND no criterion <= quality_min_criterion
+    # AND the Editor's verdict is "pass". combined = editor_weight * editor + (1 - editor_weight) * clip.
+    quality_threshold: float = 0.65
+    quality_editor_weight: float = 0.7
+    quality_min_criterion: int = 2
+    # CLIP similarity is mapped to 0..1 between these two values (0.60 -> 0, 0.90 -> 1).
+    clip_score_low: float = 0.60
+    clip_score_high: float = 0.90
+    # Per-job budgets. When one runs out, no more redraws: the best attempt is kept and the
+    # panel is marked "needs human review".
+    job_max_llm_calls: int = 150
+    job_max_llm_cost_usd: float = 3.0
+    job_max_gpu_seconds: float = 3600.0
+
     @classmethod
     def from_env(cls) -> "Settings":
         output = Path(_env("OUTPUT_DIR", "output"))
@@ -141,6 +158,16 @@ class Settings:
             auto_approve=_env_bool("AUTO_APPROVE", False),
             consistency_scorer=_env("CONSISTENCY_SCORER", "auto").lower() or "auto",
             clip_model=_env("CLIP_MODEL", "openai/clip-vit-base-patch32"),
+            editor_enabled=_env_bool("EDITOR_ENABLED", True),
+            editor_max_attempts=max(1, min(10, _env_int("EDITOR_MAX_ATTEMPTS", 3))),
+            quality_threshold=max(0.0, min(1.0, _env_float("QUALITY_THRESHOLD", 0.65))),
+            quality_editor_weight=max(0.0, min(1.0, _env_float("QUALITY_EDITOR_WEIGHT", 0.7))),
+            quality_min_criterion=max(0, min(4, _env_int("QUALITY_MIN_CRITERION", 2))),
+            clip_score_low=_env_float("CLIP_SCORE_LOW", 0.60),
+            clip_score_high=_env_float("CLIP_SCORE_HIGH", 0.90),
+            job_max_llm_calls=max(0, _env_int("JOB_MAX_LLM_CALLS", 150)),
+            job_max_llm_cost_usd=max(0.0, _env_float("JOB_MAX_LLM_COST_USD", 3.0)),
+            job_max_gpu_seconds=max(0.0, _env_float("JOB_MAX_GPU_SECONDS", 3600.0)),
         )
 
     def describe(self) -> dict:
@@ -156,4 +183,6 @@ class Settings:
             "max_pages": self.max_pages,
             "auto_approve": self.auto_approve,
             "consistency_scorer": self.consistency_scorer,
+            "editor_enabled": self.editor_enabled,
+            "quality_threshold": self.quality_threshold,
         }

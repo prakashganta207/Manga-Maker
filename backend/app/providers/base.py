@@ -29,6 +29,35 @@ class TokenUsage:
 
 
 @dataclass
+class ImageInput:
+    """An image sent to a *vision* LLM (e.g. the Editor looking at a finished panel).
+
+    `label` is a short caption ("the panel", "reference: Aya, happy") that the provider puts
+    next to the image so the model knows which picture is which.
+    """
+
+    path: Path
+    label: str = ""
+
+
+def encode_image(path: Path, max_side: int = 768, quality: int = 85) -> tuple[str, str]:
+    """Load an image, shrink it and return (media type, base64 JPEG).
+
+    Vision models bill images by size (Claude: about width x height / 750 tokens), and a
+    768 px panel is plenty to judge composition, faces and style, so we never send more.
+    """
+    import base64
+    import io
+
+    with Image.open(path) as img:
+        img = img.convert("RGB")
+        img.thumbnail((max_side, max_side), Image.Resampling.LANCZOS)
+        buffer = io.BytesIO()
+        img.save(buffer, "JPEG", quality=quality)
+    return "image/jpeg", base64.b64encode(buffer.getvalue()).decode("ascii")
+
+
+@dataclass
 class LLMResponse:
     """What an LLM call returns: the parsed JSON (or raw text if it wasn't JSON) + usage."""
 
@@ -52,8 +81,12 @@ class LLMProvider(ABC):
         schema: dict[str, Any],
         task: str,
         context: dict[str, Any],
+        images: list[ImageInput] | None = None,
     ) -> LLMResponse:
         """Return JSON that should match `schema` ("structured output").
+
+        - `images`: optional pictures for vision models (sent after the text). Providers
+          that can't see images raise ProviderError when images are given.
 
         - `system` / `user`: the prompt text, used by real models.
         - `schema`: JSON Schema of the expected answer.

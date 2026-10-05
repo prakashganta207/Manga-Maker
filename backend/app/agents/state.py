@@ -17,7 +17,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from .runner import AgentStep
-from .schemas import BeatSheet, CharacterDesign, DirectorPlan, PagePlan
+from .schemas import BeatSheet, CharacterDesign, DirectorPlan, EditorFix, EditorReview, PagePlan
 
 PROJECT_FILE = "project.json"
 
@@ -65,15 +65,73 @@ class PanelPrompt(BaseModel):
     ipadapter_weight: float | None = None
 
 
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+class QualityScore(BaseModel):
+    """The Editor's grades and the CLIP score folded into one 0..1 number (see agents/quality.py)."""
+
+    editor: float | None = None      # mean Editor criterion, rescaled 1..5 -> 0..1
+    clip: float | None = None        # weakest character's CLIP similarity, rescaled to 0..1
+    combined: float = 0.0
+    threshold: float = 0.0
+    passed: bool = False
+    reasons: list[str] = Field(default_factory=list)  # why it did not pass
+
+
+class PanelAttempt(BaseModel):
+    """One drawing of a panel. Every attempt is kept, so the timeline can show them side by side."""
+
+    attempt: int                     # 1, 2, 3... over the panel's whole history
+    round: int = 1                   # 1 = first pipeline run; each user revision/inpaint starts a new round
+    source: str = "auto"             # auto | redraw | revision | inpaint
+    image: str
+    prompt: str = ""
+    negative_prompt: str = ""
+    seed: int = 0
+    width: int = 0
+    height: int = 0
+    ipadapter_weight: float | None = None
+    workflow: str = ""
+    seconds: float = 0.0
+    consistency: dict[str, float] = Field(default_factory=dict)
+    consistency_method: str = ""
+    review: EditorReview | None = None
+    quality: QualityScore | None = None
+    fix_applied: EditorFix | None = None   # the Editor fix that produced this attempt
+    status: str = "pending"          # pending | accepted | rejected | needs_review | unreviewed
+    note: str = ""
+    extra: dict[str, Any] = Field(default_factory=dict)  # storyboard / control image / mask paths
+    created_at: str = Field(default_factory=_now)
+
+
 class PanelResult(BaseModel):
     page: int
     panel: int
-    image: str                       # path relative to the job folder
+    image: str                       # path relative to the job folder (the chosen attempt)
     seconds: float = 0.0
     workflow: str = ""
     # CLIP similarity between this panel and each character's references (0..1-ish).
     consistency: dict[str, float] = Field(default_factory=dict)
     consistency_method: str = ""
+    # Phase 3 quality loop
+    attempts: list[PanelAttempt] = Field(default_factory=list)
+    chosen_attempt: int = 0
+    status: str = "unreviewed"       # accepted | needs_review | unreviewed
+    review_note: str = ""
+
+    def attempt(self, number: int) -> PanelAttempt | None:
+        return next((a for a in self.attempts if a.attempt == number), None)
+
+    def use_attempt(self, attempt: PanelAttempt) -> None:
+        """Make an attempt the panel's current picture."""
+        self.chosen_attempt = attempt.attempt
+        self.image = attempt.image
+        self.seconds = attempt.seconds
+        self.workflow = attempt.workflow
+        self.consistency = dict(attempt.consistency)
+        self.consistency_method = attempt.consistency_method
 
 
 class Usage(BaseModel):
@@ -82,10 +140,20 @@ class Usage(BaseModel):
     cost_usd: float = 0.0
 
 
+class BudgetUsage(BaseModel):
+    """Per-job spending counters (LLM calls, GPU time) checked by the redraw loop."""
+
+    llm_calls: int = 0
+    gpu_seconds: float = 0.0
+    images: int = 0
+    redraws: int = 0
+    exhausted: str | None = None     # which limit ran out first, if any
+
+
 class MangaProject(BaseModel):
     job_id: str
     project_id: str
-    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat(timespec="seconds"))
+    created_at: str = Field(default_factory=_now)
     story: str
     title: str = ""
     status: str = "running"          # running | awaiting_approval | done | failed
@@ -106,6 +174,7 @@ class MangaProject(BaseModel):
 
     trace: list[AgentStep] = Field(default_factory=list)
     usage: Usage = Field(default_factory=Usage)
+    budget: BudgetUsage = Field(default_factory=BudgetUsage)
     timings: dict[str, float] = Field(default_factory=dict)
     warnings: list[str] = Field(default_factory=list)
     error: str | None = None
@@ -113,6 +182,7 @@ class MangaProject(BaseModel):
     # ------------------------------------------------------------------ helpers
     def add_step(self, step: AgentStep) -> None:
         self.trace.append(step)
+        self.budget.llm_calls += step.attempts  # every attempt is one LLM call
         self.usage.input_tokens += step.input_tokens
         self.usage.output_tokens += step.output_tokens
         self.usage.cost_usd = round(self.usage.cost_usd + step.cost_usd, 6)

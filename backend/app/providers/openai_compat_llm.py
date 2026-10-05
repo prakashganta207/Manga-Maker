@@ -13,7 +13,7 @@ from typing import Any
 import httpx
 
 from ..config import Settings
-from .base import LLMProvider, LLMResponse, ProviderError, TokenUsage
+from .base import ImageInput, LLMProvider, LLMResponse, ProviderError, TokenUsage, encode_image
 from .schema_utils import inline_refs, strip_unsupported
 
 
@@ -35,15 +35,28 @@ class OpenAICompatibleLLMProvider(LLMProvider):
         except httpx.HTTPError as exc:
             raise ProviderError(f"Could not reach {self.base_url}: {exc}") from exc
 
+    @staticmethod
+    def user_content(user: str, images: list[ImageInput] | None) -> str | list[dict[str, Any]]:
+        """Text only, or the OpenAI vision format: text parts + image_url parts (data: URLs)."""
+        if not images:
+            return user
+        content: list[dict[str, Any]] = []
+        for number, image in enumerate(images, start=1):
+            media_type, data = encode_image(image.path)
+            content.append({"type": "text", "text": f"Image {number}: {image.label or image.path.name}"})
+            content.append({"type": "image_url", "image_url": {"url": f"data:{media_type};base64,{data}"}})
+        content.append({"type": "text", "text": user})
+        return content
+
     def generate_json(self, *, system: str, user: str, schema: dict[str, Any],
-                      task: str, context: dict[str, Any]) -> LLMResponse:
+                      task: str, context: dict[str, Any], images: list[ImageInput] | None = None) -> LLMResponse:
         schema_text = json.dumps(inline_refs(strip_unsupported(schema, close_objects=False)))
         body: dict[str, Any] = {
             "model": self.model,
             "messages": [
                 {"role": "system", "content": f"{system}\n\nReply with a single JSON object matching this "
                                               f"JSON Schema:\n{schema_text}"},
-                {"role": "user", "content": user},
+                {"role": "user", "content": self.user_content(user, images)},
             ],
             "response_format": {"type": "json_object"},
         }

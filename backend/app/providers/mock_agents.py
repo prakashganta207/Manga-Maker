@@ -294,3 +294,61 @@ def build_director_plan(context: dict) -> dict[str, Any]:
                            "composition": focus[:200]})
         pages.append({"page_number": page.page_number, "layout": template.id, "panels": panels})
     return {"pages": pages}
+
+
+# ----------------------------------------------------------------------------- Editor (Phase 3)
+# The mock Editor can't really "see", so it checks the few things plain code can measure
+# (is the image greyscale? how similar is it to the references?) and uses a hash of the
+# seed + prompt to simulate the occasional flawed drawing. Changing the seed or prompt (which
+# is exactly what a redraw does) changes the outcome, so the redraw loop is exercised offline.
+MOCK_FAIL_RATE = 35  # percent of drawings that get a "problem"
+
+_MOCK_FAILURES = [
+    ("anatomy", "The left hand looks malformed (fused fingers).",
+     {"negative_add": ["bad hands", "fused fingers", "extra fingers"], "new_seed": True}),
+    ("shot_angle", "The framing doesn't match the requested shot.", {"new_seed": False}),
+    ("character_likeness", "The character's hair and outfit drift from the reference sheet.",
+     {"ipadapter_weight": 0.85, "new_seed": True}),
+    ("bubble_space", "The figures fill the whole frame; there is no calm area for the speech bubbles.",
+     {"prompt_add": ["negative space", "simple background"], "new_seed": True}),
+]
+
+
+def _colourfulness(path: str) -> float:
+    from PIL import Image, ImageStat
+    try:
+        with Image.open(path) as img:
+            if img.mode in ("L", "1", "LA"):
+                return 0.0
+            r, g, b = (ImageStat.Stat(c).mean[0] for c in img.convert("RGB").resize((64, 64)).split())
+            return max(abs(r - g), abs(g - b), abs(r - b))
+    except OSError:
+        return 0.0
+
+
+def build_editor_review(context: dict[str, Any]) -> dict[str, Any]:
+    key = f"{context.get('seed')}|{context.get('image_prompt_used', '')}|{context.get('page')}|{context.get('panel')}"
+    roll = _stable_index(key, 100, "editor")
+    scores = {name: 4 + (_stable_index(key, 2, name) if name not in ("anatomy",) else 0)
+              for name in ("script_action", "characters", "people_count", "character_likeness", "shot_angle",
+                           "emotion", "anatomy", "manga_style", "bubble_space")}
+    problems, fix = [], {}
+    clip = context.get("consistency") or {}
+    if clip and min(clip.values()) < 0.62:
+        scores["character_likeness"] = 3
+    if _colourfulness(context.get("image_path", "")) > 12:
+        scores["manga_style"] = 2
+        problems.append("The panel is in colour; manga panels must be black and white.")
+        fix = {"negative_add": ["color", "colorful"], "prompt_add": ["monochrome", "greyscale"]}
+    if roll < MOCK_FAIL_RATE:
+        criterion, problem, change = _MOCK_FAILURES[roll % len(_MOCK_FAILURES)]
+        scores[criterion] = 2
+        problems.append(problem)
+        fix = {**fix, **change}
+        if criterion == "shot_angle":
+            fix["prompt_add"] = [context.get("shot", "medium") + " shot", context.get("angle", "eye level")]
+    verdict = "fail" if problems else "pass"
+    reasoning = (f"Mock review of page {context.get('page')} panel {context.get('panel')} "
+                 f"(attempt {context.get('attempt')}). "
+                 + ("; ".join(problems) if problems else "Composition, style and characters match the spec."))
+    return {"scores": scores, "verdict": verdict, "problems": problems, "fix": fix, "reasoning": reasoning}

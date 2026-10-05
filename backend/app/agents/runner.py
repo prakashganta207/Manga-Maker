@@ -15,7 +15,7 @@ from typing import Any, Callable, TypeVar
 
 from pydantic import BaseModel, Field, ValidationError
 
-from ..providers.base import LLMProvider, ProviderError, TokenUsage
+from ..providers.base import ImageInput, LLMProvider, ProviderError, TokenUsage
 from .cost import cost_usd
 
 log = logging.getLogger("manga.agents")
@@ -88,11 +88,14 @@ def run_agent(
     check: Callable[[T], list[str]] | None = None,
     max_retries: int = MAX_RETRIES,
     prices: tuple[float | None, float | None] = (None, None),
+    images: list[ImageInput] | None = None,
 ) -> tuple[T, AgentStep]:
     """Call the LLM until the answer validates (schema + optional `check`).
 
     `check(result)` returns a list of problems (cross-checks against earlier agents);
     problems are fed back to the LLM exactly like schema errors.
+    `images` are sent to vision models (only passed on when there are some, so text-only
+    providers and test fakes keep working unchanged).
     """
     step = AgentStep(agent=agent, label=label, inputs=inputs_summary or {},
                      started_at=datetime.now(timezone.utc).isoformat(timespec="seconds"))
@@ -105,7 +108,9 @@ def run_agent(
     for attempt in range(1, max_retries + 2):
         step.attempts = attempt
         try:
-            response = llm.generate_json(system=system, user=prompt, schema=schema, task=task, context=context)
+            extra = {"images": images} if images else {}
+            response = llm.generate_json(system=system, user=prompt, schema=schema, task=task, context=context,
+                                         **extra)
         except ProviderError as exc:
             step.status, step.errors = "failed", step.errors + [str(exc)]
             _finish(step, usage, started, llm, prices)
