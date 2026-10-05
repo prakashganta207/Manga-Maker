@@ -174,3 +174,17 @@ reasonable option; change freely.
     and editable after a restart (in-flight jobs come back as "failed: interrupted").
 52. **Local undo/redo in the editor** covers unsaved bubble edits (Ctrl+Z / Ctrl+Y); saved changes go to
     the server-side version history (M7).
+53. **Panel Revision agent** (`agents/revision.py`): the LLM rewrites only the panel *spec* (action,
+    emotion, shot, angle, composition, extra tags, keep_seed); code rebuilds the prompt with the same
+    prompt builder (fixed character tags + emotion-matched reference) and the panel goes through the normal
+    quality loop as a new "round". keep_seed=true for expression/detail notes (keeps the composition),
+    false when the camera changes. Slow actions are queued on the GPU worker (`queue_panel_action`).
+54. **Reference crops around detected faces (Phase 2 bug found on the real GPU)**: Animagine draws the
+    "five portraits in a row" sheet as 2 rows of ~7 heads, so 1/5-width column crops held two heads and
+    IP-Adapter then drew panels full of stacked heads. Expression crops are now head-and-shoulders crops
+    around faces found by `lbpcascade_animeface` (in reading order), the turnaround's front view is the
+    figure around the first detected face; columns remain the fallback. The face detector was pulled
+    forward from M8 (the Letterer reuses it). Expression labels follow the sheet's reading order, which
+    the model doesn't always respect; the prompt still sets the panel's expression.
+55. **OpenCV pinned to 4.x** (`opencv-python-headless>=4.9,<5`): OpenCV 5.0 removed the cascade classifier
+    from the main package. The cascade file (MIT, licence text inside the XML) ships in `app/vision/models/`.

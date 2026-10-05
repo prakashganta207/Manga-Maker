@@ -13,17 +13,23 @@ from __future__ import annotations
 
 import threading
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Callable, Literal
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from .agents.pipeline import ensure_lettering, export_documents, layout_config, manifest, render_pages
+from .agents.graph import Ctx
+from .agents.revision import revise_panel
 from .agents.state import Bubble, MangaProject
 from .pipeline.layout import plan_page
 
 # One lock for all quick edits: they read-modify-write project.json.
 EDIT_LOCK = threading.Lock()
+
+
+class ReviseBody(BaseModel):
+    instruction: str = Field(min_length=2, max_length=300, description='e.g. "make her angrier", "camera from below"')
 
 
 class LetteringBody(BaseModel):
@@ -63,6 +69,41 @@ def register_editor_routes(app: FastAPI) -> None:
             job.result = manifest(project)
 
     app.state.refresh_pages = refresh
+
+    def queue_panel_action(job_id: str, page: int, panel: int, label: str,
+                           action: Callable[[MangaProject, Ctx], Any]) -> dict[str, Any]:
+        """Run a slow panel action (GPU) on the single worker; progress shows in the job's `busy` text."""
+        project = finished(job_id)
+        page_or_404(project, page)
+        if not any(s.page == page and s.panel == panel for s in project.prompts):
+            raise HTTPException(404, f"No panel {panel} on page {page}")
+
+        def task(job, _progress):
+            directory = job_dir(job_id)
+            fresh = MangaProject.load(directory)
+            ctx = Ctx(settings=settings, llm=app.state.llm, image=app.state.image, job_dir=directory,
+                      progress=lambda stage, fraction, message: manager.set_busy(job_id, f"{label} - {message}"))
+            fresh.budget_limits(settings)
+            try:
+                action(fresh, ctx)
+            finally:
+                app.state.image.free_memory()
+                fresh.save(directory)
+            with EDIT_LOCK:
+                refresh(job_id, fresh, [page])
+            return manifest(fresh)
+
+        manager.enqueue(job_id, task, label=label)
+        return manager.snapshot(job_id)
+
+    app.state.queue_panel_action = queue_panel_action
+
+    @app.post("/api/jobs/{job_id}/panels/{page}/{panel}/revise", status_code=202)
+    def revise(job_id: str, page: int, panel: int, body: ReviseBody) -> dict[str, Any]:
+        """Panel instruction -> Panel Revision agent -> redraw through the Editor loop."""
+        instruction = body.instruction.strip()
+        return queue_panel_action(job_id, page, panel, f"Revising p{page}-{panel}: {instruction[:60]}",
+                                  lambda project, ctx: revise_panel(project, ctx, page, panel, instruction))
 
     @app.get("/api/jobs/{job_id}/pages/{page}/editor")
     def editor_page(job_id: str, page: int, direction: Literal["rtl", "ltr"] = "rtl") -> dict[str, Any]:

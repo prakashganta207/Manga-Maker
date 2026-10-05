@@ -177,6 +177,8 @@ class MockLLMProvider(LLMProvider):
             return LLMResponse(mock_agents.build_character_bible(context["beat_sheet"]), model="mock")
         if task == "director":
             return LLMResponse(mock_agents.build_director_plan(context), model="mock")
+        if task == "panel_revision":
+            return LLMResponse(mock_agents.build_panel_revision(context), model="mock")
         if task == "editor_review":
             return LLMResponse(mock_agents.build_editor_review(context), model="mock")
         raise ProviderError(f"Mock LLM does not know task '{task}'")

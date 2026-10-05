@@ -16,6 +16,7 @@ from pathlib import Path
 from PIL import Image, ImageChops, ImageOps
 
 from ..providers.base import ImageProvider, ImageRequest
+from ..vision.faces import crop_around, detect_faces, reading_order
 from .prompt_builder import NEGATIVE_PROMPT
 from .state import EXPRESSIONS, VIEWS, CharacterEntry
 
@@ -55,6 +56,28 @@ def split_columns(image: Image.Image, count: int) -> list[Image.Image]:
     return [autocrop(image.crop((round(i * width), 0, round((i + 1) * width), image.height))) for i in range(count)]
 
 
+def expression_crops(sheet: Image.Image, count: int) -> list[Image.Image]:
+    """One clean head per crop. Real models rarely draw exactly `count` columns (often 2 rows of
+    6-7 heads), and a crop holding two heads teaches IP-Adapter to draw several heads. So we crop
+    around *detected* faces (in reading order) and only fall back to columns for the rest."""
+    faces = reading_order(detect_faces(sheet))
+    columns = split_columns(sheet, count)
+    return [crop_around(sheet, faces[i], wide=1.9) if i < len(faces) else columns[i] for i in range(count)]
+
+
+def turnaround_crops(sheet: Image.Image, count: int) -> list[Image.Image]:
+    """Front view = the full-height figure around the first detected face (side/back views rarely
+    show a detectable face, so they keep the column split)."""
+    columns = split_columns(sheet, count)
+    faces = reading_order(detect_faces(sheet))
+    if faces:
+        face = faces[0]
+        half = face.w * 1.8
+        cx = face.center[0]
+        columns[0] = autocrop(sheet.crop((max(0, int(cx - half)), 0, min(sheet.width, int(cx + half)), sheet.height)))
+    return columns
+
+
 def generate_sheets(character: CharacterEntry, provider: ImageProvider, job_dir: Path,
                     which: str = "both") -> None:
     """Draw (or redraw) the sheets and crops for one character, updating the entry in place."""
@@ -72,7 +95,7 @@ def generate_sheets(character: CharacterEntry, provider: ImageProvider, job_dir:
         sheet.save(path)
         character.sheets.turnaround = rel(path)
         views = {}
-        for view, crop in zip(VIEWS, split_columns(sheet, len(VIEWS))):
+        for view, crop in zip(VIEWS, turnaround_crops(sheet, len(VIEWS))):
             crop_path = folder / f"{view}_{version}.png"
             ImageOps.grayscale(crop).save(crop_path)
             views[view] = rel(crop_path)
@@ -88,7 +111,7 @@ def generate_sheets(character: CharacterEntry, provider: ImageProvider, job_dir:
         sheet.save(path)
         character.sheets.expressions = rel(path)
         refs = {}
-        for expression, crop in zip(EXPRESSIONS, split_columns(sheet, len(EXPRESSIONS))):
+        for expression, crop in zip(EXPRESSIONS, expression_crops(sheet, len(EXPRESSIONS))):
             crop_path = folder / f"{expression}_{version}.png"
             ImageOps.grayscale(crop).save(crop_path)
             refs[expression] = rel(crop_path)

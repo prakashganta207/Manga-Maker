@@ -114,3 +114,19 @@ def test_new_chapter_reuses_cast(story, settings, tmp_path):
     assert step.status == "skipped"
     for old, new in zip(first.characters, second.characters):
         assert new.tag_prompt() == old.tag_prompt() and new.turnaround_seed == old.turnaround_seed
+
+
+def test_expression_crops_follow_detected_faces(monkeypatch):
+    """Real models draw sheets in any grid; crops must hold exactly one head each."""
+    from PIL import Image
+    from app.agents import sheets
+    from app.vision.faces import Face
+    sheet = Image.new("RGB", (1536, 640), "white")
+    faces = [Face(100, 400, 150, 150), Face(40, 60, 160, 160), Face(400, 70, 150, 150)]  # two rows
+    monkeypatch.setattr(sheets, "detect_faces", lambda img: faces)
+    crops = sheets.expression_crops(sheet, 5)
+    assert len(crops) == 5
+    assert crops[0].size[0] == int(160 * 1.9) or crops[0].size[0] < 400   # first = top-left face, head-sized
+    assert crops[3].size == sheets.split_columns(sheet, 5)[3].size        # missing faces -> column fallback
+    monkeypatch.setattr(sheets, "detect_faces", lambda img: [])
+    assert [c.size for c in sheets.expression_crops(sheet, 5)] == [c.size for c in sheets.split_columns(sheet, 5)]

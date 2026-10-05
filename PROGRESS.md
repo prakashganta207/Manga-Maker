@@ -56,8 +56,18 @@ Cost per page (budget counters): mock LLM → $0. With a real vision Editor, est
   rendered-page preview. Browser smoke test `scripts/ui_smoke.py` (Playwright + installed Edge):
   select, drag, edit, save → stored, no console errors. 9 tests.
 
+- **M5 Panel instructions**: Panel Revision agent + mock (common notes: angrier/sadder/happier,
+  from below/above, close/wide, rain...), spec update + prompt rebuild, queued redraw through the
+  Editor loop as a new round (`POST /api/jobs/{id}/panels/{page}/{panel}/revise`), live progress in the
+  job's `busy` text, "Tell the director" box with suggestions in the editor. 9 tests.
+  **Real run**: "make her angrier" on p1·4 → revision agent → 36 s redraw → accepted; the new face
+  is clearly angrier (gritted teeth). This run exposed the reference-crop bug below.
+- **Fix (Phase 2 bug)**: expression/turnaround reference crops now follow detected anime faces
+  (`vision/faces.py`, DECISIONS #54) instead of fixed columns, which held two heads each on real sheets.
+  Face detection ≈2 s on a 1536×640 sheet, ≈0.06 s on a turnaround (CPU).
+
 ### Next
-- M5 panel instructions (Panel Revision agent).
+- M6 inpainting.
 
 ### Known issues
 - No LLM key on this machine: the Editor runs as the mock (it can't see real flaws such as the

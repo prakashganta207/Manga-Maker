@@ -280,3 +280,35 @@ class EditorReview(BaseModel):
                 raise ValueError("a failing review must give a concrete fix (prompt/negative changes, "
                                  "ipadapter_weight or new_seed)")
         return self
+
+
+# ----------------------------------------------------------------------------- Panel Revision (Phase 4)
+class PanelRevision(BaseModel):
+    """How to change one panel to follow the user's instruction (e.g. "make her angrier")."""
+
+    action: str = Field(min_length=1, max_length=300, description="Updated description of what we SEE")
+    emotion: str = Field(min_length=1, max_length=40, description="Updated dominant emotion")
+    shot: ShotType
+    angle: CameraAngle
+    composition: str = Field(min_length=1, max_length=200)
+    prompt_add: list[str] = Field(default_factory=list, max_length=8, description="Extra image tags for the change")
+    prompt_remove: list[str] = Field(default_factory=list, max_length=8)
+    negative_add: list[str] = Field(default_factory=list, max_length=8)
+    keep_seed: bool = Field(default=True, description="True for small changes (keep the composition), "
+                                                      "false when the camera/layout changes")
+    summary: str = Field(min_length=1, max_length=200, description="One sentence: what changes")
+
+    @field_validator("shot", mode="before")
+    @classmethod
+    def norm_shot(cls, v: object) -> object:
+        return _norm(v, _SHOT_ALIASES)
+
+    @field_validator("angle", mode="before")
+    @classmethod
+    def norm_angle(cls, v: object) -> object:
+        return _norm(v, _ANGLE_ALIASES)
+
+    @field_validator("prompt_add", "prompt_remove", "negative_add")
+    @classmethod
+    def clean_tags(cls, v: list[str]) -> list[str]:
+        return EditorFix.clean_tags(v)

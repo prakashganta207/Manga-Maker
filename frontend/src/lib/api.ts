@@ -429,6 +429,11 @@ export const api = {
       method: "PUT",
       body: JSON.stringify({ bubbles, ...(label ? { label } : {}) }),
     }),
+  revisePanel: (id: string, page: number, panel: number, instruction: string) =>
+    request<Job>(`/api/jobs/${encodeURIComponent(id)}/panels/${page}/${panel}/revise`, {
+      method: "POST",
+      body: JSON.stringify({ instruction }),
+    }),
   resetLettering: (id: string, page: number) =>
     request<EditorPage>(`/api/jobs/${encodeURIComponent(id)}/pages/${page}/lettering/reset`, { method: "POST" }),
   // Cast approval

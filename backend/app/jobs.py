@@ -102,6 +102,14 @@ class JobManager:
             job.updated_at = time.time()
         self._queue.put((job_id, task, label))
 
+    def set_busy(self, job_id: str, message: str) -> None:
+        """Live progress text for a running background action (shown by the UI while polling)."""
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if job is not None and job.busy is not None:
+                job.busy = message[:200]
+                job.updated_at = time.time()
+
     def get(self, job_id: str) -> Job | None:
         with self._lock:
             return self._jobs.get(job_id)

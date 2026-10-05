@@ -352,3 +352,40 @@ def build_editor_review(context: dict[str, Any]) -> dict[str, Any]:
                  f"(attempt {context.get('attempt')}). "
                  + ("; ".join(problems) if problems else "Composition, style and characters match the spec."))
     return {"scores": scores, "verdict": verdict, "problems": problems, "fix": fix, "reasoning": reasoning}
+
+
+# ----------------------------------------------------------------------------- Panel Revision (Phase 4)
+_REVISION_RULES = [
+    # (keywords, changes) — a tiny "understanding" of common art-direction notes.
+    (("angr", "furious", "mad", "rage"), {"emotion": "furious", "prompt_add": ["angry", "clenched teeth", "glaring"]}),
+    (("sad", "cry", "tear"), {"emotion": "sad", "prompt_add": ["sad", "tears", "downcast eyes"]}),
+    (("happ", "smil", "laugh", "joy"), {"emotion": "happy", "prompt_add": ["smile", "happy"]}),
+    (("surpris", "shock", "scared", "afraid"), {"emotion": "shocked", "prompt_add": ["surprised", "wide eyes"]}),
+    (("below", "low angle", "from under", "heroic"), {"angle": "low", "prompt_add": ["from below"], "keep_seed": False}),
+    (("above", "high angle", "overhead"), {"angle": "high", "prompt_add": ["from above"], "keep_seed": False}),
+    (("bird",), {"angle": "bird's eye", "prompt_add": ["bird's eye view"], "keep_seed": False}),
+    (("close", "zoom in", "face"), {"shot": "close-up", "keep_seed": False}),
+    (("wide", "zoom out", "far", "whole body", "full body"), {"shot": "wide", "keep_seed": False}),
+    (("rain",), {"prompt_add": ["rain"]}),
+    (("night", "dark"), {"prompt_add": ["night", "dark sky"]}),
+]
+
+
+def build_panel_revision(context: dict[str, Any]) -> dict[str, Any]:
+    instruction = str(context.get("instruction", "")).lower()
+    result = {"action": context.get("action", "a scene"), "emotion": context.get("emotion", "calm"),
+              "shot": context.get("shot", "medium"), "angle": context.get("angle", "eye level"),
+              "composition": context.get("composition", "centred subject"), "prompt_add": [],
+              "prompt_remove": [], "negative_add": [], "keep_seed": True}
+    matched = False
+    for keywords, change in _REVISION_RULES:
+        if any(k in instruction for k in keywords):
+            matched = True
+            for key, value in change.items():
+                result[key] = result[key] + value if key == "prompt_add" else value
+    if not matched:  # unknown note: pass its words through as tags
+        words = re.sub(r"[^a-z0-9 ]", " ", instruction).split()
+        result["prompt_add"] = [" ".join(words[:5])] if words else []
+    result["composition"] = _truncate(f"{result['composition'].rstrip('.')}; {instruction.strip()}", 200)
+    result["summary"] = _truncate(f"Revised for: {context.get('instruction', '').strip()}", 200)
+    return result
