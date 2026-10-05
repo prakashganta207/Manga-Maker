@@ -26,7 +26,8 @@ from typing import Any, Callable
 from ..config import Settings
 from ..pipeline import templates
 from ..pipeline.export import export_pdf
-from ..pipeline.bubbles import plan_lettering
+from ..fonts import dialogue_font
+from .letterer import letter_page, open_image
 from ..pipeline.layout import LayoutConfig, compose_page, plan_page
 from ..providers import get_image_provider, get_llm_provider
 from ..providers.base import ImageProvider, ImageRequest, LLMProvider
@@ -58,7 +59,7 @@ def panel_seed(story: str, page: int, panel: int) -> int:
 
 
 def layout_config(settings: Settings) -> LayoutConfig:
-    return LayoutConfig(font_path=settings.lettering_font)
+    return LayoutConfig(font_path=dialogue_font(settings.lettering_font))
 
 
 # --------------------------------------------------------------------------- node bodies
@@ -215,23 +216,43 @@ def node_consistency(p: MangaProject, ctx: Ctx) -> None:
         p.warn("Consistency scores use the simple pixel fallback (install torch + transformers for CLIP)")
 
 
-def ensure_lettering(p: MangaProject, settings: Settings) -> None:
-    """Plan the editable bubble layers for pages that don't have them yet (edited pages are kept)."""
+def ensure_lettering(p: MangaProject, settings: Settings, job_dir: Path | None = None) -> None:
+    """Letterer agent: plan the editable bubble layers for pages that don't have them yet (pages you
+    edited are kept). Uses the panel art (faces, busy areas) when `job_dir` is given."""
     assert p.page_plan and p.director
     cfg = layout_config(settings)
+    started, notes, planned_pages = time.monotonic(), [], []
     for planned, directed in zip(p.page_plan.pages, p.director.pages):
-        if p.page_lettering(planned.page_number) is None:
-            inner = [r.inset(cfg.border) for r in plan_page(directed.layout, cfg, rtl=True)]
-            p.lettering.append(plan_lettering(planned, inner, font_size=cfg.font_size, font_path=cfg.font_path))
-            record_lettering(p, planned.page_number, "auto_place", "Automatic lettering")
+        if p.page_lettering(planned.page_number) is not None:
+            continue
+        slots = plan_page(directed.layout, cfg, rtl=True)
+        inners = [r.inset(cfg.border) for r in slots]
+        images = {}
+        for panel in planned.panels:
+            result = p.panel_result(planned.page_number, panel.panel_number)
+            images[panel.panel_number] = open_image(job_dir / result.image) if job_dir and result and result.image else None
+        shots = {d.panel_number: d.shot for d in directed.panels}
+        lettering, page_notes = letter_page(planned, slots, inners, images, shots, font_size=cfg.font_size,
+                                            font_path=cfg.font_path, rtl=True, vertical=settings.lettering_vertical)
+        p.lettering.append(lettering)
+        notes += page_notes
+        planned_pages.append(planned.page_number)
+        record_lettering(p, planned.page_number, "auto_place", "Automatic lettering")
     p.lettering.sort(key=lambda pl: pl.page)
+    if planned_pages and job_dir is not None:
+        layers = sum(len(pl.bubbles) for pl in p.lettering if pl.page in planned_pages)
+        p.add_step(AgentStep(agent="letterer", label="Lettering", status="ok", attempts=0,
+                             duration_s=round(time.monotonic() - started, 3), notes=notes,
+                             inputs={"pages": planned_pages, "reading_order": "right-to-left",
+                                     "vertical_text": settings.lettering_vertical, "font": Path(cfg.font_path).name},
+                             output={"layers": layers}))
 
 
 def render_pages(p: MangaProject, settings: Settings, job_dir: Path, pages: list[int] | None = None) -> None:
     """(Re-)render lettered pages in both reading directions from the stored layers."""
     assert p.page_plan and p.director
     cfg = layout_config(settings)
-    ensure_lettering(p, settings)
+    ensure_lettering(p, settings, job_dir)
     outputs: dict[str, Any] = p.outputs or {}
     for direction in DIRECTIONS:
         out_dir = job_dir / "pages" / direction

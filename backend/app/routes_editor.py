@@ -150,7 +150,7 @@ def register_editor_routes(app: FastAPI) -> None:
                 "dialogue": [d.model_dump() for d in panel.dialogue], "narration": panel.narration, "sfx": panel.sfx,
             })
         if project.page_lettering(page) is None:
-            ensure_lettering(project, settings)   # older projects: plan the layers on the fly (saved on edit)
+            ensure_lettering(project, settings, job_dir(job_id))   # older projects: plan on the fly (saved on edit)
         lettering = project.page_lettering(page)
         return {
             "page": page, "direction": direction, "width": cfg.width, "height": cfg.height, "border": cfg.border,

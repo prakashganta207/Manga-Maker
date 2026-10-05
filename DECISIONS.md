@@ -208,3 +208,19 @@ reasonable option; change freely.
     means the bible tags and sheets can't be edited or regenerated, and automatic Editor fixes may not
     change that character's IP-Adapter weight or remove tags (other fixes, e.g. negative prompts, still
     apply). Look locks are saved with the project cast, so later chapters inherit them.
+59. **The Letterer is plain code, not an LLM** (`agents/letterer.py`): placement is geometry plus image
+    statistics, which code does exactly and for free; it still records an agent step (faces found, layers,
+    forced placements) in the timeline. Cost per candidate spot = 3·busy-art + 0.6·reading-position
+    (+4 if it breaks the reading order) + 0.8·distance-to-speaker (+ a top preference for narration);
+    hard rules: inside the panel, no face (padded 12%), no other bubble. If nothing fits: shrink the font
+    a little, widen the bubble, and finally accept the spot covering the least face area (noted).
+60. **Speaker → face**: faces sorted left to right = the panel's characters in order (the prompt builder
+    places them that way). With fewer detected faces than characters, the estimated positions are used
+    for the tail (detected faces are still avoided). Off-panel speakers get no tail.
+61. **Fonts**: Comic Neue Bold (dialogue/narration) and Bangers (sound effects), both SIL OFL 1.1, bundled
+    in `backend/assets/fonts/` with their licence files and copied to `frontend/public/fonts/` so the
+    editor canvas matches the renderer. SFX are drawn on their own layer with a thick white outline and a
+    ±6–7° tilt. CJK text uses `LETTERING_CJK_FONT` or a system CJK font (the bundled fonts are Latin-only).
+62. **Vertical text**: `LETTERING_VERTICAL=auto` makes Japanese/Chinese text vertical (columns read right
+    to left) and keeps Latin text horizontal (stacked Latin letters are hard to read); `on` / `off` force
+    it, and the editor has a per-page toggle and a per-bubble checkbox.

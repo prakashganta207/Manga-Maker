@@ -13,9 +13,12 @@ from PIL import ImageDraw
 
 from ..agents.schemas import PlannedPage
 from ..agents.state import Bubble, PageLettering
-from ..fonts import load_font, safe_text
+from PIL import Image
+
+from ..agents.letterer import vertical_columns
+from ..fonts import font_for, load_font, safe_text, sfx_font
 from ..geometry import Rect
-from .lettering import MIN_FONT, Balloon, draw_balloons, plan_balloons, tail_tip, wrap_text
+from .lettering import INK, MIN_FONT, PAPER, Balloon, draw_balloons, plan_balloons, tail_tip, wrap_text
 
 
 def to_fraction(box: Rect, panel: Rect) -> tuple[float, float, float, float]:
@@ -59,6 +62,7 @@ def text_area(kind: str, box: Rect) -> tuple[int, int]:
 def fit_text(kind: str, text: str, box: Rect, size: int, font_path: str,
              draw: ImageDraw.ImageDraw) -> tuple[list[str], int]:
     """Auto-fit: wrap to the shape's width and shrink the font until the lines fit its height."""
+    font_path = sfx_font() or font_path if kind == "sfx" else font_for(text, font_path)
     text = safe_text(text, font_path)
     width, height = text_area(kind, box)
     size = max(MIN_FONT, size)
@@ -66,7 +70,7 @@ def fit_text(kind: str, text: str, box: Rect, size: int, font_path: str,
         font = load_font(size, font_path)
         if kind == "sfx":
             lines = [text]
-            left, top, right, bottom = draw.textbbox((0, 0), text, font=font, stroke_width=5)
+            left, top, right, bottom = draw.textbbox((0, 0), text, font=font, stroke_width=max(3, size // 9))
             fits = right - left <= width and bottom - top <= height
         else:
             lines = wrap_text(text, font, max(20, width), draw)
@@ -76,18 +80,74 @@ def fit_text(kind: str, text: str, box: Rect, size: int, font_path: str,
         size -= 2
 
 
-def render_lettering(draw: ImageDraw.ImageDraw, lettering: PageLettering, inner: dict[int, Rect],
+def fit_vertical(text: str, box: Rect, size: int) -> tuple[list[str], int]:
+    """Vertical text: the largest size at which the columns (one per word, right to left) fit."""
+    width, height = text_area("speech", box)
+    size = max(MIN_FONT, size)
+    while True:
+        per_column = max(1, int(height / (size * 1.08)))
+        columns = vertical_columns(text, per_column)
+        if len(columns) * size * 1.25 <= width or size <= MIN_FONT - 4:
+            return columns, size
+        size -= 2
+
+
+def draw_vertical(draw: ImageDraw.ImageDraw, box: Rect, columns: list[str], size: int, font_path: str) -> None:
+    font = load_font(size, font_path)
+    col_w = size * 1.25
+    total = col_w * len(columns)
+    x = box.x + box.w / 2 + total / 2 - col_w / 2           # first column on the right
+    for column in columns:
+        y = box.y + (box.h - len(column) * size * 1.08) / 2 + size / 2
+        for ch in column:
+            draw.text((x, y), ch, fill=INK, font=font, anchor="mm")
+            y += size * 1.08
+        x -= col_w
+
+
+def draw_sfx(canvas: Image.Image, box: Rect, text: str, size: int, tilt: float) -> None:
+    """Sound effect: heavy display letters, thick white outline, slightly rotated (drawn on a layer)."""
+    font = load_font(size, sfx_font())
+    stroke = max(4, size // 8)
+    probe = ImageDraw.Draw(canvas)
+    left, top, right, bottom = probe.textbbox((0, 0), text, font=font, stroke_width=stroke)
+    w, h = right - left + 8, bottom - top + 8
+    ink = Image.new("L", (w, h), PAPER)
+    alpha = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(ink).text((4 - left, 4 - top), text, font=font, fill=INK, stroke_width=stroke, stroke_fill=PAPER)
+    ImageDraw.Draw(alpha).text((4 - left, 4 - top), text, font=font, fill=255, stroke_width=stroke, stroke_fill=255)
+    ink, alpha = ink.rotate(tilt, expand=True, fillcolor=PAPER), alpha.rotate(tilt, expand=True)
+    x = round(box.x + (box.w - ink.width) / 2)
+    y = round(box.y + (box.h - ink.height) / 2)
+    canvas.paste(ink, (x, y), alpha)
+
+
+def render_lettering(canvas: Image.Image, lettering: PageLettering, inner: dict[int, Rect],
                      font_path: str = "") -> list[Balloon]:
     """Draw the stored bubbles onto a page. `inner` maps panel number -> inner panel rect."""
+    draw = ImageDraw.Draw(canvas)
     drawn = []
     for bubble in sorted(lettering.bubbles, key=lambda b: b.order):
         rect = inner.get(bubble.panel)
         if rect is None or not bubble.text.strip():
             continue
         box = to_pixels(bubble, rect)
-        lines, size = fit_text(bubble.kind, bubble.text, box, bubble.font_size, font_path, draw)
+        meta = {"id": bubble.id, "panel": bubble.panel}
+        if bubble.kind == "sfx":
+            lines, size = fit_text("sfx", bubble.text, box, bubble.font_size, font_path, draw)
+            draw_sfx(canvas, box, lines[0], size, tilt=-7 if bubble.order % 2 else 6)
+            drawn.append(Balloon("sfx", lines, size, box, meta=meta))
+            continue
         tail = (rect.x + bubble.tail[0] * rect.w, rect.y + bubble.tail[1] * rect.h) if bubble.tail else None
-        balloon = Balloon(bubble.kind, lines, size, box, tail_target=tail, meta={"id": bubble.id, "panel": bubble.panel})
-        draw_balloons(draw, [balloon], rect, font_path, exact_tails=True)
+        if bubble.vertical and bubble.kind != "narration":
+            path = font_for(bubble.text, font_path)
+            columns, size = fit_vertical(safe_text(bubble.text, path), box, bubble.font_size)
+            balloon = Balloon(bubble.kind, [], size, box, tail_target=tail, meta=meta)
+            draw_balloons(draw, [balloon], rect, path, exact_tails=True)   # the shape + tail
+            draw_vertical(draw, box, columns, size, path)
+        else:
+            lines, size = fit_text(bubble.kind, bubble.text, box, bubble.font_size, font_path, draw)
+            balloon = Balloon(bubble.kind, lines, size, box, tail_target=tail, meta=meta)
+            draw_balloons(draw, [balloon], rect, font_for(bubble.text, font_path), exact_tails=True)
         drawn.append(balloon)
     return drawn

@@ -11,6 +11,10 @@ const AGENT_STYLE: Record<string, { name: string; badge: string; icon: string }>
   character_designer: { name: "Character Designer", badge: "bg-tone text-ink", icon: "☺" },
   studio: { name: "Studio", badge: "bg-amber-100 text-ink border border-amber-700", icon: "✓" },
   editor: { name: "Editor", badge: "bg-amber-300 text-ink border-2 border-ink", icon: "🔍" },
+  panel_revision: { name: "Panel Revision", badge: "bg-white text-ink border-2 border-dashed border-ink", icon: "✎" },
+  letterer: { name: "Letterer", badge: "bg-ink text-paper", icon: "💬" },
+  storyboard: { name: "Storyboard", badge: "bg-tone text-ink border border-ink", icon: "▤" },
+  writer_summary: { name: "Writer", badge: "bg-ink text-paper", icon: "✎" },
 };
 
 const NODE_LABELS: Record<string, string> = {

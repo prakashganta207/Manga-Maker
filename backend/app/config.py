@@ -93,6 +93,8 @@ class Settings:
     max_pages: int = 2
     max_panels_per_page: int = 6
     lettering_font: str = ""
+    # Vertical (Japanese-style) text: auto = only for Japanese/Chinese text | on | off
+    lettering_vertical: str = "auto"
 
     # Pause after character sheets until the cast is approved (unless auto-approve).
     auto_approve: bool = False
@@ -160,6 +162,7 @@ class Settings:
             max_pages=max(1, min(10, _env_int("MAX_PAGES", 2))),
             max_panels_per_page=max(1, min(6, _env_int("MAX_PANELS_PER_PAGE", 6))),
             lettering_font=_env("LETTERING_FONT"),
+            lettering_vertical=(_env("LETTERING_VERTICAL", "auto").lower() or "auto"),
             auto_approve=_env_bool("AUTO_APPROVE", False),
             consistency_scorer=_env("CONSISTENCY_SCORER", "auto").lower() or "auto",
             clip_model=_env("CLIP_MODEL", "openai/clip-vit-base-patch32"),

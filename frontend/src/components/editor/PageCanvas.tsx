@@ -34,8 +34,24 @@ export interface MaskTool extends MaskState {
   onStrokes: (strokes: MaskStroke[]) => void;
 }
 
+/** Konva measures text once when it draws, so wait until the lettering fonts are loaded. */
+function useFontsReady(): boolean {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([document.fonts.load('700 24px "Comic Neue"'), document.fonts.load('48px "Bangers"')])
+      .catch(() => undefined)
+      .finally(() => !cancelled && setReady(true));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return ready;
+}
+
 interface Props {
   data: EditorPage;
+  showFaces?: boolean;
   bubbles: Bubble[];
   displayWidth: number;
   selectedId: string | null;
@@ -237,6 +253,7 @@ function BubbleShape({ bubble, w, h, tipLocal }: { bubble: Bubble; w: number; h:
 
 export default function PageCanvas({
   data,
+  showFaces,
   bubbles,
   displayWidth,
   selectedId,
@@ -248,6 +265,7 @@ export default function PageCanvas({
   onChange,
   onEditText,
 }: Props) {
+  const fontsReady = useFontsReady();
   const scale = displayWidth / data.width;
   const inner = useMemo(() => Object.fromEntries(data.panels.map((p) => [p.panel, p.inner])), [data.panels]);
   const groupRefs = useRef<Record<string, Konva.Group | null>>({});
@@ -324,7 +342,36 @@ export default function PageCanvas({
         ))}
       </Layer>
 
-      <Layer listening={!mask} opacity={mask ? 0.35 : 1}>
+      {showFaces && data.lettering?.faces && (
+        <Layer listening={false}>
+          {Object.entries(data.lettering.faces).flatMap(([panel, faces]) => {
+            const box = inner[Number(panel)];
+            if (!box) return [];
+            return faces.map(([x, y, w, h, detected], i) => (
+              <Group key={`${panel}-${i}`}>
+                <Rect
+                  x={box.x + x * box.w}
+                  y={box.y + y * box.h}
+                  width={w * box.w}
+                  height={h * box.h}
+                  stroke={detected ? "#2563eb" : "#9ca3af"}
+                  strokeWidth={3 / scale}
+                  dash={detected ? undefined : [10, 8]}
+                />
+                <Text
+                  x={box.x + x * box.w + 4}
+                  y={box.y + y * box.h + 4}
+                  text={detected ? "face" : "face?"}
+                  fontSize={14 / Math.max(scale, 0.5)}
+                  fill={detected ? "#2563eb" : "#6b7280"}
+                />
+              </Group>
+            ));
+          })}
+        </Layer>
+      )}
+
+      <Layer listening={!mask} opacity={mask ? 0.35 : 1} visible={fontsReady}>
         {bubbles.map((b) => {
           const box = inner[b.panel];
           if (!box) return null;

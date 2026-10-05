@@ -54,6 +54,7 @@ export default function EditorView({
   const [notice, setNotice] = useState<string | null>(null);
   const [width, setWidth] = useState(640);
   const [hist, setHist] = useState<HistorySummary | null>(null);
+  const [showFaces, setShowFaces] = useState(false);
   const [tick, setTick] = useState(0); // bump to re-fetch page + history after a server-side change
   const holder = useRef<HTMLDivElement>(null);
   const textBox = useRef<HTMLTextAreaElement>(null);
@@ -285,6 +286,22 @@ export default function EditorView({
             + {KIND_LABEL[k]}
           </button>
         ))}
+        <span className="mx-1 h-6 w-px bg-ink/30" />
+        <button
+          type="button"
+          className={`btn !px-2 !py-1 text-xs ${bubbles.some((b) => b.vertical) ? "btn-primary" : ""}`}
+          disabled={locked || !!mask || !bubbles.length}
+          title="Vertical (top-to-bottom, right-to-left columns) or horizontal text for this page's balloons"
+          onClick={() => {
+            const vertical = !bubbles.some((b) => b.vertical);
+            change(bubbles.map((b) => (b.kind === "sfx" || b.kind === "narration" ? b : { ...b, vertical })));
+          }}
+        >
+          縦 Vertical text
+        </button>
+        <label className="flex items-center gap-1 text-xs" title="Show the faces the Letterer avoided (blue = detected, grey = estimated)">
+          <input type="checkbox" checked={showFaces} onChange={(e) => setShowFaces(e.target.checked)} /> Faces
+        </label>
         <span className="ml-auto flex items-center gap-2">
           <button
             type="button"
@@ -327,6 +344,7 @@ export default function EditorView({
           {data ? (
             <PageCanvas
               data={data}
+              showFaces={showFaces}
               bubbles={bubbles}
               displayWidth={width - 16}
               selectedId={selectedId}

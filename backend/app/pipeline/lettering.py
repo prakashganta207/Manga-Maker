@@ -273,6 +273,8 @@ def draw_balloons(draw: ImageDraw.ImageDraw, balloons: list[Balloon], panel: Rec
         if balloon.tail_target and balloon.kind in ("speech", "shout"):
             _draw_tail(draw, box, balloon.tail_target, panel, exact=exact_tails)
 
+        if not balloon.lines:
+            continue  # shape only (vertical text is drawn by the caller)
         line_h = int(font.size * 1.18)
         block_h = line_h * len(balloon.lines)
         y = box.y + (box.h - block_h) / 2 + line_h / 2

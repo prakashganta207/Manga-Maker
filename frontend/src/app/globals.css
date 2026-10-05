@@ -43,3 +43,17 @@ body {
   background: var(--color-ink);
   color: var(--color-paper);
 }
+
+/* Lettering fonts (SIL Open Font License, see public/fonts/*-OFL.txt) — the same files the backend
+   renders with, so the editor canvas matches the exported pages. */
+@font-face {
+  font-family: "Comic Neue";
+  src: url("/fonts/ComicNeue-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Bangers";
+  src: url("/fonts/Bangers-Regular.ttf") format("truetype");
+  font-display: swap;
+}

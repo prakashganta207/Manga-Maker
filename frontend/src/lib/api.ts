@@ -326,6 +326,8 @@ export interface PageLettering {
   page: number;
   bubbles: Bubble[];
   source: "auto" | "edited";
+  /** Faces the Letterer used per panel: [x, y, w, h, detected 1 | estimated 0] as panel fractions. */
+  faces?: Record<string, number[][]>;
 }
 
 export interface Box {

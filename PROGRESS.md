@@ -82,8 +82,16 @@ Cost per page (budget counters): mock LLM → $0. With a real vision Editor, est
   smoke: save → server undo restores text → lock panel, no console errors.
   **Phase 4 complete.** 212 passed, 2 skipped.
 
+- **M8 Letterer + face detection**: `agents/letterer.py` (faces detected through the cover fit or
+  estimated, busy-art map, cost-based placement in RTL/LTR reading order, dialogue order kept, tails
+  aimed at the speaker's face, narration at the top, forced placements cover the least face area),
+  vertical text (auto for CJK, page toggle, per bubble), auto-fit, Bangers SFX with outline + tilt,
+  Comic Neue dialogue (OFL licences bundled), timeline step, editor face overlay, fonts in the canvas.
+  9 tests. **Real page** re-lettered in 1.5 s; the cascade found 2 of ~7 faces on that page (it misses
+  strong angles and partial faces), the estimates covered the rest.
+
 ### Next
-- Phase 5: M8 Letterer agent with face-aware placement.
+- M9 ControlNet storyboard.
 
 ### Known issues
 - No LLM key on this machine: the Editor runs as the mock (it can't see real flaws such as the

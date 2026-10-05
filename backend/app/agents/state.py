@@ -180,6 +180,8 @@ class PageLettering(BaseModel):
     page: int
     bubbles: list[Bubble] = Field(default_factory=list)
     source: str = "auto"                      # auto (planned by code/Letterer) | edited (changed by you)
+    # Faces the Letterer found per panel: [x, y, w, h, detected(1)/estimated(0)] as panel fractions.
+    faces: dict[int, list[list[float]]] = Field(default_factory=dict)
 
 
 # ---------------------------------------------------------------- version history (logic: agents/history.py)

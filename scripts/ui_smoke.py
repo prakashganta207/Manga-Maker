@@ -32,6 +32,7 @@ def main() -> int:
     parser.add_argument("--front", default="http://localhost:3300")
     parser.add_argument("--api", default="http://localhost:8300")
     parser.add_argument("--channel", default="msedge", help="installed browser: msedge or chrome")
+    parser.add_argument("--faces", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--only-shot", default="", help="just screenshot this path (e.g. '/?x=1') and exit")
     parser.add_argument("--inpaint", action="store_true", help="also paint a mask on panel 1 and inpaint it")
     parser.add_argument("--history", action="store_true", help="also undo the saved edit (server history) and lock a panel")
@@ -45,6 +46,14 @@ def main() -> int:
         page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
         page.on("pageerror", lambda e: errors.append(str(e)))
 
+        if args.only_shot and args.only_shot.endswith("tab=edit"):
+            page.goto(args.front + args.only_shot)
+            page.locator("canvas").first.wait_for(timeout=30000)
+            page.get_by_label("Faces").check()
+            page.wait_for_timeout(3000)
+            page.screenshot(path=str(SHOTS / "editor_faces.png"), full_page=True)
+            print("saved editor_faces.png; console errors:", errors or "none")
+            return 1 if errors else 0
         if args.only_shot:
             page.goto(args.front + args.only_shot)
             page.wait_for_timeout(4000)

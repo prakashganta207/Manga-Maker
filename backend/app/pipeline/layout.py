@@ -90,7 +90,7 @@ def compose_page(
             canvas.paste(fit_image(img, rect.w, rect.h), (rect.x, rect.y))
     inner = {panel.panel_number: rect.inset(cfg.border) for panel, rect in zip(page.panels, rects)}
     if lettering is not None:
-        drawn = render_lettering(draw, lettering, inner, cfg.font_path)
+        drawn = render_lettering(canvas, lettering, inner, cfg.font_path)
         by_panel = {n: [b for b in drawn if b.meta["panel"] == n] for n in inner}
     for panel, rect in zip(page.panels, rects):
         if lettering is None:
