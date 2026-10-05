@@ -30,6 +30,7 @@ export interface JobResult {
   providers: { llm: string; image: string; llm_model?: string };
   warnings: string[];
   usage: Usage;
+  quality?: QualitySummary;
   characters: CharacterSummary[];
   outputs: Partial<Record<Direction, { pages: string[]; pdf: string | null }>>;
   files_base: string;
@@ -177,6 +178,68 @@ export interface PanelPrompt {
   ipadapter_weight: number | null;
 }
 
+export type Criterion =
+  | "script_action"
+  | "characters"
+  | "people_count"
+  | "character_likeness"
+  | "shot_angle"
+  | "emotion"
+  | "anatomy"
+  | "manga_style"
+  | "bubble_space";
+
+export interface EditorFix {
+  prompt_add: string[];
+  prompt_remove: string[];
+  negative_add: string[];
+  ipadapter_weight: number | null;
+  new_seed: boolean;
+}
+
+export interface EditorReview {
+  scores: Record<Criterion, number>;
+  verdict: "pass" | "fail";
+  problems: string[];
+  fix: EditorFix;
+  reasoning: string;
+}
+
+export interface QualityScore {
+  editor: number | null;
+  clip: number | null;
+  combined: number;
+  threshold: number;
+  passed: boolean;
+  reasons: string[];
+}
+
+export type AttemptStatus = "pending" | "accepted" | "rejected" | "needs_review" | "unreviewed";
+
+export interface PanelAttempt {
+  attempt: number;
+  round: number;
+  source: "auto" | "redraw" | "revision" | "inpaint" | string;
+  image: string;
+  prompt: string;
+  negative_prompt: string;
+  seed: number;
+  width: number;
+  height: number;
+  ipadapter_weight: number | null;
+  workflow: string;
+  seconds: number;
+  consistency: Record<string, number>;
+  consistency_method: string;
+  review: EditorReview | null;
+  quality: QualityScore | null;
+  fix_applied: EditorFix | null;
+  status: AttemptStatus;
+  note: string;
+  extra: Record<string, unknown>;
+  created_at: string;
+}
+
 export interface PanelResult {
   page: number;
   panel: number;
@@ -185,6 +248,32 @@ export interface PanelResult {
   workflow: string;
   consistency: Record<string, number>;
   consistency_method: string;
+  attempts: PanelAttempt[];
+  chosen_attempt: number;
+  status: "accepted" | "needs_review" | "unreviewed" | "drawing";
+  review_note: string;
+}
+
+export interface BudgetUsage {
+  llm_calls: number;
+  gpu_seconds: number;
+  images: number;
+  redraws: number;
+  exhausted: string | null;
+  limits: Partial<Record<"llm_calls" | "llm_cost_usd" | "gpu_seconds" | "max_attempts" | "threshold", number>>;
+}
+
+export interface QualitySummary {
+  accepted: number;
+  needs_review: number;
+  unreviewed: number;
+  attempts: number;
+  redraws: number;
+  llm_calls: number;
+  gpu_seconds: number;
+  budget_exhausted: string | null;
+  cost_per_page_usd: number;
+  gpu_seconds_per_page: number;
 }
 
 export interface MangaProject {
@@ -204,6 +293,7 @@ export interface MangaProject {
   panels: PanelResult[];
   trace: AgentStep[];
   usage: Usage;
+  budget: BudgetUsage;
   timings: Record<string, number>;
   warnings: string[];
   error: string | null;

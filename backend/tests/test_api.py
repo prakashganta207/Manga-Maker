@@ -97,3 +97,16 @@ def test_failed_job_reports_error(settings, story):
     assert job["stages"][0]["name"] == "writer" and job["stages"][0]["status"] == "failed"
     # The failed agent attempt is still visible in the timeline.
     assert project["status"] == "failed" and project["trace"][0]["status"] == "failed"
+
+
+def test_jobs_are_reloaded_from_disk_after_restart(settings, story):
+    from app.agents.pipeline import new_project, run_project
+    settings.auto_approve = True
+    job_dir = settings.output_dir / "oldjob"
+    run_project(new_project(story, "oldjob", settings), settings=settings, job_dir=job_dir)
+    app = create_app(settings)
+    with TestClient(app) as client:          # startup = "server restart"
+        job = client.get("/api/jobs/oldjob").json()
+        assert job["status"] == "done"
+        assert job["result"]["outputs"]["rtl"]["pages"][0].startswith("/files/oldjob/")
+        assert client.get("/api/jobs/oldjob/project").json()["job_id"] == "oldjob"

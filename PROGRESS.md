@@ -38,8 +38,18 @@ Cost per page (budget counters): mock LLM → $0. With a real vision Editor, est
 ~1k tokens + ~1.5k text per review ≈ 5k in / 0.6k out tokens; with Claude Opus 5.5 ($4/$20 per MTok)
 ≈ $0.03 per review, ≈ $0.2 per 5-panel page at ~1.4 reviews per panel (to be measured with a key).
 
+- **M3 Attempts UI** (`components/QualityLoop.tsx`): a "Quality loop" entry in the Agent timeline
+  (the Editor's reviews grouped instead of one timeline step per review) with accepted /
+  needs-review counts, budget meters (LLM calls, cost, GPU time), filters, and per panel the
+  attempts side by side: status stamps, combined-score gauge with the threshold marker, Editor/CLIP
+  sub-scores, 9 criterion bars (failures in amber), problems, the Editor's reasoning as a speech
+  balloon, suggested fix, and the fix applied between attempts; lightbox zoom. Reader gallery shows
+  each panel's Editor status. `/jobs/<id>?tab=quality` deep link. Jobs are reloaded from
+  `output/*/project.json` at startup (finished mangas survive a server restart). Verified in
+  headless Edge against the real ComfyUI run; tsc + eslint clean.
+
 ### Next
-- M3 attempts UI in the Agent timeline.
+- Phase 4: M4 canvas editor + bubble editing.
 
 ### Known issues
 - No LLM key on this machine: the Editor runs as the mock (it can't see real flaws such as the

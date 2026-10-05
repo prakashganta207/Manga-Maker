@@ -92,8 +92,37 @@ def create_app(settings: Settings | None = None, llm: LLMProvider | None = None,
 
     manager = JobManager(settings.output_dir, runner)
 
+    def reload_jobs() -> int:
+        """Register jobs found on disk (output/<id>/project.json), so finished mangas stay
+        readable and editable after a server restart."""
+        count = 0
+        for path in sorted(settings.output_dir.glob("*/project.json")):
+            job_id = path.parent.name
+            if manager.get(job_id) is not None:
+                continue
+            try:
+                project = MangaProject.load(path.parent)
+            except Exception as exc:  # noqa: BLE001 — skip unreadable leftovers
+                log.warning("Skipping %s: %s", path, exc)
+                continue
+            status = project.status if project.status in ("done", "awaiting_approval", "failed") else "failed"
+            job = Job(id=job_id, story=project.story, status=status,
+                      options={"project_id": project.project_id, "auto_approve": project.auto_approve},
+                      result=manifest(project),
+                      error=project.error or ("Interrupted by a server restart; resubmit or resume" if status == "failed"
+                                              and project.status == "running" else None))
+            job.created_at = path.stat().st_ctime
+            for state in job.stages.values():
+                state.status, state.progress = ("done", 1.0) if status == "done" else (state.status, state.progress)
+            manager.register(job)
+            count += 1
+        return count
+
     @asynccontextmanager
     async def lifespan(_: FastAPI):
+        loaded = reload_jobs()
+        if loaded:
+            log.info("Reloaded %d job(s) from %s", loaded, settings.output_dir)
         manager.start()
         if settings.consistency_scorer in ("auto", "clip"):
             # Warm up CLIP in the background so the first job doesn't wait for the import.
@@ -114,6 +143,7 @@ def create_app(settings: Settings | None = None, llm: LLMProvider | None = None,
         return MangaProject.load(job_dir(job_id))
 
     app.state.load_project = load_project
+    app.state.reload_jobs = reload_jobs
     app.state.job_dir = job_dir
 
     @app.get("/api/health")

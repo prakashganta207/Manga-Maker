@@ -22,14 +22,15 @@ const STAGE_LABELS: Record<string, string> = {
   export: "Export PNG + PDF",
 };
 
-type Tab = "progress" | "agents" | "cast" | "read";
+export type Tab = "progress" | "agents" | "quality" | "cast" | "read";
 
-export default function JobView({ id }: { id: string }) {
+export default function JobView({ id, initialTab }: { id: string; initialTab?: Tab }) {
   const [job, setJob] = useState<Job | null>(null);
   const [project, setProject] = useState<MangaProject | null>(null);
   const [layouts, setLayouts] = useState<LayoutTemplate[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab | null>(null); // null = follow the job automatically
+  // "quality" is the Agent timeline opened on the quality loop.
+  const [tab, setTab] = useState<Tab | null>(initialTab ?? null); // null = follow the job automatically
   const lastProjectFetch = useRef(0);
 
   useEffect(() => {
@@ -79,7 +80,7 @@ export default function JobView({ id }: { id: string }) {
   }
 
   const autoTab: Tab = job.status === "done" ? "read" : job.status === "awaiting_approval" ? "cast" : "progress";
-  const current = tab ?? autoTab;
+  const current = tab === "quality" ? "agents" : (tab ?? autoTab);
   const tabs: { id: Tab; label: string; enabled: boolean; badge?: string }[] = [
     { id: "progress", label: "Progress", enabled: true },
     { id: "agents", label: "Agent timeline", enabled: !!project?.trace.length, badge: project ? String(project.trace.length) : undefined },
@@ -129,7 +130,9 @@ export default function JobView({ id }: { id: string }) {
       {error && <p className="text-sm text-red-800">Connection problem: {error} (retrying)</p>}
 
       {current === "progress" && <ProgressPanel job={job} project={project} onOpenAgents={() => setTab("agents")} />}
-      {current === "agents" && project && <AgentTimeline project={project} layouts={layouts} />}
+      {current === "agents" && project && (
+        <AgentTimeline project={project} layouts={layouts} initial={tab === "quality" ? "quality" : undefined} />
+      )}
       {current === "cast" && project && <CastView job={job} project={project} onChange={refreshProject} />}
       {current === "read" && job.result && <Reader jobId={job.id} result={job.result} project={project} />}
     </div>

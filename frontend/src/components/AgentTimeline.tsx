@@ -3,12 +3,14 @@
 import { useMemo, useState } from "react";
 import type { AgentStep, BeatSheet, LayoutTemplate, MangaProject, PlannedPanel } from "@/lib/api";
 import LayoutThumb, { ANGLE_ICON, SHOT_ABBR } from "./LayoutThumb";
+import QualityLoop from "./QualityLoop";
 
 const AGENT_STYLE: Record<string, { name: string; badge: string; icon: string }> = {
   writer: { name: "Writer", badge: "bg-ink text-paper", icon: "✎" },
   director: { name: "Director", badge: "bg-white text-ink border-2 border-ink", icon: "🎬" },
   character_designer: { name: "Character Designer", badge: "bg-tone text-ink", icon: "☺" },
   studio: { name: "Studio", badge: "bg-amber-100 text-ink border border-amber-700", icon: "✓" },
+  editor: { name: "Editor", badge: "bg-amber-300 text-ink border-2 border-ink", icon: "🔍" },
 };
 
 const NODE_LABELS: Record<string, string> = {
@@ -18,7 +20,7 @@ const NODE_LABELS: Record<string, string> = {
   character_designer: "Character designer",
   reference_sheets: "Reference sheets",
   prompts: "Prompt builder",
-  panels: "Panel images",
+  panels: "Panels + Editor loop",
   consistency: "Consistency score",
   layout: "Layout + lettering",
   export: "Export",
@@ -34,11 +36,32 @@ function fmtTokens(n: number) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
 }
 
-export default function AgentTimeline({ project, layouts }: { project: MangaProject; layouts: LayoutTemplate[] }) {
-  const steps = project.trace;
-  const [selected, setSelected] = useState(0);
-  const step = steps[Math.min(selected, steps.length - 1)];
+const QUALITY = -1; // pseudo step: the Editor's quality loop (all its reviews, grouped per panel)
+
+export default function AgentTimeline({
+  project,
+  layouts,
+  initial,
+}: {
+  project: MangaProject;
+  layouts: LayoutTemplate[];
+  initial?: "quality";
+}) {
+  // Editor reviews (one per panel attempt) are grouped into a single "Quality loop" entry.
+  const steps = project.trace.filter((s) => s.agent !== "editor");
+  const reviews = project.trace.filter((s) => s.agent === "editor");
+  const hasQuality = reviews.length > 0 || project.panels.some((p) => p.attempts?.length);
+  const [selected, setSelected] = useState(initial === "quality" ? QUALITY : 0);
+  const showQuality = selected === QUALITY && hasQuality;
+  const step = steps[Math.min(Math.max(selected, 0), steps.length - 1)];
   const totalTime = Object.values(project.timings).reduce((a, b) => a + b, 0);
+  const qualityStats = {
+    accepted: project.panels.filter((p) => p.status === "accepted").length,
+    review: project.panels.filter((p) => p.status === "needs_review").length,
+    reviewTokens: reviews.reduce((n, s) => n + s.input_tokens + s.output_tokens, 0),
+    reviewCost: reviews.reduce((n, s) => n + s.cost_usd, 0),
+    seconds: reviews.reduce((n, s) => n + s.duration_s, 0),
+  };
 
   if (steps.length === 0) {
     return <div className="panel p-6 text-ink/60">The agents haven&apos;t started yet…</div>;
@@ -58,7 +81,7 @@ export default function AgentTimeline({ project, layouts }: { project: MangaProj
         <ol className="relative space-y-3 border-l-4 border-ink pl-5">
           {steps.map((s, i) => {
             const style = AGENT_STYLE[s.agent] ?? { name: s.agent, badge: "bg-white", icon: "•" };
-            const active = i === selected;
+            const active = i === selected && !showQuality;
             return (
               <li key={i} className="relative">
                 <span
@@ -93,9 +116,43 @@ export default function AgentTimeline({ project, layouts }: { project: MangaProj
               </li>
             );
           })}
+          {hasQuality && (
+            <li className="relative">
+              <span
+                className={`absolute -left-[2.05rem] top-3 flex h-6 w-6 items-center justify-center rounded-full border-2 border-ink text-xs ${
+                  showQuality ? "bg-ink text-paper" : "bg-amber-300"
+                }`}
+              >
+                ★
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelected(QUALITY)}
+                className={`w-full border-2 border-ink p-3 text-left transition ${
+                  showQuality ? "bg-white shadow-[4px_4px_0_#111]" : "bg-paper hover:bg-white"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className={`px-1.5 py-0.5 text-[11px] font-bold ${AGENT_STYLE.editor.badge}`}>
+                    {AGENT_STYLE.editor.icon} {AGENT_STYLE.editor.name}
+                  </span>
+                  <span className="font-mono text-xs text-ink/60">{fmtSeconds(qualityStats.seconds)}</span>
+                </div>
+                <div className="mt-1 font-bold">Quality loop</div>
+                <div className="mt-1 flex flex-wrap gap-1.5 text-[11px]">
+                  <Chip>{reviews.length} reviews</Chip>
+                  <Chip>✓ {qualityStats.accepted}</Chip>
+                  {qualityStats.review > 0 && <Chip tone="warn">⚑ {qualityStats.review} need review</Chip>}
+                  {qualityStats.reviewCost > 0 && <Chip>${qualityStats.reviewCost.toFixed(4)}</Chip>}
+                </div>
+              </button>
+            </li>
+          )}
         </ol>
 
-        <div className="min-w-0">{step && <StepDetail step={step} project={project} layouts={layouts} />}</div>
+        <div className="min-w-0">
+          {showQuality ? <QualityLoop project={project} /> : step && <StepDetail step={step} project={project} layouts={layouts} />}
+        </div>
       </div>
 
       <PipelineTimings timings={project.timings} />

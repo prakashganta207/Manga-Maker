@@ -95,6 +95,7 @@ export default function Reader({ jobId, result, project }: { jobId: string; resu
         <p className="text-sm text-ink/60">
           {result.page_count} page(s) · {result.panel_count} panels · LLM: {result.providers.llm} · images: {result.providers.image}
           {result.usage.cost_usd > 0 && ` · $${result.usage.cost_usd.toFixed(4)}`}
+          {result.quality && ` · Editor: ${result.quality.accepted} accepted, ${result.quality.needs_review} need review`}
         </p>
         <label className="flex cursor-pointer select-none items-center gap-3 font-semibold">
           <span className={rtl ? "text-ink/40" : ""}>Left → right</span>
@@ -186,6 +187,27 @@ export default function Reader({ jobId, result, project }: { jobId: string; resu
   );
 }
 
+function QualityPill({ panel }: { panel: MangaProject["panels"][number] }) {
+  if (!panel.attempts?.length) return null;
+  const chosen = panel.attempts.find((a) => a.attempt === panel.chosen_attempt);
+  const tone =
+    panel.status === "accepted"
+      ? "bg-ink text-paper"
+      : panel.status === "needs_review"
+        ? "bg-amber-300 text-amber-950 border border-amber-800"
+        : "border border-ink/40";
+  const label = panel.status === "accepted" ? "✓ Editor accepted" : panel.status === "needs_review" ? "⚑ Needs review" : "Unreviewed";
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span className={`px-1.5 text-[10px] font-black uppercase ${tone}`}>{label}</span>
+      {chosen?.quality && <span className="font-mono text-[10px]">score {chosen.quality.combined.toFixed(2)}</span>}
+      <span className="text-[10px] text-ink/50">
+        {panel.attempts.length} attempt{panel.attempts.length > 1 ? "s" : ""}
+      </span>
+    </div>
+  );
+}
+
 function PanelGallery({ project, page }: { project: MangaProject; page: number }) {
   const directed = project.director?.pages[page - 1]?.panels ?? [];
   const panels = project.panels.filter((p) => p.page === page).sort((a, b) => a.panel - b.panel);
@@ -212,6 +234,7 @@ function PanelGallery({ project, page }: { project: MangaProject; page: number }
                   </b>
                   <span className="font-mono text-ink/50">{p.seconds.toFixed(1)}s</span>
                 </div>
+                <QualityPill panel={p} />
                 <div className="flex flex-wrap gap-1.5">
                   {(prompt?.characters ?? []).map((name) => (
                     <span key={name} className="flex items-center gap-1 border border-ink/30 px-1">
