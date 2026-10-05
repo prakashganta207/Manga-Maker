@@ -63,7 +63,8 @@ def with_urls(job: dict[str, Any]) -> dict[str, Any]:
     result["project_url"] = url(result.get("project"))
     result["characters"] = [dict(c, reference_image_url=url(c.get("reference_image")))
                             for c in result.get("characters", [])]
-    result["outputs"] = {d: {"pages": [url(p) for p in o.get("pages", [])], "pdf": url(o.get("pdf"))}
+    result["outputs"] = {d: {"pages": [url(p) for p in o.get("pages", [])], "pdf": url(o.get("pdf")),
+                             "cbz": url(o.get("cbz")), "webtoon": [url(p) for p in o.get("webtoon", [])]}
                          for d, o in result.get("outputs", {}).items()}
     return dict(job, result=result)
 
@@ -198,6 +199,8 @@ def create_app(settings: Settings | None = None, llm: LLMProvider | None = None,
     register_cast_routes(app)
     from .routes_editor import register_editor_routes  # noqa: E402
     register_editor_routes(app)
+    from .routes_training import register_training_routes  # noqa: E402
+    register_training_routes(app)
 
     app.mount("/files", StaticFiles(directory=settings.output_dir), name="files")
     return app

@@ -26,6 +26,7 @@ from PIL import Image
 from ..providers.base import ProviderError
 
 IPADAPTER_NODES = {"IPAdapterUnifiedLoader", "IPAdapterAdvanced"}
+CONTROLNET_NODES = {"ControlNetLoader", "SetUnionControlNetType", "ControlNetApplyAdvanced"}
 
 
 @dataclass
@@ -37,10 +38,19 @@ class Capabilities:
     ipadapter_models: list[str] = field(default_factory=list)
     clip_vision_models: list[str] = field(default_factory=list)
     ipadapter_presets: list[str] = field(default_factory=list)
+    controlnet_models: list[str] = field(default_factory=list)
+    loras: list[str] = field(default_factory=list)
 
     @property
     def has_ipadapter(self) -> bool:
         return IPADAPTER_NODES <= self.nodes and bool(self.ipadapter_models) and bool(self.clip_vision_models)
+
+    @property
+    def has_controlnet(self) -> bool:
+        return CONTROLNET_NODES <= self.nodes and bool(self.controlnet_models)
+
+    def can_preprocess(self, mode: str) -> bool:
+        return {"openpose": "DWPreprocessor", "lineart": "AnimeLineArtPreprocessor"}.get(mode, "") in self.nodes
 
     def missing_nodes(self, needed: set[str]) -> set[str]:
         return needed - self.nodes
@@ -53,6 +63,11 @@ class Capabilities:
             "ipadapter_models": self.ipadapter_models,
             "clip_vision_models": self.clip_vision_models,
             "ipadapter_ready": self.has_ipadapter,
+            "controlnet_models": self.controlnet_models,
+            "controlnet_ready": self.has_controlnet,
+            "pose_preprocessor": self.can_preprocess("openpose"),
+            "lineart_preprocessor": self.can_preprocess("lineart"),
+            "loras": self.loras,
         }
 
 
@@ -110,6 +125,8 @@ class ComfyClient:
                 ipadapter_models=_choices(info, "IPAdapterModelLoader", "ipadapter_file"),
                 clip_vision_models=_choices(info, "CLIPVisionLoader", "clip_name"),
                 ipadapter_presets=_choices(info, "IPAdapterUnifiedLoader", "preset"),
+                controlnet_models=_choices(info, "ControlNetLoader", "control_net_name"),
+                loras=_choices(info, "LoraLoader", "lora_name"),
             )
         return self._caps
 

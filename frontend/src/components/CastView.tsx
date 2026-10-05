@@ -2,8 +2,9 @@
 
 /* eslint-disable @next/next/no-img-element -- images come from the backend */
 
-import { useState } from "react";
-import { api, jobFileUrl, type CharacterEntry, type Job, type MangaProject, type VisualTags } from "@/lib/api";
+import { useEffect, useState } from "react";
+import { api, jobFileUrl, type CharacterEntry, type Job, type MangaProject, type TrainingInfo, type VisualTags } from "@/lib/api";
+import LoraPanel from "./LoraPanel";
 
 const EXPRESSIONS = ["neutral", "happy", "angry", "sad", "surprised"];
 const VIEWS = ["front", "side", "back"];
@@ -12,6 +13,10 @@ const TAG_FIELDS: (keyof VisualTags)[] = ["hair", "eyes", "outfit", "accessories
 export default function CastView({ job, project, onChange }: { job: Job; project: MangaProject; onChange: () => void }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [trainingInfo, setTrainingInfo] = useState<TrainingInfo | null>(null);
+  useEffect(() => {
+    api.trainingInfo().then(setTrainingInfo).catch(() => setTrainingInfo(null));
+  }, []);
   const waiting = job.status === "awaiting_approval";
   const locked = !waiting || !!job.busy || busy !== null;
 
@@ -65,7 +70,17 @@ export default function CastView({ job, project, onChange }: { job: Job; project
       {error && <p className="border-2 border-red-700 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
 
       {main.map((c) => (
-        <CharacterCard key={c.name} job={job} project={project} character={c} locked={locked} busy={busy} act={act} />
+        <CharacterCard
+          key={c.name}
+          job={job}
+          project={project}
+          character={c}
+          locked={locked}
+          busy={busy}
+          act={act}
+          trainingInfo={trainingInfo}
+          onChange={onChange}
+        />
       ))}
 
       {supporting.length > 0 && (
@@ -91,12 +106,16 @@ function CharacterCard({
   locked,
   busy,
   act,
+  trainingInfo,
+  onChange,
 }: {
   job: Job;
   project: MangaProject;
   character: CharacterEntry;
   locked: boolean;
   busy: string | null;
+  trainingInfo: TrainingInfo | null;
+  onChange: () => void;
   act: (label: string, fn: () => Promise<unknown>) => Promise<void>;
 }) {
   const [editing, setEditing] = useState(false);
@@ -207,6 +226,7 @@ function CharacterCard({
           onRegenerate={() => act(`regen-${c.name}-e`, () => api.regenerateSheet(job.id, c.name, "expressions"))}
         />
       </div>
+      {c.lora && <LoraPanel job={job} project={project} character={c} info={trainingInfo} onChange={onChange} />}
     </article>
   );
 }

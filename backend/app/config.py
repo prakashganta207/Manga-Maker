@@ -124,6 +124,30 @@ class Settings:
     inpaint_grow: int = 12                # px the mask grows so seams fall outside the edited area
     inpaint_feather: int = 10             # px of soft edge when pasting the region back
 
+    # --- Phase 5: storyboard + ControlNet ---
+    storyboard: str = "auto"              # auto (when ControlNet is available) | on | off
+    storyboard_base_size: int = 768       # rough drawings are ~768² px (640 px roughs were too vague for pose detection)
+    storyboard_steps: int = 16
+    storyboard_control: str = "auto"      # auto (pose, line-art fallback) | openpose | lineart
+    controlnet_model: str = "controlnet-union-sdxl-1.0.safetensors"
+    controlnet_strength: float = 0.55     # how strictly the final panel follows the rough's layout
+    controlnet_end: float = 0.6           # stop guiding after 60% of the steps (details from the prompt)
+
+    # --- Phase 5: character LoRA training (see app/training/lora.py, CLOUD_TRAINING.md) ---
+    trainer: str = "auto"                 # auto (kohya if installed, else mock) | kohya | mock
+    sd_scripts_dir: str = ""              # kohya-ss sd-scripts checkout (default: tools/sd-scripts)
+    sd_scripts_python: str = ""           # its Python (default: <dir>/venv/Scripts/python)
+    lora_base_model: str = ""             # SDXL .safetensors to train on (default: the ComfyUI checkpoint)
+    comfyui_models_dir: str = ""          # ComfyUI's models/ folder, to install LoRAs (default: comfyui/ComfyUI/models)
+    lora_resolution: int = 768
+    lora_rank: int = 16
+    lora_alpha: int = 8
+    lora_steps: int = 600
+    lora_learning_rate: float = 1e-4
+    lora_repeats: int = 10
+    lora_strength: float = 0.8            # LoRA strength in panel workflows
+    ipadapter_weight_with_lora: float = 0.45   # IP-Adapter is turned down when a LoRA carries the look
+
     @classmethod
     def from_env(cls) -> "Settings":
         output = Path(_env("OUTPUT_DIR", "output"))
@@ -179,6 +203,26 @@ class Settings:
             inpaint_denoise=max(0.1, min(1.0, _env_float("INPAINT_DENOISE", 0.9))),
             inpaint_grow=max(0, min(64, _env_int("INPAINT_GROW", 12))),
             inpaint_feather=max(0, min(64, _env_int("INPAINT_FEATHER", 10))),
+            storyboard=(_env("STORYBOARD", "auto").lower() or "auto"),
+            storyboard_base_size=max(384, min(1024, _env_int("STORYBOARD_BASE_SIZE", 768))),
+            storyboard_steps=max(4, min(40, _env_int("STORYBOARD_STEPS", 16))),
+            storyboard_control=(_env("STORYBOARD_CONTROL", "auto").lower() or "auto"),
+            controlnet_model=_env("CONTROLNET_MODEL", "controlnet-union-sdxl-1.0.safetensors"),
+            controlnet_strength=max(0.0, min(1.5, _env_float("CONTROLNET_STRENGTH", 0.55))),
+            controlnet_end=max(0.05, min(1.0, _env_float("CONTROLNET_END", 0.6))),
+            trainer=(_env("TRAINER", "auto").lower() or "auto"),
+            sd_scripts_dir=_env("SD_SCRIPTS_DIR"),
+            sd_scripts_python=_env("SD_SCRIPTS_PYTHON"),
+            lora_base_model=_env("LORA_BASE_MODEL"),
+            comfyui_models_dir=_env("COMFYUI_MODELS_DIR"),
+            lora_resolution=max(512, min(1024, _env_int("LORA_RESOLUTION", 768))),
+            lora_rank=max(4, min(128, _env_int("LORA_RANK", 16))),
+            lora_alpha=max(1, min(128, _env_int("LORA_ALPHA", 8))),
+            lora_steps=max(20, min(5000, _env_int("LORA_STEPS", 600))),
+            lora_learning_rate=max(1e-6, min(1e-2, _env_float("LORA_LEARNING_RATE", 1e-4))),
+            lora_repeats=max(1, min(50, _env_int("LORA_REPEATS", 10))),
+            lora_strength=max(0.0, min(1.5, _env_float("LORA_STRENGTH", 0.8))),
+            ipadapter_weight_with_lora=max(0.0, min(1.2, _env_float("IPADAPTER_WEIGHT_WITH_LORA", 0.45))),
         )
 
     def describe(self) -> dict:

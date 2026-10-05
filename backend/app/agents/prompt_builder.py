@@ -85,15 +85,18 @@ def choose_reference(character: CharacterEntry, emotion: str) -> tuple[str | Non
 
 
 def build_prompt(panel: PlannedPanel, direction: DirectedPanel,
-                 characters: dict[str, CharacterEntry]) -> str:
+                 characters: dict[str, CharacterEntry], style_tags: str = "") -> str:
     present = [characters[n.lower()] for n in panel.characters if n.lower() in characters]
     expression = expression_for(panel.emotion)
-    parts = [STYLE_PREFIX, SHOT_TAGS[direction.shot], ANGLE_TAGS[direction.angle],
+    # Series art style (e.g. "heavy shadows, thick lines") right after the base style, so every chapter matches.
+    parts = [STYLE_PREFIX, style_tags.strip(", "), SHOT_TAGS[direction.shot], ANGLE_TAGS[direction.angle],
              COUNT_TAGS.get(len(present), "group of people")]
     for character in present:
         # The fixed tags, exactly as written in the bible (+ this panel's expression).
         face = EXPRESSION_TAGS[expression] if direction.shot != "establishing" else ""
-        parts.append(f"({character.tag_prompt()}{', ' + face if face else ''})")
+        # A trained character LoRA is "summoned" by its trigger word, placed first in the group.
+        trigger = f"{character.lora.trigger}, " if character.has_lora() else ""
+        parts.append(f"({trigger}{character.tag_prompt()}{', ' + face if face else ''})")
     parts += [panel.action.rstrip("."), f"setting: {panel.setting}", direction.composition.rstrip(".")]
     mood = MOOD_TAGS.get(panel.emotion.lower())
     if mood:

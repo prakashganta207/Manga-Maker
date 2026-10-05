@@ -53,5 +53,93 @@
       832,
       1216
     ]
+  },
+  {
+    "workflow": "storyboard_rough",
+    "seconds": 14.2,
+    "peak_vram_mib": 6889,
+    "baseline_vram_mib": 169,
+    "at": "2026-10-05T22:52:01+00:00",
+    "size": [
+      512,
+      768
+    ]
+  },
+  {
+    "workflow": "preprocess_pose",
+    "seconds": 22.0,
+    "peak_vram_mib": 825,
+    "baseline_vram_mib": 169,
+    "at": "2026-10-05T22:52:25+00:00",
+    "size": [
+      512,
+      768
+    ]
+  },
+  {
+    "workflow": "preprocess_lineart",
+    "seconds": 10.2,
+    "peak_vram_mib": 1017,
+    "baseline_vram_mib": 825,
+    "at": "2026-10-05T22:52:37+00:00",
+    "size": [
+      512,
+      768
+    ]
+  },
+  {
+    "workflow": "controlnet",
+    "seconds": 44.6,
+    "peak_vram_mib": 7019,
+    "baseline_vram_mib": 827,
+    "at": "2026-10-05T22:53:24+00:00",
+    "size": [
+      832,
+      1216
+    ]
+  },
+  {
+    "workflow": "controlnet_ipadapter_1ref",
+    "seconds": 58.4,
+    "peak_vram_mib": 6811,
+    "baseline_vram_mib": 827,
+    "at": "2026-10-05T22:54:25+00:00",
+    "size": [
+      832,
+      1216
+    ]
+  },
+  {
+    "workflow": "controlnet_ipadapter_2ref",
+    "seconds": 74.5,
+    "peak_vram_mib": 6587,
+    "baseline_vram_mib": 827,
+    "at": "2026-10-05T22:55:42+00:00",
+    "size": [
+      832,
+      1216
+    ]
+  },
+  {
+    "workflow": "storyboard_rough",
+    "seconds": 17.9,
+    "peak_vram_mib": 6907,
+    "baseline_vram_mib": 827,
+    "at": "2026-10-05T22:57:21+00:00",
+    "size": [
+      640,
+      960
+    ]
+  },
+  {
+    "workflow": "preprocess_pose",
+    "seconds": 2.2,
+    "peak_vram_mib": 987,
+    "baseline_vram_mib": 827,
+    "at": "2026-10-05T22:57:26+00:00",
+    "size": [
+      640,
+      960
+    ]
   }
 ]

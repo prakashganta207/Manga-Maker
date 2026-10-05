@@ -72,3 +72,59 @@ def build_workflow(name: str, values: dict[str, Any], directory: Path | None = N
         if isinstance(node, dict):
             node.pop("_meta", None)
     return workflow
+
+
+# ControlNet node ids added by `add_controlnet` (high numbers so they never clash with templates).
+CN_LOADER, CN_TYPE, CN_IMAGE, CN_APPLY = "60", "61", "62", "63"
+UNION_TYPES = {"openpose": "openpose", "lineart": "canny/lineart/anime_lineart/mlsd", "depth": "depth"}
+
+
+def add_controlnet(workflow: dict[str, Any], *, model: str, image: str, control_type: str, strength: float,
+                   end: float, start: float = 0.0, sampler: str = "3") -> dict[str, Any]:
+    """Insert ControlNet guidance into any workflow (txt2img or IP-Adapter).
+
+    ControlNet is a copy of the diffusion model's encoder that takes an extra *control image*
+    (a pose skeleton, line art or depth map) and nudges every denoising step so the picture follows
+    its layout. It works on the conditioning: positive/negative prompts go in, "prompts + layout
+    hints" come out, and the sampler uses those instead. The "union" model handles several control
+    types, picked with SetUnionControlNetType.
+
+    strength: how hard the layout is enforced (0.4-0.7 keeps it a guide, 1.0 copies it rigidly).
+    end: stop guiding after this share of the steps, so the final details come from the prompt.
+    """
+    wf = copy.deepcopy(workflow)
+    ksampler = wf[sampler]["inputs"]
+    wf[CN_LOADER] = {"class_type": "ControlNetLoader", "inputs": {"control_net_name": model}}
+    wf[CN_TYPE] = {"class_type": "SetUnionControlNetType",
+                   "inputs": {"control_net": [CN_LOADER, 0], "type": UNION_TYPES.get(control_type, "auto")}}
+    wf[CN_IMAGE] = {"class_type": "LoadImage", "inputs": {"image": image}}
+    wf[CN_APPLY] = {"class_type": "ControlNetApplyAdvanced",
+                    "inputs": {"positive": ksampler["positive"], "negative": ksampler["negative"],
+                               "control_net": [CN_TYPE, 0], "image": [CN_IMAGE, 0], "strength": strength,
+                               "start_percent": start, "end_percent": end}}
+    ksampler["positive"], ksampler["negative"] = [CN_APPLY, 0], [CN_APPLY, 1]
+    return wf
+
+
+def add_loras(workflow: dict[str, Any], loras: list[tuple[str, float]], checkpoint: str = "4") -> dict[str, Any]:
+    """Chain LoraLoader nodes after the checkpoint: every node that used the checkpoint's model or
+    CLIP now uses the LoRA-patched versions. strength 0.8 = strong, but leaves room for the prompt."""
+    if not loras:
+        return workflow
+    wf = copy.deepcopy(workflow)
+    previous = checkpoint
+    ids = []
+    for index, (name, strength) in enumerate(loras):
+        node_id = str(70 + index)
+        wf[node_id] = {"class_type": "LoraLoader", "inputs": {"model": [previous, 0], "clip": [previous, 1],
+                                                              "lora_name": name, "strength_model": strength,
+                                                              "strength_clip": strength}}
+        ids.append(node_id)
+        previous = node_id
+    for node_id, node in wf.items():
+        if node_id in ids or not isinstance(node, dict):
+            continue
+        for key, value in node.get("inputs", {}).items():
+            if isinstance(value, list) and len(value) == 2 and value[0] == checkpoint and value[1] in (0, 1):
+                node["inputs"][key] = [previous, value[1]]      # model (0) and CLIP (1); the VAE (2) stays
+    return wf

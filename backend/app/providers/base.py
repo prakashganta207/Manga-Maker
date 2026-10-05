@@ -123,6 +123,14 @@ class ImageRequest:
     init_image: Path | None = None
     mask_image: Path | None = None
     denoise: float = 1.0
+    # ControlNet (Phase 5): a control image (pose skeleton / line art from the storyboard rough) that
+    # the final drawing must follow. `control_strength` 0..1, guidance stops at `control_end` of the steps.
+    control_image: Path | None = None
+    control_type: str = "openpose"
+    control_strength: float = 0.55
+    control_end: float = 0.6
+    # Character LoRAs (Phase 5): (file name, strength) applied to the model.
+    loras: list[tuple[str, float]] = field(default_factory=list)
     # Structured info (shot, character names, ...) — used by the mock to draw
     # placeholders; real providers rely on the prompt text only.
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -136,6 +144,15 @@ class ImageProvider(ABC):
     @abstractmethod
     def generate(self, request: ImageRequest) -> Image.Image:
         """Return a PIL image of roughly request.width x request.height."""
+
+    def supports_controlnet(self) -> bool:
+        """Can this provider follow a control image (ControlNet)?"""
+        return False
+
+    def preprocess(self, image: Path, mode: str) -> Image.Image | None:
+        """Turn a picture into a control image: mode "openpose" (pose skeleton) or "lineart".
+        None if the provider can't."""
+        return None
 
     def free_memory(self) -> None:
         """Release GPU memory between pipeline stages (no-op unless the provider has a GPU)."""

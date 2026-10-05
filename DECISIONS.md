@@ -224,3 +224,13 @@ reasonable option; change freely.
 62. **Vertical text**: `LETTERING_VERTICAL=auto` makes Japanese/Chinese text vertical (columns read right
     to left) and keeps Latin text horizontal (stacked Latin letters are hard to read); `on` / `off` force
     it, and the editor has a per-page toggle and a per-bubble checkbox.
+63. **Storyboard + ControlNet** (`agents/storyboard.py`, `comfy/workflows.add_controlnet`): one ControlNet
+    model, xinsir **controlnet-union-sdxl-1.0** (Apache-2.0; pose, line art and depth in one file), injected
+    into any workflow in code (conditioning → ControlNetApplyAdvanced → sampler) instead of duplicating
+    every template. Default strength 0.55, guidance for the first 60% of the steps (`CONTROLNET_*`).
+    Rough = same prompt at 768 px / 16 steps (640 px / 12 steps was too vague for pose detection).
+    Pose via **DWPose** (Apache-2.0) rather than CMU OpenPose weights (non-commercial); line art when no
+    pose is found and for scenery panels. Measured: ControlNet + 2 IP-Adapter references fits 8 GB at full
+    832×1216 (6.6 GB peak, ~75 s cold); an out-of-memory error retries without ControlNet, then at 85%.
+    On the real run 4 of 5 roughs gave no detectable pose (two-character anime roughs), so line art did most
+    of the guiding.

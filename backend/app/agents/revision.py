@@ -62,7 +62,7 @@ def apply_revision(project: MangaProject, planned: PlannedPanel, directed: Direc
     fix = EditorFix(prompt_add=revision.prompt_add, prompt_remove=revision.prompt_remove,
                     negative_add=revision.negative_add)
     # Same prompt builder as the first drawing -> fixed character tags + matching expression reference.
-    prompt = apply_prompt_fix(build_prompt(planned, directed, characters), fix)
+    prompt = apply_prompt_fix(build_prompt(planned, directed, characters, project.style_tags), fix)
     negative = apply_negative_fix(spec.negative_prompt, fix)
     refs, labels = panel_references(planned, characters, job_dir)
     spec.prompt, spec.negative_prompt = prompt, negative
@@ -93,6 +93,11 @@ def revise_panel(project: MangaProject, ctx: Ctx, page: int, panel: int, instruc
     result = project.panel_result(page, panel)
     start = apply_revision(project, planned, directed, spec, revision, ctx.job_dir,
                            attempt_hint=len(result.attempts) + 1 if result else 1)
+    if not revision.keep_seed and project.storyboard(page, panel) is not None:
+        # The composition changes (new camera): draw a new rough so ControlNet follows the new layout.
+        from .storyboard import storyboard_panel
+        ctx.progress("panels", 0.2, "New storyboard rough for the new camera")
+        storyboard_panel(project, ctx, spec, planned)
     chosen = result.attempt(result.chosen_attempt) if result else None
     if seed_locked and chosen:
         start.seed = spec.seed = chosen.seed   # locked: keep the current composition

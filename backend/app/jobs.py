@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .agents.graph import STAGES
+from .gpu import GPU_LOCK
 
 log = logging.getLogger("manga.jobs")
 
@@ -168,7 +169,8 @@ class JobManager:
                 job.busy = None if is_run else label
                 job.updated_at = time.time()
             try:
-                result = (task or self.runner)(job, lambda s, f, m, job=job: self._update(job, s, f, m))
+                with GPU_LOCK:  # waits while a LoRA is training
+                    result = (task or self.runner)(job, lambda s, f, m, job=job: self._update(job, s, f, m))
                 with self._lock:
                     if result is not None:
                         job.result = result

@@ -389,3 +389,20 @@ def build_panel_revision(context: dict[str, Any]) -> dict[str, Any]:
     result["composition"] = _truncate(f"{result['composition'].rstrip('.')}; {instruction.strip()}", 200)
     result["summary"] = _truncate(f"Revised for: {context.get('instruction', '').strip()}", 200)
     return result
+
+
+# ----------------------------------------------------------------------------- Series memory (Phase 5)
+def build_story_so_far(context: dict[str, Any]) -> dict[str, Any]:
+    """Mock running summary: the earlier summary + this chapter's first, climax and last beats."""
+    sheet = context["beat_sheet"]
+    beats = sheet["beats"]
+    climax = next((b for b in beats if b["id"] == sheet["climax_beat"]), beats[-1])
+    picked = [beats[0], climax, beats[-1]] if len(beats) > 2 else beats
+    chapter = " ".join(dict.fromkeys(b["summary"].rstrip(".") + "." for b in picked))
+    chapter_summary = _truncate(f"Chapter {context.get('chapter', 1)}: {chapter}", 500)
+    previous = (context.get("story_so_far") or "").strip()
+    summary = _truncate(f"{previous} {chapter_summary}".strip(), 1500)
+    threads = [_truncate(f"What happens after: {beats[-1]['summary']}", 200)]
+    names = [c["name"] for c in sheet.get("characters", [])]
+    notes = [f"{n} appeared in chapter {context.get('chapter', 1)}" for n in names[:4]]
+    return {"summary": summary, "chapter_summary": chapter_summary, "open_threads": threads, "character_notes": notes}

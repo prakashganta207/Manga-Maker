@@ -34,6 +34,26 @@ class CharacterSheets(BaseModel):
     expression_refs: dict[str, str] = Field(default_factory=dict)  # "happy" -> cropped image
 
 
+class LoraInfo(BaseModel):
+    """A character LoRA: a small add-on to the image model, trained on this character's references."""
+
+    status: str = "none"             # none | queued | training | ready | failed
+    trigger: str = ""                # the made-up word that "summons" the character in prompts
+    file: str | None = None          # file name inside ComfyUI's models/loras
+    path: str | None = None          # the file kept in the project store (for later chapters)
+    trainer: str = ""                # kohya | mock | imported
+    dataset_size: int = 0
+    steps: int = 0
+    seconds: float = 0.0
+    trained_at: str | None = None
+    # Consistency check: mean CLIP similarity of test drawings vs the references, without / with the LoRA.
+    before: float | None = None
+    after: float | None = None
+    eval_images: dict[str, list[str]] = Field(default_factory=dict)   # "before"/"after" -> image paths
+    error: str | None = None
+    training_id: str | None = None
+
+
 class CharacterEntry(CharacterDesign):
     """A character bible entry: the design + generated sheets + approval state."""
 
@@ -49,9 +69,14 @@ class CharacterEntry(CharacterDesign):
     # Look locked: the bible tags and sheets can't change, and automatic redraws may not touch this
     # character's tags or IP-Adapter weight.
     look_locked: bool = False
+    lora: LoraInfo = Field(default_factory=LoraInfo)
 
     def tag_prompt(self) -> str:
         return self.visual_tags.as_prompt()
+
+    def has_lora(self) -> bool:
+        """A real trained (or imported) LoRA is ready to use (mock LoRAs are demos only)."""
+        return self.lora.status == "ready" and bool(self.lora.file) and self.lora.trainer in ("kohya", "imported")
 
 
 class PanelPrompt(BaseModel):
@@ -66,6 +91,7 @@ class PanelPrompt(BaseModel):
     references: list[str] = Field(default_factory=list)  # reference image paths used (IP-Adapter)
     reference_kinds: list[str] = Field(default_factory=list)  # e.g. "Mira: happy"
     ipadapter_weight: float | None = None
+    loras: list[tuple[str, float]] = Field(default_factory=list)  # character LoRAs (file, strength)
 
 
 def _now() -> str:
@@ -107,6 +133,18 @@ class PanelAttempt(BaseModel):
     note: str = ""
     extra: dict[str, Any] = Field(default_factory=dict)  # storyboard / control image / mask paths
     created_at: str = Field(default_factory=_now)
+
+
+class StoryboardFrame(BaseModel):
+    """A panel's storyboard: a fast low-res rough + the control image extracted from it."""
+
+    page: int
+    panel: int
+    rough: str                       # path relative to the job folder
+    control: str | None = None       # pose skeleton or line art (None = no usable control)
+    control_type: str = "openpose"   # openpose | lineart
+    seconds: float = 0.0
+    note: str = ""
 
 
 class PanelResult(BaseModel):
@@ -243,6 +281,11 @@ class MangaProject(BaseModel):
     title: str = ""
     status: str = "running"          # running | awaiting_approval | done | failed
     auto_approve: bool = False
+    # Series memory (Phase 5): chapter number, the running summary of earlier chapters, art style.
+    chapter: int = 1
+    series_title: str = ""
+    story_so_far: str = ""
+    style_tags: str = ""
     max_pages: int = 2
     max_panels_per_page: int = 6
     providers: dict[str, Any] = Field(default_factory=dict)
@@ -254,6 +297,7 @@ class MangaProject(BaseModel):
     characters: list[CharacterEntry] = Field(default_factory=list)
     renames: dict[str, str] = Field(default_factory=dict)
     prompts: list[PanelPrompt] = Field(default_factory=list)
+    storyboards: list[StoryboardFrame] = Field(default_factory=list)
     panels: list[PanelResult] = Field(default_factory=list)
     lettering: list[PageLettering] = Field(default_factory=list)
     history: History | None = None
@@ -295,6 +339,9 @@ class MangaProject(BaseModel):
     def all_approved(self) -> bool:
         main = {n.lower() for n in self.main_character_names()}
         return all(c.approved for c in self.characters if c.name.lower() in main)
+
+    def storyboard(self, page: int, panel: int) -> "StoryboardFrame | None":
+        return next((f for f in self.storyboards if f.page == page and f.panel == panel), None)
 
     def page_lettering(self, page: int) -> PageLettering | None:
         return next((pl for pl in self.lettering if pl.page == page), None)

@@ -58,6 +58,17 @@ def _names_in_story(names: list[str], story: str) -> list[str]:
     return missing
 
 
+def with_series_memory(project: MangaProject, user: str) -> str:
+    """Chapter 2+: give the Writer the story so far, so names, places and open threads carry over."""
+    if project.chapter <= 1 or not project.story_so_far:
+        return user
+    series = project.series_title or project.title
+    return (f'This is chapter {project.chapter} of the series "{series}".\n'
+            f"<story_so_far>\n{project.story_so_far}\n</story_so_far>\n"
+            "Keep continuity with the story so far (same characters, places and unresolved threads), "
+            "but adapt only the new chapter below.\n\n" + user)
+
+
 def write_beat_sheet(project: MangaProject, llm, prices=(None, None)) -> AgentStep:
     story = project.story
     # Every beat needs at least one panel, so the page budget caps the number of beats.
@@ -75,7 +86,7 @@ def write_beat_sheet(project: MangaProject, llm, prices=(None, None)) -> AgentSt
 
     sheet, step = run_agent(
         agent="writer", label="Beat sheet", llm=llm, system=BEAT_SYSTEM.format(max_beats=max_beats),
-        user=f"<story>\n{story}\n</story>", output_model=BeatSheet, task="beat_sheet",
+        user=with_series_memory(project, f"<story>\n{story}\n</story>"), output_model=BeatSheet, task="beat_sheet",
         context={"story": story, "max_beats": max_beats},
         inputs_summary={"story_words": len(story.split()), "max_beats": max_beats},
         check=check, prices=prices,
@@ -162,7 +173,7 @@ def plan_pages(project: MangaProject, llm, prices=(None, None)) -> AgentStep:
     assert sheet is not None, "beat sheet missing"
     max_pages, max_panels = project.max_pages, project.max_panels_per_page
     system = PAGE_SYSTEM.format(max_pages=max_pages, max_panels=max_panels)
-    user = (f"<story>\n{project.story}\n</story>\n\n<beat_sheet>\n"
+    user = with_series_memory(project, f"<story>\n{project.story}\n</story>\n\n<beat_sheet>\n"
             f"{json.dumps(sheet.model_dump(mode='json'), indent=1)}\n</beat_sheet>")
     plan, step = run_agent(
         agent="writer", label="Page plan", llm=llm, system=system, user=user, output_model=PagePlan,

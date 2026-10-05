@@ -11,6 +11,7 @@ import {
   type MangaProject,
   type PanelAttempt,
   type PanelResult,
+  type StoryboardFrame,
 } from "@/lib/api";
 import { SHOT_ABBR } from "./LayoutThumb";
 
@@ -178,6 +179,7 @@ function PanelRow({
   const planned = project.page_plan?.pages[panel.page - 1]?.panels.find((p) => p.panel_number === panel.panel);
   const directed = project.director?.pages[panel.page - 1]?.panels.find((p) => p.panel_number === panel.panel);
   const status = STATUS[panel.status] ?? STATUS.unreviewed;
+  const frame = project.storyboards?.find((f) => f.page === panel.page && f.panel === panel.panel);
   // Newest round first is confusing in a "story" of attempts: keep chronological order, left to right.
   const attempts = [...panel.attempts].sort((a, b) => a.attempt - b.attempt);
   return (
@@ -204,6 +206,14 @@ function PanelRow({
       {panel.review_note && <p className="text-xs text-amber-900">{panel.review_note}</p>}
 
       <div className="flex items-stretch gap-0 overflow-x-auto pb-2">
+        {frame && <StoryboardCard frame={frame} project={project} onZoom={onZoom} />}
+        {frame && (
+          <div className="flex w-24 shrink-0 flex-col items-center justify-center px-1 text-center text-[10px]">
+            <div className="font-black uppercase tracking-wide text-ink/60">{frame.control ? "ControlNet" : "no guide"}</div>
+            <div className="my-1 text-2xl leading-none">→</div>
+            {frame.control && <span className="border border-ink/40 bg-white px-1">{frame.control_type === "openpose" ? "follow pose" : "follow lines"}</span>}
+          </div>
+        )}
         {attempts.map((attempt, i) => (
           <div key={attempt.attempt} className="flex items-stretch">
             {i > 0 && <FixArrow fix={attempt.fix_applied} source={attempt.source} newRound={attempt.round !== attempts[i - 1].round} />}
@@ -223,6 +233,45 @@ function PanelRow({
         ))}
       </div>
     </article>
+  );
+}
+
+/** The storyboard rough and the control image ControlNet followed. */
+function StoryboardCard({
+  frame,
+  project,
+  onZoom,
+}: {
+  frame: StoryboardFrame;
+  project: MangaProject;
+  onZoom: (z: { src: string; caption: string }) => void;
+}) {
+  const images = [
+    { src: frame.rough, label: "rough" },
+    ...(frame.control ? [{ src: frame.control, label: frame.control_type === "openpose" ? "pose" : "line art" }] : []),
+  ];
+  return (
+    <div className="flex w-44 shrink-0 flex-col border-[3px] border-dashed border-ink/50 bg-white">
+      <div className="grid grid-cols-2 gap-0.5 bg-tone p-0.5">
+        {images.map((img) => (
+          <button
+            key={img.label}
+            type="button"
+            title={`Enlarge the ${img.label}`}
+            onClick={() => onZoom({ src: jobFileUrl(project, img.src), caption: `Storyboard ${img.label} — page ${frame.page} panel ${frame.panel}` })}
+            className="relative"
+          >
+            <img src={jobFileUrl(project, img.src)} alt={img.label} loading="lazy" className="aspect-[3/4] w-full bg-ink object-cover" />
+            <span className="absolute bottom-0.5 left-0.5 bg-paper/90 px-1 text-[9px] font-bold uppercase">{img.label}</span>
+          </button>
+        ))}
+      </div>
+      <div className="flex-1 space-y-1 p-2 text-[11px]">
+        <b className="text-sm">Storyboard</b>
+        <p className="text-ink/70">Fast rough ({frame.seconds.toFixed(1)}s) → {frame.control ? frame.control_type : "no usable guide"}.</p>
+        {frame.note && <p className="text-amber-900">{frame.note}</p>}
+      </div>
+    </div>
   );
 }
 

@@ -172,6 +172,29 @@ class MockImageProvider(ImageProvider):
         draw.text((10, h - 10), label, fill=INK, font=font, anchor="ld")
         return img
 
+    def supports_controlnet(self) -> bool:
+        return True
+
+    def preprocess(self, image, mode: str) -> Image.Image:
+        """Mock control images (ControlNet convention: white on black). "openpose": a stick figure
+        where the rough has ink (all black = no pose found); "lineart": the rough's edges."""
+        from PIL import ImageFilter, ImageStat
+        rough = Image.open(image).convert("L")
+        if mode == "lineart":
+            return rough.filter(ImageFilter.FIND_EDGES).convert("RGB")
+        pose = Image.new("RGB", rough.size, "black")
+        if ImageStat.Stat(rough).mean[0] > 248:     # an empty rough: no pose to find
+            return pose
+        d = ImageDraw.Draw(pose)
+        w, h = rough.size
+        cx, top = w / 2, h * 0.2
+        joints = {"head": (cx, top), "neck": (cx, top + h * 0.1), "hip": (cx, top + h * 0.4),
+                  "lh": (cx - w * 0.15, top + h * 0.3), "rh": (cx + w * 0.15, top + h * 0.3),
+                  "lf": (cx - w * 0.1, top + h * 0.7), "rf": (cx + w * 0.1, top + h * 0.7)}
+        for a, b in (("head", "neck"), ("neck", "hip"), ("neck", "lh"), ("neck", "rh"), ("hip", "lf"), ("hip", "rf")):
+            d.line((*joints[a], *joints[b]), fill=(255, 255, 255), width=max(3, w // 80))
+        return pose
+
     def _inpaint(self, request: ImageRequest, rng: random.Random) -> Image.Image:
         """Mock inpainting: cross-hatching + a label inside the mask, everything else untouched."""
         base = Image.open(request.init_image).convert("L")

@@ -58,16 +58,24 @@ def attempt_path(job_dir: Path, page: int, panel: int, attempt: int) -> Path:
     return job_dir / "panels" / f"p{page:02d}_{panel:02d}_a{attempt}.png"
 
 
-def default_generator(ctx: Ctx, spec: PanelPrompt, planned: PlannedPanel, directed: DirectedPanel) -> Generator:
+def default_generator(p: MangaProject, ctx: Ctx, spec: PanelPrompt, planned: PlannedPanel,
+                      directed: DirectedPanel) -> Generator:
+    from .storyboard import control_for  # late import (storyboard imports graph/state only)
+
     def generate(draw: DrawSettings, attempt: int) -> tuple[Image.Image, dict[str, Any]]:
+        control = control_for(p, ctx, spec.page, spec.panel)   # the storyboard's pose / line art, if any
         image = ctx.image.generate(ImageRequest(
             prompt=draw.prompt, negative_prompt=draw.negative_prompt, width=spec.width, height=spec.height,
             seed=draw.seed, kind="panel", reference_images=[ctx.job_dir / r for r in spec.references],
-            ipadapter_weight=draw.ipadapter_weight,
+            ipadapter_weight=draw.ipadapter_weight, loras=list(spec.loras),
             metadata={"page": spec.page, "panel": spec.panel, "shot": directed.shot, "angle": directed.angle,
                       "characters": list(planned.characters), "mood": planned.emotion, "attempt": attempt},
+            **control,
         ))
         info = dict(getattr(ctx.image, "last_info", {}) or {})
+        if control:
+            info.update(control=Path(control["control_image"]).relative_to(ctx.job_dir).as_posix(),
+                        control_type=control["control_type"], control_strength=control["control_strength"])
         return image, info
     return generate
 
@@ -121,7 +129,7 @@ def run_quality_loop(p: MangaProject, ctx: Ctx, spec: PanelPrompt, planned: Plan
     """Draw (or redraw) one panel until it passes, a limit is hit, or attempts run out."""
     key = (spec.page, spec.panel)
     cfg = QualityConfig.from_settings(ctx.settings)
-    generator = generator or default_generator(ctx, spec, planned, directed)
+    generator = generator or default_generator(p, ctx, spec, planned, directed)
     max_attempts = max_attempts or ctx.settings.editor_max_attempts
     say = progress or (lambda message: None)
     (ctx.job_dir / "panels").mkdir(parents=True, exist_ok=True)

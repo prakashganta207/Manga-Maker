@@ -35,6 +35,10 @@ Plan: PHASE_3_5_PLAN.md. Test command: `python scripts/tasks.py test` (mock mode
 | character sheets (turnaround + expressions) | ~25 s each | — |
 | inpaint (mask ≈ 13% of the panel, denoise 0.9) | 30.0 s | 7017 MiB |
 | inpaint + IP-Adapter reference | 37.5 s | 6825 MiB |
+| storyboard rough (768 px, 16 steps, cold) | 17.9 s | 6907 MiB |
+| DWPose preprocess (first use incl. download / warm) | 22.0 / 2.2 s | 987 MiB |
+| anime line art preprocess | 10.2 s | 1017 MiB |
+| ControlNet + txt2img / + 1 ref / + 2 refs | 44.6 / 58.4 / 74.5 s | 7019 / 6811 / 6587 MiB |
 
 Cost per page (budget counters): mock LLM → $0. With a real vision Editor, estimate ≈ 3 images ×
 ~1k tokens + ~1.5k text per review ≈ 5k in / 0.6k out tokens; with Claude Opus 5.5 ($4/$20 per MTok)
@@ -90,8 +94,16 @@ Cost per page (budget counters): mock LLM → $0. With a real vision Editor, est
   9 tests. **Real page** re-lettered in 1.5 s; the cascade found 2 of ~7 faces on that page (it misses
   strong angles and partial faces), the estimates covered the rest.
 
+- **M9 ControlNet storyboard**: storyboard node (rough → DWPose pose / anime line art → ControlNet on
+  the final panel), ControlNet injection for every workflow, configurable strength/end, new rough
+  when a revision changes the camera, OOM fallback (retry without ControlNet, then at 85%), storyboard
+  cards (rough + control image) in the Quality loop, `SETUP_COMFYUI.md` section. 13 tests.
+  **Real 1-page run** (storyboard + ControlNet + IP-Adapter + mock Editor + Letterer): 1081 GPU-seconds
+  (sheets 100 s, storyboard 104 s, panels 897 s for 5 panels / 12 attempts at 52–91 s each). Panels are
+  now single coherent compositions; the mock Editor's random "flaws" cause most of the redraw time.
+
 ### Next
-- M9 ControlNet storyboard.
+- M10 LoRA training (code + mock trainer in place; real kohya run pending).
 
 ### Known issues
 - No LLM key on this machine: the Editor runs as the mock (it can't see real flaws such as the

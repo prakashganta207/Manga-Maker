@@ -1,0 +1,6 @@
+{
+  "1": {"class_type": "LoadImage", "_meta": {"title": "Storyboard rough"}, "inputs": {"image": "{{image}}"}},
+  "2": {"class_type": "AnimeLineArtPreprocessor", "_meta": {"title": "Anime line art"},
+        "inputs": {"image": ["1", 0], "resolution": "{{resolution}}"}},
+  "3": {"class_type": "SaveImage", "inputs": {"filename_prefix": "{{filename_prefix}}", "images": ["2", 0]}}
+}

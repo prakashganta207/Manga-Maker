@@ -312,3 +312,16 @@ class PanelRevision(BaseModel):
     @classmethod
     def clean_tags(cls, v: list[str]) -> list[str]:
         return EditorFix.clean_tags(v)
+
+
+# ----------------------------------------------------------------------------- Series memory (Phase 5)
+class StorySoFar(BaseModel):
+    """The Writer's running memory of a series, updated after every chapter."""
+
+    summary: str = Field(min_length=1, max_length=1500,
+                         description="The whole story so far (earlier chapters + this one), 3-8 sentences")
+    chapter_summary: str = Field(min_length=1, max_length=500, description="What happened in THIS chapter")
+    open_threads: list[str] = Field(default_factory=list, max_length=6,
+                                    description="Unresolved questions / promises the next chapter can pick up")
+    character_notes: list[str] = Field(default_factory=list, max_length=8,
+                                       description="How characters changed (relationships, injuries, new items...)")

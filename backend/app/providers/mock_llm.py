@@ -177,6 +177,8 @@ class MockLLMProvider(LLMProvider):
             return LLMResponse(mock_agents.build_character_bible(context["beat_sheet"]), model="mock")
         if task == "director":
             return LLMResponse(mock_agents.build_director_plan(context), model="mock")
+        if task == "story_so_far":
+            return LLMResponse(mock_agents.build_story_so_far(context), model="mock")
         if task == "panel_revision":
             return LLMResponse(mock_agents.build_panel_revision(context), model="mock")
         if task == "editor_review":

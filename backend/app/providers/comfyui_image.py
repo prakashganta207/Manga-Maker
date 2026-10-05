@@ -19,6 +19,7 @@ pipeline stages.
 from __future__ import annotations
 
 import time
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -26,7 +27,7 @@ import httpx
 from PIL import Image
 
 from ..comfy.client import ComfyClient
-from ..comfy.workflows import build_workflow
+from ..comfy.workflows import add_controlnet, add_loras, build_workflow
 from ..config import Settings
 from .base import ImageProvider, ImageRequest, ProviderError
 
@@ -53,9 +54,7 @@ class ComfyUIImageProvider(ImageProvider):
         if request.kind != "panel" or refs == 0:
             return "txt2img"
         if not self.comfy.capabilities().has_ipadapter:
-            message = "IP-Adapter not installed in ComfyUI: panels use text prompts only (less consistent)"
-            if message not in self.warnings:
-                self.warnings.append(message)
+            self._warn("IP-Adapter not installed in ComfyUI: panels use text prompts only (less consistent)")
             return "txt2img"
         return "ipadapter_1ref" if refs == 1 else "ipadapter_2ref"
 
@@ -75,7 +74,8 @@ class ComfyUIImageProvider(ImageProvider):
             "seed": int(request.seed) % (2**32),
             "width": int(request.width),
             "height": int(request.height),
-            "steps": self.settings.comfyui_steps,
+            # Storyboard roughs only need the composition: far fewer steps.
+            "steps": self.settings.storyboard_steps if request.kind == "storyboard" else self.settings.comfyui_steps,
             "cfg": self.settings.comfyui_cfg,
             "sampler": self.settings.comfyui_sampler,
             "scheduler": self.settings.comfyui_scheduler,
@@ -98,14 +98,75 @@ class ComfyUIImageProvider(ImageProvider):
             values["reference_image_1"] = self._upload(request.reference_images[0])
             if name == "ipadapter_2ref":
                 values["reference_image_2"] = self._upload(request.reference_images[1])
-        return name, build_workflow(name, values, self.workflow_dir)
+        workflow = build_workflow(name, values, self.workflow_dir)
+        if request.loras:
+            installed = self.comfy.capabilities().loras
+            usable = [(n, w) for n, w in request.loras if n in installed]
+            if len(usable) < len(request.loras):
+                self._warn("A character LoRA is not installed in ComfyUI's models/loras; drawing without it")
+            if usable:
+                workflow = add_loras(workflow, usable)
+                name += "+lora"
+        if request.control_image and request.kind == "panel":
+            caps = self.comfy.capabilities()
+            if caps.has_controlnet:
+                model = (self.settings.controlnet_model if self.settings.controlnet_model in caps.controlnet_models
+                         else caps.controlnet_models[0])
+                workflow = add_controlnet(workflow, model=model, image=self.comfy.upload_image(Path(request.control_image)),
+                                          control_type=request.control_type,
+                                          strength=round(request.control_strength, 3), end=round(request.control_end, 3))
+                name += "+controlnet"
+            else:
+                self._warn("ControlNet model or nodes missing in ComfyUI: storyboard layouts are not enforced")
+        return name, workflow
+
+    def _warn(self, message: str) -> None:
+        if message not in self.warnings:
+            self.warnings.append(message)
+
+    def supports_controlnet(self) -> bool:
+        try:
+            return self.comfy.capabilities().has_controlnet
+        except ProviderError:
+            return False
+
+    def preprocess(self, image: Path, mode: str) -> Image.Image | None:
+        """Pose skeleton (DWPose) or anime line art of a storyboard rough, via comfyui_controlnet_aux."""
+        if not self.comfy.capabilities().can_preprocess(mode):
+            self._warn(f"comfyui_controlnet_aux is missing the {mode} preprocessor (see SETUP_COMFYUI.md)")
+            return None
+        with Image.open(image) as img:
+            resolution = max(256, min(1024, round(min(img.size) / 64) * 64))
+        workflow = build_workflow(f"preprocess_{'pose' if mode == 'openpose' else 'lineart'}",
+                                  {"image": self.comfy.upload_image(Path(image)), "resolution": resolution,
+                                   "filename_prefix": f"manga_{mode}"}, self.workflow_dir)
+        return self.comfy.run(workflow)
 
     def generate(self, request: ImageRequest) -> Image.Image:
         started = time.monotonic()
         name, workflow = self.build(request)
-        image = self.comfy.run(workflow)
+        fallback = None
+        try:
+            image = self.comfy.run(workflow)
+        except ProviderError as exc:
+            if "out of memory" not in str(exc).lower() and "out of vram" not in str(exc).lower():
+                raise
+            # 8 GB fallback: drop the heaviest extra (ControlNet), else draw at ~85% resolution.
+            self.comfy.free()
+            if request.control_image:
+                fallback = "out of VRAM: retried without ControlNet"
+                request = replace(request, control_image=None)
+            else:
+                fallback = "out of VRAM: retried at 85% resolution"
+                request = replace(request, width=max(512, int(request.width * 0.85) // 64 * 64),
+                                  height=max(512, int(request.height * 0.85) // 64 * 64))
+            self._warn(f"Some images ran out of GPU memory ({fallback})")
+            name, workflow = self.build(request)
+            image = self.comfy.run(workflow)
         self.last_info = {"workflow": name, "seconds": round(time.monotonic() - started, 2),
-                          "ipadapter": name.startswith("ipadapter")}
+                          "ipadapter": "ipadapter" in name, "controlnet": "controlnet" in name, "lora": "lora" in name}
+        if fallback:
+            self.last_info["fallback"] = fallback
         return image
 
     def free_memory(self) -> None:

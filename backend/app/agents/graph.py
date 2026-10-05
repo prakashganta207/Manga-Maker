@@ -29,7 +29,7 @@ from .state import MangaProject
 log = logging.getLogger("manga.graph")
 
 # Progress stages shown in the UI, in order.
-STAGES = ["writer", "director", "characters", "sheets", "approval", "prompts", "panels",
+STAGES = ["writer", "director", "characters", "sheets", "approval", "prompts", "storyboard", "panels",
           "consistency", "layout", "export"]
 
 ProgressFn = Callable[[str, float, str], None]

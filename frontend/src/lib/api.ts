@@ -163,6 +163,46 @@ export interface CharacterEntry {
   version: number;
   reused_from: string | null;
   look_locked: boolean;
+  lora: LoraInfo;
+}
+
+export interface LoraInfo {
+  status: "none" | "queued" | "training" | "ready" | "failed";
+  trigger: string;
+  file: string | null;
+  path: string | null;
+  trainer: string;
+  dataset_size: number;
+  steps: number;
+  seconds: number;
+  trained_at: string | null;
+  before: number | null;
+  after: number | null;
+  eval_images: Record<string, string[]>;
+  error: string | null;
+  training_id: string | null;
+}
+
+export interface Training {
+  id: string;
+  job_id: string;
+  character: string;
+  trainer: string;
+  status: "queued" | "running" | "done" | "failed" | "cancelled";
+  progress: number;
+  message: string;
+  error: string | null;
+  log_tail: string[];
+  created_at: number;
+  finished_at: number | null;
+}
+
+export interface TrainingInfo {
+  trainer: "kohya" | "mock";
+  kohya_available: boolean;
+  steps: number;
+  resolution: number;
+  rank: number;
 }
 
 export interface PanelPrompt {
@@ -256,6 +296,16 @@ export interface PanelResult {
   locked: boolean;
 }
 
+export interface StoryboardFrame {
+  page: number;
+  panel: number;
+  rough: string;
+  control: string | null;
+  control_type: "openpose" | "lineart" | string;
+  seconds: number;
+  note: string;
+}
+
 export interface BudgetUsage {
   llm_calls: number;
   gpu_seconds: number;
@@ -292,6 +342,7 @@ export interface MangaProject {
   rule_fixes: string[];
   characters: CharacterEntry[];
   prompts: PanelPrompt[];
+  storyboards?: StoryboardFrame[];
   panels: PanelResult[];
   trace: AgentStep[];
   usage: Usage;
@@ -418,7 +469,11 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
     // Only send Content-Type with a body: on GETs it would trigger a CORS preflight per poll.
-    headers: { ...(init?.body ? { "Content-Type": "application/json" } : {}), ...(init?.headers || {}) },
+    // JSON bodies get a Content-Type; FormData (file uploads) sets its own multipart boundary.
+    headers: {
+      ...(init?.body && !(init.body instanceof FormData) ? { "Content-Type": "application/json" } : {}),
+      ...(init?.headers || {}),
+    },
     cache: "no-store",
   });
   if (!response.ok) {
@@ -485,6 +540,21 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ locked }),
     }),
+  trainingInfo: () => request<TrainingInfo>("/api/training/info"),
+  trainLora: (id: string, name: string) =>
+    request<Training>(`/api/jobs/${encodeURIComponent(id)}/characters/${encodeURIComponent(name)}/lora/train`, { method: "POST" }),
+  trainings: (id: string) => request<Training[]>(`/api/jobs/${encodeURIComponent(id)}/trainings`),
+  training: (tid: string) => request<Training>(`/api/trainings/${encodeURIComponent(tid)}`),
+  cancelTraining: (tid: string) => request<Training>(`/api/trainings/${encodeURIComponent(tid)}/cancel`, { method: "POST" }),
+  importLora: (id: string, name: string, file: File, trigger: string) => {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("trigger", trigger);
+    return request<{ lora: LoraInfo }>(`/api/jobs/${encodeURIComponent(id)}/characters/${encodeURIComponent(name)}/lora/import`, {
+      method: "POST",
+      body: form,
+    });
+  },
   resetLettering: (id: string, page: number) =>
     request<EditorPage>(`/api/jobs/${encodeURIComponent(id)}/pages/${page}/lettering/reset`, { method: "POST" }),
   // Cast approval

@@ -25,7 +25,7 @@ from typing import Any, Callable
 
 from ..config import Settings
 from ..pipeline import templates
-from ..pipeline.export import export_pdf
+from ..pipeline.export import export_cbz, export_pdf, export_webtoon
 from ..fonts import dialogue_font
 from .letterer import letter_page, open_image
 from ..pipeline.layout import LayoutConfig, compose_page, plan_page
@@ -39,6 +39,8 @@ from .graph import Ctx, Node, run_graph
 from .history import record_lettering
 from .prompt_builder import NEGATIVE_PROMPT, build_prompt, image_size_for_aspect, panel_references
 from .redraw import run_quality_loop
+from .series import SeriesStore, node_series, series_done, setup_chapter
+from .storyboard import node_storyboard, storyboard_done
 from .schemas import DirectedPanel, PlannedPanel
 from .sheets import generate_sheets, sheets_present
 from .runner import AgentStep
@@ -119,6 +121,16 @@ def cast_approved(p: MangaProject) -> bool:
     return p.all_approved()
 
 
+def panel_loras(panel: PlannedPanel, characters: dict, settings: Settings) -> list[tuple[str, float]]:
+    """LoRAs of the characters in the panel (max 2, like the IP-Adapter references)."""
+    found = []
+    for name in panel.characters:
+        entry = characters.get(name.lower())
+        if entry is not None and entry.has_lora():
+            found.append((entry.lora.file, settings.lora_strength * (1.0 if len(panel.characters) == 1 else 0.75)))
+    return found[:2]
+
+
 def node_prompts(p: MangaProject, ctx: Ctx) -> None:
     assert p.page_plan and p.director
     cfg = layout_config(ctx.settings)
@@ -129,13 +141,16 @@ def node_prompts(p: MangaProject, ctx: Ctx) -> None:
         for panel, direction, rect in zip(planned.panels, directed.panels, rects):
             width, height = image_size_for_aspect(rect.w / rect.h, ctx.settings.image_base_size)
             refs, labels = panel_references(panel, characters, ctx.job_dir)
+            loras = panel_loras(panel, characters, ctx.settings)
+            # With a LoRA carrying the look, IP-Adapter only needs a light touch.
+            weight = ctx.settings.ipadapter_weight_with_lora if loras else ctx.settings.ipadapter_weight
             prompts.append(PanelPrompt(
                 page=planned.page_number, panel=panel.panel_number,
-                prompt=build_prompt(panel, direction, characters), negative_prompt=NEGATIVE_PROMPT,
+                prompt=build_prompt(panel, direction, characters, p.style_tags), negative_prompt=NEGATIVE_PROMPT,
                 seed=panel_seed(p.story, planned.page_number, panel.panel_number), width=width, height=height,
                 characters=list(panel.characters),
                 references=[r.relative_to(ctx.job_dir).as_posix() for r in refs], reference_kinds=labels,
-                ipadapter_weight=ctx.settings.ipadapter_weight if refs else None,
+                ipadapter_weight=weight if refs else None, loras=loras,
             ))
     p.prompts = prompts
 
@@ -278,12 +293,21 @@ def render_pages(p: MangaProject, settings: Settings, job_dir: Path, pages: list
 
 
 def export_documents(p: MangaProject, job_dir: Path) -> None:
+    """PDF + CBZ per reading direction, and the vertical webtoon strip (from the RTL pages)."""
     from PIL import Image
+    title = p.title or "Manga"
     for direction in DIRECTIONS:
         out = p.outputs[direction]
-        images = [Image.open(job_dir / page) for page in out["pages"]]
+        files = [job_dir / page for page in out["pages"]]
+        images = [Image.open(f) for f in files]
         pdf = export_pdf(images, job_dir / f"manga_{direction}.pdf")
         out["pdf"] = pdf.relative_to(job_dir).as_posix()
+        cbz = export_cbz(files, job_dir / f"manga_{direction}.cbz", title=title, rtl=direction == "rtl",
+                         series=p.series_title or title, number=p.chapter)
+        out["cbz"] = cbz.relative_to(job_dir).as_posix()
+    rtl = p.outputs["rtl"]
+    strips = export_webtoon([job_dir / page for page in rtl["pages"]], rtl.get("layout", []), job_dir / "webtoon")
+    p.outputs["rtl"]["webtoon"] = [s.relative_to(job_dir).as_posix() for s in strips]
 
 
 def node_layout(p: MangaProject, ctx: Ctx) -> None:
@@ -310,6 +334,7 @@ def build_nodes(job_dir: Path) -> list[Node]:
              lambda p: all(sheets_present(c, job_dir) for c in main_characters(p))),
         Node("approval", "approval", "Cast approval", node_approval, cast_approved),
         Node("prompts", "prompts", "Prompt builder", node_prompts, lambda p: bool(p.prompts)),
+        Node("storyboard", "storyboard", "Storyboard roughs + ControlNet guides", node_storyboard, storyboard_done),
         Node("panels", "panels", "Drawing panels + Editor loop", node_panels,
              lambda p: bool(p.prompts) and len(p.panels) == len(p.prompts)
              and all(r.status != "drawing" and r.image and (job_dir / r.image).exists() for r in p.panels)),
@@ -318,9 +343,10 @@ def build_nodes(job_dir: Path) -> list[Node]:
         Node("layout", "layout", "Layout and lettering", node_layout,
              lambda p: bool(p.outputs) and all(_exists(p, job_dir, pg) for d in DIRECTIONS
                                                 for pg in p.outputs.get(d, {}).get("pages", []))),
-        Node("export", "export", "Export PNG + PDF", node_export,
+        Node("export", "export", "Export PNG, PDF, CBZ, webtoon", node_export,
              lambda p: p.status == "done" and all(_exists(p, job_dir, p.outputs.get(d, {}).get("pdf"))
                                                   for d in DIRECTIONS)),
+        Node("series", "export", "Writer: story so far", node_series, series_done),
     ]
 
 
@@ -338,6 +364,9 @@ def run_project(project: MangaProject, *, settings: Settings, job_dir: Path, llm
     llm = llm or get_llm_provider(settings)
     image = image or get_image_provider(settings)
     project.providers = {"llm": llm.name, "llm_model": getattr(llm, "model", ""), "image": image.name}
+    if project.chapter == 1 and project.project_id != project.job_id and not project.story_so_far:
+        setup_chapter(project, settings)            # a new chapter of an existing series
+    SeriesStore(settings.output_dir).register(project)
     project.status = "running"
     project.error = None
     extras = dict(extras or {})
@@ -375,7 +404,9 @@ def manifest(project: MangaProject) -> dict[str, Any]:
         "characters": [{"name": c.name, "description": c.description, "tags": c.tag_prompt(),
                         "approved": c.approved, "reference_image": c.sheets.views.get("front") or c.sheets.turnaround}
                        for c in project.characters],
-        "outputs": {d: {"pages": o.get("pages", []), "pdf": o.get("pdf")} for d, o in project.outputs.items()},
+        "outputs": {d: {"pages": o.get("pages", []), "pdf": o.get("pdf"), "cbz": o.get("cbz"),
+                        "webtoon": o.get("webtoon", [])} for d, o in project.outputs.items()},
+        "chapter": project.chapter, "project_id": project.project_id, "series_title": project.series_title,
         "project": "project.json",
     }
 
