@@ -3,8 +3,9 @@
 /* eslint-disable @next/next/no-img-element -- images come from the backend, plain <img> is simplest */
 
 import { useState } from "react";
-import { api, jobFileUrl, type EditorPanel, type Job, type MangaProject } from "@/lib/api";
+import { api, jobFileUrl, type EditorPanel, type HistorySummary, type Job, type MangaProject, type Version } from "@/lib/api";
 import type { MaskState } from "./PageCanvas";
+import VersionList from "./VersionList";
 
 const SUGGESTIONS = ["make the emotion stronger", "camera from below", "zoom in on the face", "wide shot, show the place", "add rain"];
 
@@ -15,6 +16,9 @@ export default function PanelTools({
   panel,
   mask,
   setMask,
+  history,
+  onRestore,
+  onLocked,
   onQueued,
   onError,
 }: {
@@ -24,10 +28,14 @@ export default function PanelTools({
   panel: EditorPanel;
   mask: MaskState | null;
   setMask: (m: MaskState | null) => void;
+  history: HistorySummary | null;
+  onRestore: (v: Version) => void;
+  onLocked: () => void;
   onQueued: (message: string) => void;
   onError: (message: string) => void;
 }) {
   const [instruction, setInstruction] = useState("");
+  const [locking, setLocking] = useState(false);
   const [sending, setSending] = useState(false);
   const result = project.panels.find((r) => r.page === page && r.panel === panel.panel);
   const busy = !!job.busy || job.status !== "done";
@@ -43,6 +51,19 @@ export default function PanelTools({
       onError(err instanceof Error ? err.message : String(err));
     } finally {
       setSending(false);
+    }
+  }
+
+  async function toggleLock() {
+    if (!result) return;
+    setLocking(true);
+    try {
+      await api.lockPanel(job.id, page, panel.panel, !result.locked);
+      onLocked();
+    } catch (err) {
+      onError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLocking(false);
     }
   }
 
@@ -62,6 +83,20 @@ export default function PanelTools({
           )}
         </div>
       </div>
+      {result && (
+        <button
+          type="button"
+          onClick={toggleLock}
+          disabled={locking || !!job.busy}
+          className={`flex w-full items-center justify-between border-2 px-2 py-1 text-xs font-bold ${
+            result.locked ? "border-ink bg-ink text-paper" : "border-ink/40 bg-paper"
+          }`}
+          title="A locked panel is never redrawn automatically (re-runs, Editor redraws). Your own edits still work."
+        >
+          <span>{result.locked ? "🔒 Panel locked" : "🔓 Lock this panel"}</span>
+          <span className="font-normal opacity-70">{result.locked ? "no automatic redraws" : "allow automatic redraws"}</span>
+        </button>
+      )}
 
       <section className="space-y-2 border-t-2 border-ink/10 pt-3">
         <h4 className="text-xs font-black uppercase tracking-wide">Tell the director</h4>
@@ -93,6 +128,16 @@ export default function PanelTools({
       </section>
 
       <InpaintSection job={job} page={page} panel={panel} mask={mask} setMask={setMask} busy={busy} onQueued={onQueued} onError={onError} />
+      {history && (
+        <VersionList
+          title="Panel versions"
+          history={history}
+          target={`panel:${page}:${panel.panel}`}
+          project={project}
+          disabled={busy}
+          onRestore={onRestore}
+        />
+      )}
     </div>
   );
 }

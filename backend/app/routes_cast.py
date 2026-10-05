@@ -98,10 +98,15 @@ def register_cast_routes(app: FastAPI) -> None:
         resume_if_ready(job_id, project)
         return manager.snapshot(job_id)
 
+    def unlocked(character: CharacterEntry) -> CharacterEntry:
+        if character.look_locked:
+            raise HTTPException(409, f"{character.name}'s look is locked. Unlock it first.")
+        return character
+
     @app.post("/api/jobs/{job_id}/characters/{name}/regenerate", status_code=202)
     def regenerate(job_id: str, name: str, body: RegenerateRequest) -> dict[str, Any]:
         project = editable(job_id)
-        character = find(project, name)
+        character = unlocked(find(project, name))
         character.version += 1
         if body.sheet in ("turnaround", "both"):
             character.turnaround_seed = new_seed(character.turnaround_seed, character.version)
@@ -125,7 +130,7 @@ def register_cast_routes(app: FastAPI) -> None:
     @app.patch("/api/jobs/{job_id}/characters/{name}")
     def edit_character(job_id: str, name: str, body: CharacterPatch) -> dict[str, Any]:
         project = editable(job_id)
-        character = find(project, name)
+        character = unlocked(find(project, name))
         for field in ("description", "personality", "age_range", "body_type"):
             value = getattr(body, field)
             if value is not None:

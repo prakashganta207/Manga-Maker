@@ -134,8 +134,17 @@ function CharacterCard({
           >
             {c.approved ? "Unapprove" : "✓ Approve"}
           </button>
-          <button type="button" className="btn" disabled={locked} onClick={() => setEditing((v) => !v)}>
+          <button type="button" className="btn" disabled={locked || c.look_locked} onClick={() => setEditing((v) => !v)}>
             {editing ? "Cancel edit" : "✎ Edit"}
+          </button>
+          <button
+            type="button"
+            className={`btn ${c.look_locked ? "btn-primary" : ""}`}
+            disabled={!!job.busy || busy !== null}
+            title="A locked look can't be edited or regenerated, and automatic redraws may not change this character's tags or reference strength"
+            onClick={() => act(`lock-${c.name}`, () => api.lockCharacter(job.id, c.name, !c.look_locked))}
+          >
+            {c.look_locked ? "🔒 Look locked" : "🔓 Lock look"}
           </button>
         </div>
       </header>
@@ -186,7 +195,7 @@ function CharacterCard({
           seed={c.turnaround_seed}
           sheet={img(c.sheets.turnaround)}
           crops={VIEWS.map((v) => ({ label: v, src: img(c.sheets.views[v]) }))}
-          disabled={locked}
+          disabled={locked || c.look_locked}
           onRegenerate={() => act(`regen-${c.name}-t`, () => api.regenerateSheet(job.id, c.name, "turnaround"))}
         />
         <SheetBlock
@@ -194,7 +203,7 @@ function CharacterCard({
           seed={c.expression_seed}
           sheet={img(c.sheets.expressions)}
           crops={EXPRESSIONS.map((e) => ({ label: e, src: img(c.sheets.expression_refs[e]) }))}
-          disabled={locked}
+          disabled={locked || c.look_locked}
           onRegenerate={() => act(`regen-${c.name}-e`, () => api.regenerateSheet(job.id, c.name, "expressions"))}
         />
       </div>

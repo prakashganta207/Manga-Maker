@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from .runner import AgentStep
 from .schemas import BeatSheet, CharacterDesign, DirectorPlan, EditorFix, EditorReview, PagePlan
@@ -46,6 +46,9 @@ class CharacterEntry(CharacterDesign):
     approved: bool = False
     version: int = 1
     reused_from: str | None = None  # project id, when the character came from an earlier chapter
+    # Look locked: the bible tags and sheets can't change, and automatic redraws may not touch this
+    # character's tags or IP-Adapter weight.
+    look_locked: bool = False
 
     def tag_prompt(self) -> str:
         return self.visual_tags.as_prompt()
@@ -120,6 +123,8 @@ class PanelResult(BaseModel):
     chosen_attempt: int = 0
     status: str = "unreviewed"       # accepted | needs_review | unreviewed
     review_note: str = ""
+    # Locked by you: automatic redraws never change this panel (your own edits still can).
+    locked: bool = False
 
     def attempt(self, number: int) -> PanelAttempt | None:
         return next((a for a in self.attempts if a.attempt == number), None)
@@ -163,11 +168,52 @@ class Bubble(BaseModel):
     def clamp(cls, v: float) -> float:
         return max(0.0, min(1.0, float(v)))
 
+    @model_validator(mode="after")
+    def inside_panel(self) -> "Bubble":
+        """Keep the whole bubble inside its panel (shift it back in if it sticks out)."""
+        self.w, self.h = max(0.02, self.w), max(0.02, self.h)
+        self.x, self.y = min(self.x, 1 - self.w), min(self.y, 1 - self.h)
+        return self
+
 
 class PageLettering(BaseModel):
     page: int
     bubbles: list[Bubble] = Field(default_factory=list)
     source: str = "auto"                      # auto (planned by code/Letterer) | edited (changed by you)
+
+
+# ---------------------------------------------------------------- version history (logic: agents/history.py)
+class Version(BaseModel):
+    id: int
+    target: str
+    kind: str                     # generate | redraw | revision | inpaint | bubbles | auto_place
+    label: str
+    created_at: str = Field(default_factory=_now)
+    data: dict[str, Any] = Field(default_factory=dict)
+
+
+class Change(BaseModel):
+    target: str
+    from_id: int | None
+    to_id: int
+    label: str
+
+
+class History(BaseModel):
+    versions: list[Version] = Field(default_factory=list)
+    current: dict[str, int] = Field(default_factory=dict)
+    undo_stack: list[Change] = Field(default_factory=list)
+    redo_stack: list[Change] = Field(default_factory=list)
+
+    def version(self, version_id: int) -> Version:
+        found = next((v for v in self.versions if v.id == version_id), None)
+        if found is None:
+            raise KeyError(f"No version {version_id}")
+        return found
+
+    def for_target(self, target: str) -> list[Version]:
+        return [v for v in self.versions if v.target == target]
+
 
 
 class Usage(BaseModel):
@@ -208,6 +254,7 @@ class MangaProject(BaseModel):
     prompts: list[PanelPrompt] = Field(default_factory=list)
     panels: list[PanelResult] = Field(default_factory=list)
     lettering: list[PageLettering] = Field(default_factory=list)
+    history: History | None = None
     outputs: dict[str, Any] = Field(default_factory=dict)
 
     trace: list[AgentStep] = Field(default_factory=list)

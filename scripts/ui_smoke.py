@@ -34,6 +34,7 @@ def main() -> int:
     parser.add_argument("--channel", default="msedge", help="installed browser: msedge or chrome")
     parser.add_argument("--only-shot", default="", help="just screenshot this path (e.g. '/?x=1') and exit")
     parser.add_argument("--inpaint", action="store_true", help="also paint a mask on panel 1 and inpaint it")
+    parser.add_argument("--history", action="store_true", help="also undo the saved edit (server history) and lock a panel")
     args = parser.parse_args()
     SHOTS.mkdir(parents=True, exist_ok=True)
     errors: list[str] = []
@@ -69,7 +70,8 @@ def main() -> int:
         page.wait_for_timeout(300)
         page.mouse.move(cx, cy)
         page.mouse.down()
-        page.mouse.move(cx + 40, cy + 30, steps=8)
+        dx = -40 if bubble["x"] > 0.4 else 40          # move toward the middle so it can always move
+        page.mouse.move(cx + dx, cy + 30, steps=8)
         page.mouse.up()
         page.wait_for_timeout(300)
         area = page.locator("textarea").first
@@ -89,6 +91,25 @@ def main() -> int:
         after = api(args.api, f"/api/jobs/{args.job}/pages/1/editor")["lettering"]
         moved = next(b for b in after["bubbles"] if b["id"] == bubble["id"])
         ok = moved["text"] == "SMOKE TEST EDIT" and abs(moved["x"] - bubble["x"]) > 0.01 and after["source"] == "edited"
+
+        if args.history:
+            page.get_by_title("Undo: Edited lettering (Ctrl+Z)").click()
+            page.get_by_text("done.").wait_for(timeout=30000)
+            undone = api(args.api, f"/api/jobs/{args.job}/pages/1/editor")["lettering"]["bubbles"]
+            back = next(b for b in undone if b["id"] == bubble["id"])
+            print("server undo restored text:", back["text"] == bubble["text"])
+            ok = ok and back["text"] == bubble["text"]
+            # select panel 1 (a corner, away from bubbles) and lock it
+            r = data["panels"][0]["rect"]
+            page.mouse.click(box["x"] + (r["x"] + r["w"] * 0.97) * scale, box["y"] + (r["y"] + r["h"] * 0.97) * scale)
+            page.get_by_role("button", name="Lock this panel").click()
+            page.get_by_role("button", name="Panel locked").wait_for(timeout=10000)
+            page.wait_for_timeout(800)
+            page.screenshot(path=str(SHOTS / "editor_6_history.png"), full_page=True)
+            locked = api(args.api, f"/api/jobs/{args.job}/project")["panels"]
+            ok = ok and any(x["locked"] for x in locked)
+            page.get_by_role("button", name="Panel locked").click()   # unlock again
+            page.wait_for_timeout(800)
         browser.close()
 
     print("stored change:", ok, "| console errors:", errors or "none")

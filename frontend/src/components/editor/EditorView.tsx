@@ -4,10 +4,21 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api, fileUrl, type Bubble, type BubbleKind, type Direction, type EditorPage, type Job, type MangaProject } from "@/lib/api";
+import {
+  api,
+  fileUrl,
+  type Bubble,
+  type BubbleKind,
+  type Direction,
+  type EditorPage,
+  type HistorySummary,
+  type Job,
+  type MangaProject,
+} from "@/lib/api";
 import { KIND_LABEL, newBubbleId } from "@/lib/bubbles";
 import type { MaskState } from "./PageCanvas";
 import PanelTools from "./PanelTools";
+import VersionList from "./VersionList";
 
 // Konva needs the browser (window, canvas), so the canvas is never rendered on the server.
 const PageCanvas = dynamic(() => import("./PageCanvas"), {
@@ -42,6 +53,8 @@ export default function EditorView({
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [width, setWidth] = useState(640);
+  const [hist, setHist] = useState<HistorySummary | null>(null);
+  const [tick, setTick] = useState(0); // bump to re-fetch page + history after a server-side change
   const holder = useRef<HTMLDivElement>(null);
   const textBox = useRef<HTMLTextAreaElement>(null);
   const dirty = JSON.stringify(bubbles) !== JSON.stringify(saved);
@@ -71,7 +84,39 @@ export default function EditorView({
     return () => {
       cancelled = true;
     };
-  }, [job.id, page, direction, seenUpdate, apply]);
+  }, [job.id, page, direction, seenUpdate, tick, apply]);
+
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .history(job.id)
+      .then((h) => !cancelled && setHist(h))
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [job.id, seenUpdate, tick]);
+
+  /** Server-side history action (undo / redo / restore): re-render happens on the backend. */
+  const serverHistory = useCallback(
+    async (action: () => Promise<HistorySummary>, message: string) => {
+      setBusy(message);
+      setError(null);
+      try {
+        const result = await action();
+        setHist(result);
+        if (result.page && result.page !== page) setPage(result.page);
+        setTick((t) => t + 1);
+        setNotice(`${message.replace("…", "")} done.`);
+        onChanged();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        setBusy(null);
+      }
+    },
+    [page, onChanged],
+  );
 
   // Fit the canvas to its column.
   useEffect(() => {
@@ -92,18 +137,31 @@ export default function EditorView({
   );
   const updateBubble = useCallback((b: Bubble) => change(bubbles.map((x) => (x.id === b.id ? b : x))), [bubbles, change]);
 
-  const undo = useCallback(() => {
+  const undoLocal = useCallback(() => {
     if (!past.length) return;
     setFuture((f) => [bubbles, ...f]);
     setBubbles(past[past.length - 1]);
     setPast((p) => p.slice(0, -1));
   }, [past, bubbles]);
-  const redo = useCallback(() => {
+  const redoLocal = useCallback(() => {
     if (!future.length) return;
     setPast((p) => [...p, bubbles]);
     setBubbles(future[0]);
     setFuture((f) => f.slice(1));
   }, [future, bubbles]);
+
+  // Unsaved bubble edits are undone locally; once saved, undo/redo walk the server's version history.
+  const localMode = dirty || past.length > 0 || future.length > 0;
+  const canUndo = localMode ? past.length > 0 : !!hist?.can_undo;
+  const canRedo = localMode ? future.length > 0 : !!hist?.can_redo;
+  const undo = useCallback(() => {
+    if (localMode) undoLocal();
+    else if (hist?.can_undo) serverHistory(() => api.undo(job.id), `Undoing “${hist.undo_label}”…`);
+  }, [localMode, undoLocal, hist, job.id, serverHistory]);
+  const redo = useCallback(() => {
+    if (localMode) redoLocal();
+    else if (hist?.can_redo) serverHistory(() => api.redo(job.id), `Redoing “${hist.redo_label}”…`);
+  }, [localMode, redoLocal, hist, job.id, serverHistory]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -152,6 +210,7 @@ export default function EditorView({
     setError(null);
     try {
       apply(await api.saveLettering(job.id, page, bubbles));
+      setTick((t) => t + 1);
       setNotice("Saved. The page PNG and PDFs were re-rendered.");
       onChanged();
     } catch (err) {
@@ -166,6 +225,7 @@ export default function EditorView({
     setBusy("Re-planning bubbles…");
     try {
       apply(await api.resetLettering(job.id, page));
+      setTick((t) => t + 1);
       setSelectedId(null);
       setNotice("Automatic placement restored.");
       onChanged();
@@ -226,10 +286,22 @@ export default function EditorView({
           </button>
         ))}
         <span className="ml-auto flex items-center gap-2">
-          <button type="button" className="btn !px-2 !py-1 text-sm" onClick={undo} disabled={!past.length} title="Undo (Ctrl+Z)">
+          <button
+            type="button"
+            className="btn !px-2 !py-1 text-sm"
+            onClick={undo}
+            disabled={!canUndo || locked || !!busy}
+            title={localMode ? "Undo unsaved edit (Ctrl+Z)" : hist?.undo_label ? `Undo: ${hist.undo_label} (Ctrl+Z)` : "Nothing to undo"}
+          >
             ↶
           </button>
-          <button type="button" className="btn !px-2 !py-1 text-sm" onClick={redo} disabled={!future.length} title="Redo (Ctrl+Y)">
+          <button
+            type="button"
+            className="btn !px-2 !py-1 text-sm"
+            onClick={redo}
+            disabled={!canRedo || locked || !!busy}
+            title={localMode ? "Redo (Ctrl+Y)" : hist?.redo_label ? `Redo: ${hist.redo_label} (Ctrl+Y)` : "Nothing to redo"}
+          >
             ↷
           </button>
           <button type="button" className="btn !px-2 !py-1 text-sm" onClick={reset} disabled={locked || !!busy}>
@@ -296,6 +368,15 @@ export default function EditorView({
               <h3 className="mb-1 font-black">Lettering</h3>
               Select a bubble to edit its text, type and speaker. {bubbles.length} layer(s) on this page
               {data?.lettering?.source === "edited" ? " (edited by you)" : " (automatic placement)"}.
+              {hist && (
+                <VersionList
+                  title="Lettering versions"
+                  history={hist}
+                  target={`lettering:${page}`}
+                  disabled={locked || !!busy || dirty}
+                  onRestore={(v) => serverHistory(() => api.restore(job.id, v.id), `Restoring “${v.label}”…`)}
+                />
+              )}
             </div>
           )}
           {panelInfo && data && (
@@ -306,6 +387,9 @@ export default function EditorView({
               panel={panelInfo}
               mask={mask}
               setMask={setMask}
+              history={hist}
+              onRestore={(v) => serverHistory(() => api.restore(job.id, v.id), `Restoring “${v.label}”…`)}
+              onLocked={() => onChanged()}
               onQueued={(message) => {
                 setNotice(message);
                 onChanged();

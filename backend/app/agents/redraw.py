@@ -24,6 +24,7 @@ from PIL import Image
 
 from ..providers.base import ImageRequest
 from .editor import review_panel
+from .history import panel_target, record_panel
 from .graph import Ctx
 from .quality import QualityConfig, apply_fix, best_attempt, budget_problem, combine
 from .runner import AgentFailed
@@ -129,6 +130,13 @@ def run_quality_loop(p: MangaProject, ctx: Ctx, spec: PanelPrompt, planned: Plan
     if result is None:
         result = PanelResult(page=spec.page, panel=spec.panel, image="")
         p.panels.append(result)
+    if result.chosen_attempt and (p.history is None or panel_target(*key) not in p.history.current):
+        # Older project without history: the drawing we are about to replace becomes the baseline version.
+        record_panel(p, spec.page, spec.panel, "generate", "Before your edits")
+    if result.locked:
+        max_attempts = 1   # locked panel: only your own action draws it, no automatic redraws
+    # A character with a locked look: automatic fixes may not change its tags or reference strength.
+    look_locked = any(c is not None and c.look_locked for c in (p.character(n) for n in planned.characters))
     round_no = (max((a.round for a in result.attempts), default=0) + 1) if result.attempts else 1
     result.status = "drawing"  # resume knows this panel isn't finished
     draw = start or DrawSettings.from_spec(spec)
@@ -176,6 +184,8 @@ def run_quality_loop(p: MangaProject, ctx: Ctx, spec: PanelPrompt, planned: Plan
             break
         attempt.status = "rejected"
         fix = attempt.review.fix
+        if look_locked:
+            fix = fix.model_copy(update={"ipadapter_weight": None, "prompt_remove": []})
         redraw = apply_fix(draw.prompt, draw.negative_prompt, draw.seed, draw.ipadapter_weight, fix,
                            attempt=number, seed_locked=seed_locked)
         draw = DrawSettings(redraw.prompt, redraw.negative_prompt, redraw.seed, redraw.ipadapter_weight,
@@ -198,6 +208,11 @@ def run_quality_loop(p: MangaProject, ctx: Ctx, spec: PanelPrompt, planned: Plan
     result.status = {"accepted": "accepted", "needs_review": "needs_review"}.get(best.status, "unreviewed")
     result.review_note = "" if result.status == "accepted" else (
         f"Kept attempt {best.attempt} (best score): {stop_reason}" if stop_reason else "")
+    kind = "generate" if source == "auto" and round_no == 1 else source
+    first_note = this_round[0].note.split(";")[0]          # e.g. "instruction: angrier" / "inpaint: a lamp"
+    label = ({"generate": "First drawing", "auto": "Redrawn after a restart"}.get(kind)
+             or (first_note[:1].upper() + first_note[1:]) or kind.title())
+    record_panel(p, spec.page, spec.panel, kind, label[:120])
     p.save(ctx.job_dir)
     return result
 

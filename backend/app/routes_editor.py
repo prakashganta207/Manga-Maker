@@ -20,7 +20,10 @@ from PIL import Image
 from pydantic import BaseModel, Field
 
 from .agents.pipeline import ensure_lettering, export_documents, layout_config, manifest, render_pages
+from .agents.cast_store import CastStore
 from .agents.graph import Ctx
+from .agents import history
+from .agents.history import lettering_target, record, record_lettering
 from .agents.inpaint import inpaint_panel
 from .agents.revision import revise_panel
 from .pipeline.masks import Stroke, coverage, rasterize, soften
@@ -46,6 +49,14 @@ class InpaintBody(BaseModel):
     prompt: str = Field(min_length=2, max_length=300, description="What should be in the painted region")
     character: str = Field(default="auto", max_length=40, description='"auto", "" (nobody) or a character name')
     denoise: float | None = Field(default=None, ge=0.1, le=1.0)
+
+
+class LockBody(BaseModel):
+    locked: bool = True
+
+
+class RestoreBody(BaseModel):
+    version_id: int = Field(ge=1)
 
 
 class LetteringBody(BaseModel):
@@ -177,6 +188,65 @@ def register_editor_routes(app: FastAPI) -> None:
                                   lambda proj, ctx: inpaint_panel(proj, ctx, page, panel, mask_path, region,
                                                                   body.character, body.denoise))
 
+    # ------------------------------------------------------------------ versions, undo / redo, locks
+    @app.get("/api/jobs/{job_id}/history")
+    def get_history(job_id: str) -> dict[str, Any]:
+        if manager.get(job_id) is None:
+            raise HTTPException(404, "Job not found")
+        return history.summary(app.state.load_project(job_id))
+
+    def move(job_id: str, action: Callable[[MangaProject], Any]) -> dict[str, Any]:
+        with EDIT_LOCK:
+            project = finished(job_id)
+            try:
+                moved = action(project)
+            except KeyError as exc:
+                raise HTTPException(404, str(exc)) from exc
+            if moved is None:
+                raise HTTPException(409, "Nothing to do")
+            change, page = moved
+            refresh(job_id, project, [page])
+            return {**history.summary(project), "applied": change.model_dump(), "page": page}
+
+    @app.post("/api/jobs/{job_id}/history/undo")
+    def undo(job_id: str) -> dict[str, Any]:
+        return move(job_id, history.undo)
+
+    @app.post("/api/jobs/{job_id}/history/redo")
+    def redo(job_id: str) -> dict[str, Any]:
+        return move(job_id, history.redo)
+
+    @app.post("/api/jobs/{job_id}/history/restore")
+    def restore(job_id: str, body: RestoreBody) -> dict[str, Any]:
+        return move(job_id, lambda project: history.restore(project, body.version_id))
+
+    @app.post("/api/jobs/{job_id}/panels/{page}/{panel}/lock")
+    def lock_panel(job_id: str, page: int, panel: int, body: LockBody) -> dict[str, Any]:
+        with EDIT_LOCK:
+            project = finished(job_id)
+            result = project.panel_result(page, panel)
+            if result is None:
+                raise HTTPException(404, f"No panel {panel} on page {page}")
+            result.locked = body.locked
+            project.save(job_dir(job_id))
+            return {"page": page, "panel": panel, "locked": result.locked}
+
+    @app.post("/api/jobs/{job_id}/characters/{name}/lock")
+    def lock_character(job_id: str, name: str, body: LockBody) -> dict[str, Any]:
+        """Lock a character's look: no tag edits / sheet regeneration, no automatic look changes."""
+        with EDIT_LOCK:
+            if manager.get(job_id) is None:
+                raise HTTPException(404, "Job not found")
+            project = app.state.load_project(job_id)
+            character = project.character(name)
+            if character is None:
+                raise HTTPException(404, f"No character named '{name}'")
+            character.look_locked = body.locked
+            project.save(job_dir(job_id))
+            if character.approved:
+                CastStore(settings.output_dir).save(project, job_dir(job_id))  # later chapters inherit the lock
+            return {"name": character.name, "look_locked": character.look_locked}
+
     @app.put("/api/jobs/{job_id}/pages/{page}/lettering")
     def save_lettering(job_id: str, page: int, body: LetteringBody) -> dict[str, Any]:
         with EDIT_LOCK:
@@ -206,13 +276,21 @@ def register_editor_routes(app: FastAPI) -> None:
         with EDIT_LOCK:
             project = finished(job_id)
             page_or_404(project, page)
-            before = project.page_lettering(page)
+            lettering_baseline(project, page, project.page_lettering(page))
             project.lettering = [pl for pl in project.lettering if pl.page != page]
-            render_pages(project, settings, job_dir(job_id), [page])   # re-plans the missing page
-            record_lettering_version(project, page, before, "Automatic placement")
-            refresh(job_id, project, [page])
+            refresh(job_id, project, [page])   # re-plans the page and records it as a new version
             return editor_page(job_id, page)
 
 
+def lettering_baseline(project: MangaProject, page: int, before) -> None:
+    """Old project without history: store the lettering as it was before this edit as the starting version."""
+    if before is not None and (project.history is None or lettering_target(page) not in project.history.current):
+        record(project, lettering_target(page), "auto_place", "Before your edits",
+               {"bubbles": [b.model_dump(mode="json") for b in before.bubbles], "source": before.source},
+               undoable=False)
+
+
 def record_lettering_version(project: MangaProject, page: int, before, label: str) -> None:
-    """Hook for version history (M7)."""
+    """Every saved bubble edit becomes a version (undo / redo / restore)."""
+    lettering_baseline(project, page, before)
+    record_lettering(project, page, "bubbles", label)

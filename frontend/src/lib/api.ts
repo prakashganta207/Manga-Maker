@@ -162,6 +162,7 @@ export interface CharacterEntry {
   approved: boolean;
   version: number;
   reused_from: string | null;
+  look_locked: boolean;
 }
 
 export interface PanelPrompt {
@@ -252,6 +253,7 @@ export interface PanelResult {
   chosen_attempt: number;
   status: "accepted" | "needs_review" | "unreviewed" | "drawing";
   review_note: string;
+  locked: boolean;
 }
 
 export interface BudgetUsage {
@@ -360,6 +362,25 @@ export interface EditorPage {
   files_base: string;
 }
 
+export interface Version {
+  id: number;
+  target: string; // "panel:<page>:<panel>" | "lettering:<page>"
+  kind: string;
+  label: string;
+  created_at: string;
+  data: { attempt?: number; image?: string; bubbles?: Bubble[]; source?: string };
+}
+
+export interface HistorySummary {
+  versions: Version[];
+  current: Record<string, number>;
+  can_undo: boolean;
+  can_redo: boolean;
+  undo_label: string | null;
+  redo_label: string | null;
+  page?: number;
+}
+
 export interface LayoutTemplate {
   id: string;
   name: string;
@@ -443,6 +464,24 @@ export const api = {
     request<Job>(`/api/jobs/${encodeURIComponent(id)}/panels/${page}/${panel}/inpaint`, {
       method: "POST",
       body: JSON.stringify(body),
+    }),
+  history: (id: string) => request<HistorySummary>(`/api/jobs/${encodeURIComponent(id)}/history`),
+  undo: (id: string) => request<HistorySummary>(`/api/jobs/${encodeURIComponent(id)}/history/undo`, { method: "POST" }),
+  redo: (id: string) => request<HistorySummary>(`/api/jobs/${encodeURIComponent(id)}/history/redo`, { method: "POST" }),
+  restore: (id: string, versionId: number) =>
+    request<HistorySummary>(`/api/jobs/${encodeURIComponent(id)}/history/restore`, {
+      method: "POST",
+      body: JSON.stringify({ version_id: versionId }),
+    }),
+  lockPanel: (id: string, page: number, panel: number, locked: boolean) =>
+    request<{ locked: boolean }>(`/api/jobs/${encodeURIComponent(id)}/panels/${page}/${panel}/lock`, {
+      method: "POST",
+      body: JSON.stringify({ locked }),
+    }),
+  lockCharacter: (id: string, name: string, locked: boolean) =>
+    request<{ look_locked: boolean }>(`/api/jobs/${encodeURIComponent(id)}/characters/${encodeURIComponent(name)}/lock`, {
+      method: "POST",
+      body: JSON.stringify({ locked }),
     }),
   resetLettering: (id: string, page: number) =>
     request<EditorPage>(`/api/jobs/${encodeURIComponent(id)}/pages/${page}/lettering/reset`, { method: "POST" }),

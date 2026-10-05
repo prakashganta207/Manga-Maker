@@ -75,8 +75,15 @@ Cost per page (budget counters): mock LLM → $0. With a real vision Editor, est
   character, strength. 12 tests (incl. "nothing outside the mask changes"). **Real**: 30.0 s / 7017 MiB
   (plain), 37.5 s / 6825 MiB (with reference); UI smoke run on the GPU: paint → 45 s → accepted.
 
+- **M7 Lock + version history**: undo / redo / restore for panels and lettering (`agents/history.py`,
+  `GET /history`, `POST /history/undo|redo|restore`), panel lock and character look lock (endpoints,
+  loop + pipeline + cast-route enforcement), editor: server undo/redo with labels, version lists
+  (panel thumbnails, CURRENT, Restore), lock toggles on panels and on the Cast page. 12 tests; UI
+  smoke: save → server undo restores text → lock panel, no console errors.
+  **Phase 4 complete.** 212 passed, 2 skipped.
+
 ### Next
-- M7 lock + version history.
+- Phase 5: M8 Letterer agent with face-aware placement.
 
 ### Known issues
 - No LLM key on this machine: the Editor runs as the mock (it can't see real flaws such as the

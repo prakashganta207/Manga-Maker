@@ -35,6 +35,7 @@ from .cast_store import CastStore
 from .character_designer import design_characters
 from .director import direct
 from .graph import Ctx, Node, run_graph
+from .history import record_lettering
 from .prompt_builder import NEGATIVE_PROMPT, build_prompt, image_size_for_aspect, panel_references
 from .redraw import run_quality_loop
 from .schemas import DirectedPanel, PlannedPanel
@@ -154,8 +155,8 @@ def node_panels(p: MangaProject, ctx: Ctx) -> None:
     for index, spec in enumerate(p.prompts, start=1):
         key = (spec.page, spec.panel)
         done = p.panel_result(*key)
-        if done and done.status != "drawing" and done.image and (ctx.job_dir / done.image).exists():
-            continue  # resumed job: this panel was finished before
+        if done and (done.status != "drawing" or done.locked) and done.image and (ctx.job_dir / done.image).exists():
+            continue  # resumed job: this panel was finished before (locked panels are never redrawn)
         planned, directed = specs[key]
         result = run_quality_loop(
             p, ctx, spec, planned, directed,
@@ -222,6 +223,7 @@ def ensure_lettering(p: MangaProject, settings: Settings) -> None:
         if p.page_lettering(planned.page_number) is None:
             inner = [r.inset(cfg.border) for r in plan_page(directed.layout, cfg, rtl=True)]
             p.lettering.append(plan_lettering(planned, inner, font_size=cfg.font_size, font_path=cfg.font_path))
+            record_lettering(p, planned.page_number, "auto_place", "Automatic lettering")
     p.lettering.sort(key=lambda pl: pl.page)
 
 

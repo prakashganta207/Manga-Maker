@@ -197,3 +197,14 @@ reasonable option; change freely.
     The mask is painted in page coordinates, sent as fractions of the panel *slot*, and rasterised at the
     panel image's resolution by undoing the cover fit. Inpaints go through the same Editor loop (redraws
     repaint the same region of the same base image).
+57. **Version history** (`agents/history.py`, stored in `project.json`): versions per target (`panel:<p>:<n>`
+    = which attempt is shown, `lettering:<p>` = the bubble list), a global undo stack of changes
+    (target, from, to) and a redo stack. Restore = a new undoable change to an older version. Versions are
+    never deleted (attempt images stay on disk). The first drawing / automatic lettering is the starting
+    version and can't be undone into nothing; older projects get a "Before your edits" baseline on their
+    first edit. In the editor, ↶/↷ undo unsaved bubble edits locally and walk the server history otherwise.
+58. **Locks**: a *panel* lock means "never redraw automatically" (pipeline re-runs skip it, the Editor loop
+    makes one attempt for your own revision/inpaint and no automatic redraws). A *character look* lock
+    means the bible tags and sheets can't be edited or regenerated, and automatic Editor fixes may not
+    change that character's IP-Adapter weight or remove tags (other fixes, e.g. negative prompts, still
+    apply). Look locks are saved with the project cast, so later chapters inherit them.
