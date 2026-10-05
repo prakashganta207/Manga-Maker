@@ -21,6 +21,10 @@ MODELS = [
      "https://huggingface.co/h94/IP-Adapter/resolve/main/sdxl_models/ip-adapter-plus_sdxl_vit-h.safetensors"),
     ("clip_vision", "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors",
      "https://huggingface.co/h94/IP-Adapter/resolve/main/models/image_encoder/model.safetensors"),
+    # Phase 5: ControlNet "union" for SDXL (one model for openpose / lineart / depth guidance,
+    # Apache-2.0). Used by the storyboard stage; optional (panels work without it).
+    ("controlnet", "controlnet-union-sdxl-1.0.safetensors",
+     "https://huggingface.co/xinsir/controlnet-union-sdxl-1.0/resolve/main/diffusion_pytorch_model.safetensors"),
 ]
 
 
@@ -43,18 +47,21 @@ def download(url: str, target: Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--comfyui-dir", required=True, type=Path, help="the ComfyUI folder (contains models/)")
+    parser.add_argument("--skip-controlnet", action="store_true", help="skip the 2.5 GB ControlNet model")
     args = parser.parse_args()
     models_dir = args.comfyui_dir / "models"
     if not models_dir.is_dir():
-        print(f"{models_dir} not found — point --comfyui-dir at the folder that contains 'models'.")
+        print(f"{models_dir} not found - point --comfyui-dir at the folder that contains 'models'.")
         return 1
     for sub, name, url in MODELS:
+        if args.skip_controlnet and sub == "controlnet":
+            continue
         target = models_dir / sub / name
         target.parent.mkdir(parents=True, exist_ok=True)
         if target.exists():
-            print(f"✓ {sub}/{name} already present")
+            print(f"ok {sub}/{name} already present")
             continue
-        print(f"↓ {sub}/{name}")
+        print(f"downloading {sub}/{name}")
         download(url, target)
     print("Done. Restart ComfyUI, then run: python -m app.tools.comfy_check --generate (in backend/)")
     return 0
