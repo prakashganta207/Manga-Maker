@@ -97,7 +97,7 @@ class LLMProvider(ABC):
         """
 
 
-ImageKind = Literal["panel", "character_ref", "turnaround", "expressions"]
+ImageKind = Literal["panel", "character_ref", "turnaround", "expressions", "inpaint", "storyboard"]
 
 
 @dataclass
@@ -118,6 +118,11 @@ class ImageRequest:
     reference_images: list[Path] = field(default_factory=list)
     # How strongly references steer the image (None = provider default).
     ipadapter_weight: float | None = None
+    # Inpainting (kind="inpaint"): repaint only the white area of `mask_image` on `init_image`.
+    # `denoise` = how much of the masked area is redrawn (1.0 = from scratch, 0.5 = gentle change).
+    init_image: Path | None = None
+    mask_image: Path | None = None
+    denoise: float = 1.0
     # Structured info (shot, character names, ...) — used by the mock to draw
     # placeholders; real providers rely on the prompt text only.
     metadata: dict[str, Any] = field(default_factory=dict)

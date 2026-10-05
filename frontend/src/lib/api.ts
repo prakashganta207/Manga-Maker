@@ -434,6 +434,16 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ instruction }),
     }),
+  inpaintPanel: (
+    id: string,
+    page: number,
+    panel: number,
+    body: { strokes: { points: number[]; size: number; erase: boolean }[]; prompt: string; character: string; denoise?: number },
+  ) =>
+    request<Job>(`/api/jobs/${encodeURIComponent(id)}/panels/${page}/${panel}/inpaint`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
   resetLettering: (id: string, page: number) =>
     request<EditorPage>(`/api/jobs/${encodeURIComponent(id)}/pages/${page}/lettering/reset`, { method: "POST" }),
   // Cast approval

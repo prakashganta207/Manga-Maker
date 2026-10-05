@@ -15,7 +15,9 @@ from app.providers.comfyui_image import ComfyUIImageProvider
 from app.tools import comfy_check
 
 CORE = ["CheckpointLoaderSimple", "EmptyLatentImage", "CLIPTextEncode", "KSampler", "VAEDecode",
-        "SaveImage", "LoadImage"]
+        "SaveImage", "LoadImage",
+        # inpainting (Phase 4)
+        "VAEEncode", "SetLatentNoiseMask", "ImageToMask", "GrowMask", "FeatherMask", "ImageCompositeMasked"]
 IPA = ["IPAdapterUnifiedLoader", "IPAdapterAdvanced", "IPAdapterModelLoader", "CLIPVisionLoader"]
 
 

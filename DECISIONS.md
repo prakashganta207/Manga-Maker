@@ -188,3 +188,12 @@ reasonable option; change freely.
     the model doesn't always respect; the prompt still sets the panel's expression.
 55. **OpenCV pinned to 4.x** (`opencv-python-headless>=4.9,<5`): OpenCV 5.0 removed the cascade classifier
     from the main package. The cascade file (MIT, licence text inside the XML) ships in `app/vision/models/`.
+56. **Inpainting with the regular checkpoint** (no separate inpainting model to download): `VAEEncode` →
+    `SetLatentNoiseMask` (noise only inside the mask) → KSampler at `INPAINT_DENOISE` (0.9) →
+    `ImageCompositeMasked` pastes the decoded region back through a grown (12 px) + feathered (10 px) mask,
+    so pixels outside the mask are untouched. All core nodes (checked with `/object_info`).
+    `inpaint_ipadapter.json` adds the character's reference when the region shows a character ("auto" =
+    the character whose detected face is under the mask, faces left-to-right = panel characters in order).
+    The mask is painted in page coordinates, sent as fractions of the panel *slot*, and rasterised at the
+    panel image's resolution by undoing the cover fit. Inpaints go through the same Editor loop (redraws
+    repaint the same region of the same base image).

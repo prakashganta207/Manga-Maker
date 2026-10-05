@@ -22,11 +22,15 @@ export interface MaskStroke {
   erase: boolean;
 }
 
-export interface MaskTool {
+/** Inpainting mask being painted on one panel (strokes in page pixels). */
+export interface MaskState {
   panel: number;
   brush: number;
   erase: boolean;
   strokes: MaskStroke[];
+}
+
+export interface MaskTool extends MaskState {
   onStrokes: (strokes: MaskStroke[]) => void;
 }
 

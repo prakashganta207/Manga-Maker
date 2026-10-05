@@ -33,6 +33,8 @@ Plan: PHASE_3_5_PLAN.md. Test command: `python scripts/tasks.py test` (mock mode
 | IP-Adapter, 1 reference | 35.4 s | 6853 MiB |
 | IP-Adapter, 2 references | 51.2 s | 6597 MiB |
 | character sheets (turnaround + expressions) | ~25 s each | — |
+| inpaint (mask ≈ 13% of the panel, denoise 0.9) | 30.0 s | 7017 MiB |
+| inpaint + IP-Adapter reference | 37.5 s | 6825 MiB |
 
 Cost per page (budget counters): mock LLM → $0. With a real vision Editor, estimate ≈ 3 images ×
 ~1k tokens + ~1.5k text per review ≈ 5k in / 0.6k out tokens; with Claude Opus 5.5 ($4/$20 per MTok)
@@ -66,8 +68,15 @@ Cost per page (budget counters): mock LLM → $0. With a real vision Editor, est
   (`vision/faces.py`, DECISIONS #54) instead of fixed columns, which held two heads each on real sheets.
   Face detection ≈2 s on a 1536×640 sheet, ≈0.06 s on a turnaround (CPU).
 
+- **M6 Inpainting**: `inpaint.json` / `inpaint_ipadapter.json` workflows (core nodes + IP-Adapter),
+  mask rasterising that undoes the cover fit (`pipeline/masks.py`), region character auto-detection,
+  inpaint action through the Editor loop, `POST .../inpaint` (validates empty / whole-panel masks), mock
+  inpainting that only touches the mask, editor brush (paint/erase, size, clear), region text,
+  character, strength. 12 tests (incl. "nothing outside the mask changes"). **Real**: 30.0 s / 7017 MiB
+  (plain), 37.5 s / 6825 MiB (with reference); UI smoke run on the GPU: paint → 45 s → accepted.
+
 ### Next
-- M6 inpainting.
+- M7 lock + version history.
 
 ### Known issues
 - No LLM key on this machine: the Editor runs as the mock (it can't see real flaws such as the

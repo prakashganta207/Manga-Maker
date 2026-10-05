@@ -16,11 +16,14 @@ from pathlib import Path
 from typing import Any, Callable, Literal
 
 from fastapi import FastAPI, HTTPException
+from PIL import Image
 from pydantic import BaseModel, Field
 
 from .agents.pipeline import ensure_lettering, export_documents, layout_config, manifest, render_pages
 from .agents.graph import Ctx
+from .agents.inpaint import inpaint_panel
 from .agents.revision import revise_panel
+from .pipeline.masks import Stroke, coverage, rasterize, soften
 from .agents.state import Bubble, MangaProject
 from .pipeline.layout import plan_page
 
@@ -30,6 +33,19 @@ EDIT_LOCK = threading.Lock()
 
 class ReviseBody(BaseModel):
     instruction: str = Field(min_length=2, max_length=300, description='e.g. "make her angrier", "camera from below"')
+
+
+class StrokeBody(BaseModel):
+    points: list[float] = Field(min_length=2, max_length=20000, description="x0, y0, x1, y1... as slot fractions")
+    size: float = Field(gt=0, le=1, description="brush diameter as a fraction of the slot width")
+    erase: bool = False
+
+
+class InpaintBody(BaseModel):
+    strokes: list[StrokeBody] = Field(min_length=1, max_length=500)
+    prompt: str = Field(min_length=2, max_length=300, description="What should be in the painted region")
+    character: str = Field(default="auto", max_length=40, description='"auto", "" (nobody) or a character name')
+    denoise: float | None = Field(default=None, ge=0.1, le=1.0)
 
 
 class LetteringBody(BaseModel):
@@ -132,6 +148,34 @@ def register_editor_routes(app: FastAPI) -> None:
             "rendered": project.outputs.get(direction, {}).get("pages", [None] * page)[page - 1],
             "files_base": f"/files/{job_id}/",
         }
+
+    @app.post("/api/jobs/{job_id}/panels/{page}/{panel}/inpaint", status_code=202)
+    def inpaint(job_id: str, page: int, panel: int, body: InpaintBody) -> dict[str, Any]:
+        """Repaint only the masked region of a panel (ComfyUI inpainting, Editor loop afterwards)."""
+        project = finished(job_id)
+        result = project.panel_result(page, panel)
+        if result is None or not result.image:
+            raise HTTPException(404, f"No drawn panel {panel} on page {page}")
+        if body.character not in ("auto", "") and project.character(body.character) is None:
+            raise HTTPException(422, f"No character named '{body.character}'")
+        _, directed = page_or_404(project, page)
+        slot = plan_page(directed.layout, layout_config(settings))[panel - 1]
+        strokes = [Stroke(points=list(zip(s.points[0::2], s.points[1::2])), size=s.size, erase=s.erase)
+                   for s in body.strokes]
+        with Image.open(job_dir(job_id) / result.image) as img:
+            mask = rasterize(strokes, img.size, (slot.w, slot.h))
+        share = coverage(mask)
+        if share < 0.002:
+            raise HTTPException(422, "The mask is empty: paint over the region to change")
+        if share > 0.9:
+            raise HTTPException(422, "The mask covers almost the whole panel: use 'Tell the director' to redraw it instead")
+        number = len(result.attempts) + 1
+        mask_path = job_dir(job_id) / "panels" / f"p{page:02d}_{panel:02d}_mask{number}.png"
+        soften(mask).save(mask_path)
+        region = body.prompt.strip()
+        return queue_panel_action(job_id, page, panel, f"Inpainting p{page}-{panel}: {region[:50]}",
+                                  lambda proj, ctx: inpaint_panel(proj, ctx, page, panel, mask_path, region,
+                                                                  body.character, body.denoise))
 
     @app.put("/api/jobs/{job_id}/pages/{page}/lettering")
     def save_lettering(job_id: str, page: int, body: LetteringBody) -> dict[str, Any]:

@@ -33,6 +33,7 @@ def main() -> int:
     parser.add_argument("--api", default="http://localhost:8300")
     parser.add_argument("--channel", default="msedge", help="installed browser: msedge or chrome")
     parser.add_argument("--only-shot", default="", help="just screenshot this path (e.g. '/?x=1') and exit")
+    parser.add_argument("--inpaint", action="store_true", help="also paint a mask on panel 1 and inpaint it")
     args = parser.parse_args()
     SHOTS.mkdir(parents=True, exist_ok=True)
     errors: list[str] = []
@@ -80,6 +81,11 @@ def main() -> int:
         page.wait_for_timeout(1500)
         page.screenshot(path=str(SHOTS / "editor_3_saved.png"), full_page=True)
 
+        if args.inpaint:
+            ok_inpaint = inpaint_flow(page, canvas, args)
+            if not ok_inpaint:
+                errors.append("inpaint flow failed")
+
         after = api(args.api, f"/api/jobs/{args.job}/pages/1/editor")["lettering"]
         moved = next(b for b in after["bubbles"] if b["id"] == bubble["id"])
         ok = moved["text"] == "SMOKE TEST EDIT" and abs(moved["x"] - bubble["x"]) > 0.01 and after["source"] == "edited"
@@ -87,6 +93,43 @@ def main() -> int:
 
     print("stored change:", ok, "| console errors:", errors or "none")
     return 0 if ok and not errors else 1
+
+
+def inpaint_flow(page, canvas, args) -> bool:
+    """Select panel 1, paint a stroke, describe the region, submit, wait for the GPU job."""
+    import time
+    data = api(args.api, f"/api/jobs/{args.job}/pages/1/editor")
+    target = data["panels"][0]
+    before = len(next(r for r in api(args.api, f"/api/jobs/{args.job}/project")["panels"]
+                      if (r["page"], r["panel"]) == (1, target["panel"]))["attempts"])
+    box = canvas.bounding_box()
+    scale = box["width"] / data["width"]
+    r = target["rect"]
+    px = lambda fx, fy: (box["x"] + (r["x"] + fx * r["w"]) * scale, box["y"] + (r["y"] + fy * r["h"]) * scale)
+    page.mouse.click(*px(0.95, 0.95))       # a corner of the panel, away from bubbles
+    page.get_by_role("button", name="Paint a region to redraw").click()
+    page.mouse.move(*px(0.35, 0.3))
+    page.mouse.down()
+    for i in range(10):
+        page.mouse.move(*px(0.35 + i * 0.03, 0.3 + (i % 2) * 0.05), steps=3)
+    page.mouse.up()
+    page.get_by_placeholder("What should be there?").fill("a surprised face, wide eyes")
+    page.screenshot(path=str(SHOTS / "editor_4_mask.png"), full_page=True)
+    page.get_by_role("button", name="Redraw region").click()
+    started = time.monotonic()
+    while time.monotonic() - started < 900:
+        job = api(args.api, f"/api/jobs/{args.job}")
+        if not job["busy"]:
+            break
+        time.sleep(3)
+    page.wait_for_timeout(5000)
+    page.screenshot(path=str(SHOTS / "editor_5_inpainted.png"), full_page=True)
+    result = next(r for r in api(args.api, f"/api/jobs/{args.job}/project")["panels"]
+                  if (r["page"], r["panel"]) == (1, target["panel"]))
+    new = result["attempts"][before:]
+    print("inpaint attempts:", [(a["source"], a["status"], a["seconds"], a["workflow"]) for a in new],
+          "in", round(time.monotonic() - started), "s; job error:", job["error"])
+    return bool(new) and new[0]["source"] == "inpaint" and not job["error"]
 
 
 if __name__ == "__main__":

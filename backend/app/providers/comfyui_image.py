@@ -48,6 +48,8 @@ class ComfyUIImageProvider(ImageProvider):
 
     def choose_workflow(self, request: ImageRequest) -> str:
         refs = len(request.reference_images)
+        if request.kind == "inpaint":
+            return "inpaint_ipadapter" if refs and self.comfy.capabilities().has_ipadapter else "inpaint"
         if request.kind != "panel" or refs == 0:
             return "txt2img"
         if not self.comfy.capabilities().has_ipadapter:
@@ -84,7 +86,15 @@ class ComfyUIImageProvider(ImageProvider):
             "ipadapter_weight_2": round(weight * 0.65, 3),
             "ipadapter_end_at": self.settings.ipadapter_end_at,
         }
-        if name.startswith("ipadapter"):
+        if name.startswith("inpaint"):
+            if not (request.init_image and request.mask_image):
+                raise ProviderError("Inpainting needs init_image and mask_image")
+            # Uploaded fresh every time: the panel and the mask change between edits.
+            values.update(init_image=self.comfy.upload_image(Path(request.init_image)),
+                          mask_image=self.comfy.upload_image(Path(request.mask_image)),
+                          denoise=round(max(0.05, min(1.0, request.denoise)), 3),
+                          mask_grow=self.settings.inpaint_grow, mask_feather=self.settings.inpaint_feather)
+        if name.startswith("ipadapter") or name == "inpaint_ipadapter":
             values["reference_image_1"] = self._upload(request.reference_images[0])
             if name == "ipadapter_2ref":
                 values["reference_image_2"] = self._upload(request.reference_images[1])

@@ -117,6 +117,11 @@ class Settings:
     job_max_llm_cost_usd: float = 3.0
     job_max_gpu_seconds: float = 3600.0
 
+    # --- Phase 4: inpainting ---
+    inpaint_denoise: float = 0.9          # how much of the masked region is redrawn (1 = from scratch)
+    inpaint_grow: int = 12                # px the mask grows so seams fall outside the edited area
+    inpaint_feather: int = 10             # px of soft edge when pasting the region back
+
     @classmethod
     def from_env(cls) -> "Settings":
         output = Path(_env("OUTPUT_DIR", "output"))
@@ -168,6 +173,9 @@ class Settings:
             job_max_llm_calls=max(0, _env_int("JOB_MAX_LLM_CALLS", 150)),
             job_max_llm_cost_usd=max(0.0, _env_float("JOB_MAX_LLM_COST_USD", 3.0)),
             job_max_gpu_seconds=max(0.0, _env_float("JOB_MAX_GPU_SECONDS", 3600.0)),
+            inpaint_denoise=max(0.1, min(1.0, _env_float("INPAINT_DENOISE", 0.9))),
+            inpaint_grow=max(0, min(64, _env_int("INPAINT_GROW", 12))),
+            inpaint_feather=max(0, min(64, _env_int("INPAINT_FEATHER", 10))),
         )
 
     def describe(self) -> dict:

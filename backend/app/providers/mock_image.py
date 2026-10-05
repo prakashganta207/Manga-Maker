@@ -115,6 +115,8 @@ class MockImageProvider(ImageProvider):
         draw = ImageDraw.Draw(img)
         meta = request.metadata
 
+        if request.kind == "inpaint":
+            return self._inpaint(request, rng)
         if request.kind == "character_ref":
             return self._character_ref(img, draw, meta)
         if request.kind == "turnaround":
@@ -169,6 +171,22 @@ class MockImageProvider(ImageProvider):
         draw.rectangle((bbox[0] - 6, bbox[1] - 4, bbox[2] + 6, bbox[3] + 4), fill=PAPER, outline=INK, width=2)
         draw.text((10, h - 10), label, fill=INK, font=font, anchor="ld")
         return img
+
+    def _inpaint(self, request: ImageRequest, rng: random.Random) -> Image.Image:
+        """Mock inpainting: cross-hatching + a label inside the mask, everything else untouched."""
+        base = Image.open(request.init_image).convert("L")
+        mask = Image.open(request.mask_image).convert("L").resize(base.size)
+        patch = Image.new("L", base.size, PAPER)
+        draw = ImageDraw.Draw(patch)
+        step = rng.randint(9, 14)
+        for x in range(-base.height, base.width, step):
+            draw.line((x, 0, x + base.height, base.height), fill=INK, width=2)
+        box = mask.getbbox()
+        if box:
+            label = safe_text(request.metadata.get("region", "inpainted"))[:24]
+            draw.rectangle((box[0] + 4, box[1] + 4, box[0] + 12 + 9 * len(label), box[1] + 30), fill=PAPER)
+            draw.text((box[0] + 8, box[1] + 8), label, fill=INK, font=load_font(16))
+        return Image.composite(patch, base, mask)
 
     def _character_ref(self, img: Image.Image, draw: ImageDraw.ImageDraw, meta: dict) -> Image.Image:
         w, h = img.size

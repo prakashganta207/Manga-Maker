@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, fileUrl, type Bubble, type BubbleKind, type Direction, type EditorPage, type Job, type MangaProject } from "@/lib/api";
 import { KIND_LABEL, newBubbleId } from "@/lib/bubbles";
-import type { MaskTool } from "./PageCanvas";
+import type { MaskState } from "./PageCanvas";
 import PanelTools from "./PanelTools";
 
 // Konva needs the browser (window, canvas), so the canvas is never rendered on the server.
@@ -37,7 +37,7 @@ export default function EditorView({
   const [future, setFuture] = useState<Bubble[][]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedPanel, setSelectedPanel] = useState<number | null>(null);
-  const [mask, setMask] = useState<MaskTool | null>(null);
+  const [mask, setMask] = useState<MaskState | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -260,7 +260,7 @@ export default function EditorView({
               selectedId={selectedId}
               selectedPanel={selectedPanel}
               imageVersion={version}
-              mask={mask}
+              mask={mask && { ...mask, onStrokes: (strokes) => setMask((m) => (m ? { ...m, strokes } : m)) }}
               onSelectBubble={setSelectedId}
               onSelectPanel={setSelectedPanel}
               onChange={updateBubble}
