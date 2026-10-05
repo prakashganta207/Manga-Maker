@@ -148,6 +148,7 @@ class BudgetUsage(BaseModel):
     images: int = 0
     redraws: int = 0
     exhausted: str | None = None     # which limit ran out first, if any
+    limits: dict[str, float] = Field(default_factory=dict)  # snapshot of the .env limits (for the UI)
 
 
 class MangaProject(BaseModel):
@@ -186,6 +187,11 @@ class MangaProject(BaseModel):
         self.usage.input_tokens += step.input_tokens
         self.usage.output_tokens += step.output_tokens
         self.usage.cost_usd = round(self.usage.cost_usd + step.cost_usd, 6)
+
+    def budget_limits(self, settings: Any) -> None:
+        self.budget.limits = {"llm_calls": settings.job_max_llm_calls, "llm_cost_usd": settings.job_max_llm_cost_usd,
+                              "gpu_seconds": settings.job_max_gpu_seconds, "max_attempts": settings.editor_max_attempts,
+                              "threshold": settings.quality_threshold}
 
     def warn(self, message: str) -> None:
         if message not in self.warnings:

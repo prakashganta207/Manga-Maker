@@ -27,3 +27,5 @@ backend/.cache/
 # local ComfyUI install + models (see SETUP_COMFYUI.md) and LoRA training tools
 comfyui/
 tools/
+samples/integration_output/
+samples/benchmarks/

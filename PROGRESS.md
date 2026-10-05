@@ -1,5 +1,56 @@
 # Progress
 
+## Phase 3–5 (quality loop, interactive editor, pro features) — in progress
+
+Plan: PHASE_3_5_PLAN.md. Test command: `python scripts/tasks.py test` (mock mode, no GPU/keys).
+
+### Start-of-phase check (2026-10-06)
+- Phase 1+2 verified before new work: 124 passed / 2 skipped; drama sample end to end in mock mode (3 s).
+  One existing bug found and fixed: `scripts/download_comfyui_models.py` crashed on Windows consoles
+  (non-ASCII arrows in print).
+- ComfyUI installed inside the project (`comfyui/`, DECISIONS #42) with all Phase 2 models + the
+  ControlNet union model. `comfy_check`: 1071 nodes, checkpoint + IP-Adapter + CLIP vision found.
+  First **real** panel: `samples/comfyui_test_panel.png`.
+
+### Done
+- **M1 Editor agent + schemas**: vision input in all LLM providers, `EditorReview` (9 criteria 1–5,
+  verdict, problems, machine-applicable fix), Editor agent, mock Editor, combined Editor+CLIP score
+  with configurable threshold (`agents/quality.py`). 32 tests.
+- **M2 Redraw loop + budgets** (`agents/redraw.py`): every attempt stored (image, prompt, seed,
+  scores, review, applied fix); failed panels redrawn with the Editor's fix; max 3 attempts; per-job
+  budgets (LLM calls, LLM cost, GPU seconds) from `.env`; best attempt kept + "needs review";
+  Editor errors never fail the job; resume redraws an interrupted panel. Only real CLIP votes in the
+  combined score (the pixel fallback measures layout, not likeness). Benchmark tool
+  `python -m app.tools.bench`. 13 tests.
+  **Real run** (ComfyUI + CLIP + mock Editor, 1 page, action story): 5 panels, 12 images, 3 redraws,
+  CLIP 0.83–0.96, all accepted; 497 GPU-seconds for the page incl. 4 character sheets (102 s).
+
+### Measurements (RTX 4060 Laptop 8 GB, ComfyUI 0.38, torch 2.14 cu130, Animagine XL 3.1, 832×1216, 28 steps)
+| Workflow | Time | Peak VRAM (nvidia-smi, idle 165 MiB) |
+|---|---|---|
+| txt2img (cold, incl. checkpoint load) | 31.0 s | 6981 MiB |
+| txt2img (after /free) | 26.7 s | 6949 MiB |
+| IP-Adapter, 1 reference | 35.4 s | 6853 MiB |
+| IP-Adapter, 2 references | 51.2 s | 6597 MiB |
+| character sheets (turnaround + expressions) | ~25 s each | — |
+
+Cost per page (budget counters): mock LLM → $0. With a real vision Editor, estimate ≈ 3 images ×
+~1k tokens + ~1.5k text per review ≈ 5k in / 0.6k out tokens; with Claude Opus 5.5 ($4/$20 per MTok)
+≈ $0.03 per review, ≈ $0.2 per 5-panel page at ~1.4 reviews per panel (to be measured with a key).
+
+### Next
+- M3 attempts UI in the Agent timeline.
+
+### Known issues
+- No LLM key on this machine: the Editor runs as the mock (it can't see real flaws such as the
+  duplicated heads two-reference IP-Adapter sometimes draws). Real providers are tested with fakes.
+- Windows Application Control blocks newly installed DLLs on first load (allowed on the next load).
+  If ComfyUI fails to start right after installing packages, start it again.
+- Only ~1.3 GB of the 16 GB system RAM was free while ComfyUI ran (checkpoint offloading); close other
+  apps for long runs.
+
+---
+
 ## Phase 1 + 2 (agents, character bible, consistency) — all milestones M0–M8 done
 
 `python scripts/tasks.py test` → 124 passed, 2 skipped (opt-in real-CLIP test, integration test).

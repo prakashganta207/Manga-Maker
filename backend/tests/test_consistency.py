@@ -121,7 +121,8 @@ def test_panels_use_ipadapter_with_emotion_matched_references(story, settings, t
             assert kind in (wanted, "front")                                   # matching expression if any
             assert Path(tmp_path / ref).exists()
     ip_workflows = [w for w in fake.workflows if "12" in w and w["12"]["class_type"] == "IPAdapterAdvanced"]
-    assert len(ip_workflows) == len(with_refs)
+    # Every attempt of the quality loop (first drawing + Editor redraws) uses the references.
+    assert len(ip_workflows) == sum(len(project.panel_result(x.page, x.panel).attempts) for x in with_refs)
     two_ref = [w for w in ip_workflows if "14" in w]
     for w in two_ref:                                                          # 2 characters: reduced weight
         assert w["12"]["inputs"]["weight"] == pytest.approx(0.65 * 0.65, abs=1e-3)

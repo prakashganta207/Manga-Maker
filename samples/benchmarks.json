@@ -1,0 +1,35 @@
+[
+  {
+    "workflow": "txt2img",
+    "seconds": 26.7,
+    "peak_vram_mib": 6949,
+    "baseline_vram_mib": 165,
+    "at": "2026-10-05T21:24:14+00:00",
+    "size": [
+      832,
+      1216
+    ]
+  },
+  {
+    "workflow": "ipadapter_1ref",
+    "seconds": 35.4,
+    "peak_vram_mib": 6853,
+    "baseline_vram_mib": 165,
+    "at": "2026-10-05T21:24:52+00:00",
+    "size": [
+      832,
+      1216
+    ]
+  },
+  {
+    "workflow": "ipadapter_2ref",
+    "seconds": 51.2,
+    "peak_vram_mib": 6597,
+    "baseline_vram_mib": 165,
+    "at": "2026-10-05T21:25:45+00:00",
+    "size": [
+      832,
+      1216
+    ]
+  }
+]

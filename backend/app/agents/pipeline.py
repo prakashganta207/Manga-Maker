@@ -35,6 +35,8 @@ from .character_designer import design_characters
 from .director import direct
 from .graph import Ctx, Node, run_graph
 from .prompt_builder import NEGATIVE_PROMPT, build_prompt, image_size_for_aspect, panel_references
+from .redraw import run_quality_loop
+from .schemas import DirectedPanel, PlannedPanel
 from .sheets import generate_sheets, sheets_present
 from .runner import AgentStep
 from .state import MangaProject, PanelPrompt, PanelResult
@@ -84,7 +86,10 @@ def node_reference_sheets(p: MangaProject, ctx: Ctx) -> None:
     todo = [c for c in main_characters(p) if not sheets_present(c, ctx.job_dir)]
     for index, character in enumerate(todo, start=1):
         ctx.progress("sheets", (index - 1) / len(todo), f"Drawing {character.name}'s turnaround + expressions")
+        started = time.monotonic()
         generate_sheets(character, ctx.image, ctx.job_dir)
+        p.budget.gpu_seconds = round(p.budget.gpu_seconds + time.monotonic() - started, 2)
+        p.budget.images += 2
         p.save(ctx.job_dir)
     ctx.image.free_memory()  # unload models before the next stage
 
@@ -132,38 +137,35 @@ def node_prompts(p: MangaProject, ctx: Ctx) -> None:
     p.prompts = prompts
 
 
-def node_panels(p: MangaProject, ctx: Ctx) -> None:
+def panel_specs(p: MangaProject) -> dict[tuple[int, int], tuple[PlannedPanel, DirectedPanel]]:
     assert p.page_plan and p.director
-    panel_dir = ctx.job_dir / "panels"
-    panel_dir.mkdir(parents=True, exist_ok=True)
-    planned = {(pg.page_number, pn.panel_number): pn for pg, pn in p.page_plan.all_panels()}
     directed = {(pg.page_number, pn.panel_number): pn for pg in p.director.pages for pn in pg.panels}
+    return {(pg.page_number, pn.panel_number): (pn, directed[(pg.page_number, pn.panel_number)])
+            for pg, pn in p.page_plan.all_panels()}
+
+
+def node_panels(p: MangaProject, ctx: Ctx) -> None:
+    """Draw every panel through the quality loop (draw -> Editor review -> redraw with fixes)."""
+    specs = panel_specs(p)
     total = len(p.prompts)
+    p.budget_limits(ctx.settings)
     # Sequential on purpose: one image at a time fits an 8 GB GPU.
     for index, spec in enumerate(p.prompts, start=1):
         key = (spec.page, spec.panel)
         done = p.panel_result(*key)
-        if done and (ctx.job_dir / done.image).exists():
-            continue  # resumed job: this panel was drawn before
-        panel, direction = planned[key], directed[key]
-        started = time.monotonic()
-        image = ctx.image.generate(ImageRequest(
-            prompt=spec.prompt, negative_prompt=spec.negative_prompt, width=spec.width, height=spec.height,
-            seed=spec.seed, kind="panel", reference_images=[ctx.job_dir / r for r in spec.references],
-            ipadapter_weight=spec.ipadapter_weight,
-            metadata={"page": spec.page, "panel": spec.panel, "shot": direction.shot, "angle": direction.angle,
-                      "characters": list(panel.characters), "mood": panel.emotion},
-        ))
-        path = panel_dir / f"p{spec.page:02d}_{spec.panel:02d}.png"
-        image.save(path)
-        info = getattr(ctx.image, "last_info", {}) or {}
-        p.panels = [r for r in p.panels if (r.page, r.panel) != key]
-        p.panels.append(PanelResult(page=spec.page, panel=spec.panel, image=path.relative_to(ctx.job_dir).as_posix(),
-                                    seconds=round(time.monotonic() - started, 2), workflow=info.get("workflow", ctx.image.name)))
-        p.save(ctx.job_dir)  # progress survives a crash mid-way
-        ctx.progress("panels", index / total, f"Drew page {spec.page} panel {spec.panel}")
+        if done and done.status != "drawing" and done.image and (ctx.job_dir / done.image).exists():
+            continue  # resumed job: this panel was finished before
+        planned, directed = specs[key]
+        result = run_quality_loop(
+            p, ctx, spec, planned, directed,
+            progress=lambda message, i=index: ctx.progress("panels", (i - 1) / total, message))
+        verdict = {"accepted": "accepted", "needs_review": "needs review"}.get(result.status, result.status)
+        ctx.progress("panels", index / total,
+                     f"Page {spec.page} panel {spec.panel}: {verdict} after {len(result.attempts)} attempt(s)")
     for warning in getattr(ctx.image, "warnings", []):
         p.warn(warning)
+    if p.budget.exhausted:
+        p.warn(f"Budget limit reached: {p.budget.exhausted}. Some panels kept their best attempt without more redraws.")
     ctx.image.free_memory()  # unload models before the next stage
 
 
@@ -193,6 +195,8 @@ def node_consistency(p: MangaProject, ctx: Ctx) -> None:
     scorer = scorer_for(ctx.settings)
     prompts = {(x.page, x.panel): x for x in p.prompts}
     for index, result in enumerate(p.panels, start=1):
+        if result.consistency_method:
+            continue  # already scored inside the quality loop
         if scorer is None:
             result.consistency, result.consistency_method = {}, "off"
             continue
@@ -253,9 +257,9 @@ def build_nodes(job_dir: Path) -> list[Node]:
              lambda p: all(sheets_present(c, job_dir) for c in main_characters(p))),
         Node("approval", "approval", "Cast approval", node_approval, cast_approved),
         Node("prompts", "prompts", "Prompt builder", node_prompts, lambda p: bool(p.prompts)),
-        Node("panels", "panels", "Drawing panels", node_panels,
+        Node("panels", "panels", "Drawing panels + Editor loop", node_panels,
              lambda p: bool(p.prompts) and len(p.panels) == len(p.prompts)
-             and all((job_dir / r.image).exists() for r in p.panels)),
+             and all(r.status != "drawing" and r.image and (job_dir / r.image).exists() for r in p.panels)),
         Node("consistency", "consistency", "Consistency score", node_consistency,
              lambda p: bool(p.panels) and all(r.consistency_method for r in p.panels)),
         Node("layout", "layout", "Layout and lettering", node_layout,
@@ -314,11 +318,26 @@ def manifest(project: MangaProject) -> dict[str, Any]:
         "providers": project.providers,
         "warnings": project.warnings,
         "usage": project.usage.model_dump(),
+        "quality": quality_summary(project),
         "characters": [{"name": c.name, "description": c.description, "tags": c.tag_prompt(),
                         "approved": c.approved, "reference_image": c.sheets.views.get("front") or c.sheets.turnaround}
                        for c in project.characters],
         "outputs": {d: {"pages": o.get("pages", []), "pdf": o.get("pdf")} for d, o in project.outputs.items()},
         "project": "project.json",
+    }
+
+
+def quality_summary(project: MangaProject) -> dict[str, Any]:
+    """Counts for the UI + cost per page from the budget counters."""
+    statuses = [r.status for r in project.panels]
+    pages = len(project.page_plan.pages) if project.page_plan else 0
+    return {
+        "accepted": statuses.count("accepted"), "needs_review": statuses.count("needs_review"),
+        "unreviewed": statuses.count("unreviewed"), "attempts": sum(len(r.attempts) for r in project.panels),
+        "redraws": project.budget.redraws, "llm_calls": project.budget.llm_calls,
+        "gpu_seconds": project.budget.gpu_seconds, "budget_exhausted": project.budget.exhausted,
+        "cost_per_page_usd": round(project.usage.cost_usd / pages, 4) if pages else 0.0,
+        "gpu_seconds_per_page": round(project.budget.gpu_seconds / pages, 1) if pages else 0.0,
     }
 
 
