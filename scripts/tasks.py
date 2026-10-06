@@ -6,6 +6,8 @@
     python scripts/tasks.py backend   # backend only
     python scripts/tasks.py frontend  # frontend only
     python scripts/tasks.py sample    # run samples/stories/*.txt -> samples/output/
+    python scripts/tasks.py comfyui   # start the in-project ComfyUI (comfyui/, see SETUP_COMFYUI.md)
+    python scripts/tasks.py demo      # final 2-chapter run -> samples/demo (add --train-lora by hand)
 
 Ports: BACKEND_PORT (default 8000) and FRONTEND_PORT (default 3000) env vars.
 """
@@ -108,6 +110,18 @@ def sample() -> None:
         run([python(), "-m", "app.cli", story, "--out", out], BACKEND)
 
 
+def comfyui() -> None:
+    """Start the ComfyUI installed inside the project. --disable-pinned-memory keeps ~6 GB of RAM free
+    for LoRA training on 16 GB machines (DECISIONS #66)."""
+    folder = ROOT / "comfyui"
+    py = folder / ".venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+    if not py.exists():
+        print("No ComfyUI in comfyui/ - see SETUP_COMFYUI.md (Option B).")
+        sys.exit(1)
+    run([py, "ComfyUI/main.py", "--listen", "127.0.0.1", "--port", "8188", "--disable-auto-launch",
+         "--disable-pinned-memory"], folder)
+
+
 TASKS = {
     "install": install,
     "test": test,
@@ -115,6 +129,8 @@ TASKS = {
     "backend": lambda: run(backend_cmd(), BACKEND),
     "frontend": lambda: run(frontend_cmd(), FRONTEND, env=frontend_env()),
     "sample": sample,
+    "comfyui": comfyui,
+    "demo": lambda: run([python(), ROOT / "scripts" / "make_demo.py"], ROOT),
 }
 
 if __name__ == "__main__":

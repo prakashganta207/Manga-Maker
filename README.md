@@ -1,235 +1,249 @@
 # Story to Manga
 
-Paste a short story. A small team of AI agents turns it into black-and-white manga
-pages, and you watch every step. A Writer plans beats and pages, a Director picks layouts
-and camera shots, and a Character Designer writes a character bible and draws reference
-sheets that you approve. Then the panels are drawn with those references (IP-Adapter),
-scored for character consistency (CLIP), lettered in code, and exported as PNG and PDF.
+Paste a short story. A team of AI agents turns it into black-and-white manga pages, and you
+watch, judge and change every step:
 
-![Sample page (mock mode)](samples/output/action_rooftop_chase/pages/rtl/page_02.png)
+- a **Writer** plans beats and pages,
+- a **Director** picks layouts and camera shots,
+- a **Character Designer** writes a character bible and draws reference sheets you approve.
 
-*The sample above is **mock mode**: placeholder art drawn with Pillow, no API keys. With
-ComfyUI connected, the panels come from an anime SDXL model; everything else is the same.*
+Then each panel is roughed out on a storyboard, drawn with the characters' references
+(IP-Adapter, ControlNet, optional character LoRAs) and graded by a vision-LLM **Editor**, which
+sends weak panels back for a redraw. A **Letterer** places the speech bubbles away from faces.
+Finally you can edit everything on a canvas and export PNG, PDF, CBZ or a vertical webtoon.
+Chapters of a series share the cast, the art style and a running "story so far".
 
-## Quick start (mock mode, no keys, no GPU)
+![A page from the real pipeline (ComfyUI + Animagine XL on an 8 GB laptop GPU)](samples/output/rooftop_series/rooftop-ch1/pages/rtl/page_01.png)
 
-Requirements: Python 3.11+, Node 20+.
+## Quick start
+
+Requirements: Python 3.11+, Node 20+. No API keys and no GPU needed (mock mode).
 
 ```bash
 python scripts/tasks.py install   # or: make install
-python scripts/tasks.py test      # or: make test    (mock mode, ~1-2 min)
+python scripts/tasks.py test      # or: make test    (all unit tests, mock mode, ~2 min)
 python scripts/tasks.py dev       # or: make dev
 ```
 
-Open http://localhost:3000, pick a sample story, and click **Make my manga**.
-API docs are at http://localhost:8000/docs.
+Open http://localhost:3000 and either click **▶ Open the demo** (a finished 2-chapter series made
+with the real pipeline; it loads instantly, with no GPU) or pick a sample story and click **Make my
+manga**. API docs are at http://localhost:8000/docs.
 
-Ports busy? Set `BACKEND_PORT` / `FRONTEND_PORT`, for example
-`BACKEND_PORT=8300 FRONTEND_PORT=3300 python scripts/tasks.py dev` (in PowerShell, set them
-first with `$env:BACKEND_PORT=8300; $env:FRONTEND_PORT=3300`).
+Ports busy? `BACKEND_PORT=8300 FRONTEND_PORT=3300 python scripts/tasks.py dev` (PowerShell:
+`$env:BACKEND_PORT=8300; $env:FRONTEND_PORT=3300` first).
 
 Optional: `pip install -r backend/requirements-ai.txt` adds real **CLIP** consistency scores
-(CPU only, ~1.2 GB model download on first use). Without it, a simple pixel score is used.
+(CPU only, ~1.2 GB download on first use). Without it a simple pixel score is shown (and it does not
+vote in the Editor's pass/fail decision).
 
-## How the agents work
+## The agent pipeline
 
-```
-story
-  │  ✎ Writer, pass 1 ─── beat sheet: beats (emotion, intensity 1-5, kind), emotional arc, climax, characters
-  │  ✎ Writer, pass 2 ─── page plan: pages → panels (purpose, size, characters, action, setting,
-  │                        emotion, dialogue, narration, SFX) using manga pacing rules
-  │  🎬 Director ──────── a layout template per page + shot / angle / composition per panel
-  │                        (+ rules enforced in code: establishing shots, close-ups on peaks, shot variety)
-  │  ☺ Character Designer ─ character bible: fixed visual tags, age, body, personality, expressions
-  │  🖼 Reference sheets ─ turnaround (front/side/back) + 5 expressions per main character, fixed seeds
-  │  ⏸ Cast approval ──── you approve / edit / regenerate (or auto-approve), then the job resumes
-  │  ✚ Prompt builder ─── manga prompt + negative prompt per panel (shot/angle tags, exact character tags)
-  │  🖌 Panels ─────────── ComfyUI + IP-Adapter with the matching character reference, one at a time
-  │  ≈ Consistency ────── CLIP similarity between each panel and its characters' references
-  │  ▦ Layout + lettering ─ template layout, balloons, captions, SFX (plain Pillow code, no AI)
-  ▼  ⇩ Export ─────────── PNG per page + PDF, right-to-left (default) and left-to-right
+```mermaid
+flowchart TD
+    S([Story<br/>+ story so far for chapter 2+]) --> W1
+    subgraph Plan["Planning agents (LLM, strict JSON + validation + retries)"]
+        W1["✎ Writer · beat sheet"] --> W2["✎ Writer · page plan<br/>(manga pacing rules)"]
+        W2 --> D["🎬 Director · layout + shot/angle per panel<br/>(house rules enforced in code)"]
+        D --> CD["☺ Character Designer · bible<br/>(fixed visual tags, seeds)"]
+    end
+    CD --> SH["Reference sheets<br/>turnaround + 5 expressions → face-based crops"]
+    SH --> AP{{"⏸ Cast approval (you)<br/>edit · new seed · lock look · train LoRA"}}
+    AP --> PB["Prompt builder<br/>tags + trigger words + series style"]
+    PB --> SB["▤ Storyboard · fast rough → DWPose pose / line art"]
+    subgraph Loop["Quality loop, per panel (max 3 attempts, per-job budgets)"]
+        AR["🖌 Artist · SDXL + IP-Adapter refs<br/>+ ControlNet guide + character LoRA"] --> CL["≈ CLIP likeness vs references"]
+        CL --> ED["🔍 Editor (vision LLM) · 9 criteria 1–5<br/>+ problems + concrete fix"]
+        ED --> Q{"combined ≥ threshold<br/>and no criterion ≤ 2?"}
+        Q -- "no: apply the fix" --> AR
+    end
+    SB --> AR
+    Q -- "yes / limits hit → best attempt<br/>(marked 'needs review')" --> LT["💬 Letterer · face detection,<br/>reading order, tails to speakers"]
+    LT --> LY["Layout · pages from editable layers"]
+    LY --> EX["⇩ Export · PNG · PDF · CBZ · webtoon"]
+    EX --> SM["✎ Writer · story so far → series memory"]
+    EX --> HE{{"✋ Canvas editor (you)<br/>bubbles · 'make her angrier' · inpaint · locks · undo/versions"}}
+    HE -- "Panel Revision agent / inpaint<br/>(through the quality loop)" --> AR
 ```
 
 - **Shared state.** All agents read and write one Pydantic object, `MangaProject`
-  (`backend/app/agents/state.py`). It is saved to `output/<job>/project.json` after every
-  step, so a job can pause for approval, survive a crash, and **resume** where it stopped.
-- **The graph.** The pipeline is a [LangGraph](https://langchain-ai.github.io/langgraph/)
-  state graph (`agents/graph.py`, `agents/pipeline.py`). Each node skips itself if its output
-  is already in the project. A conditional edge after "approval" stops the run until the cast
-  is approved.
-- **Structured outputs.** Every agent must answer with JSON matching a Pydantic schema
-  (`agents/schemas.py`). The schema goes to the LLM, the answer is validated, and on failure
-  the validation errors are sent back for up to **2 retries** (`agents/runner.py`).
-  Cross-checks such as "is this speaker in the beat sheet?" are fed back the same way.
-- **Rules in code.** Things the LLM must get right every time are enforced after it answers:
-  pacing (one large panel per page, splash pages alone) and the Director's camera rules
-  (`agents/director.py`). Each fix is recorded in the trace.
-- **Agent trace.** Every step records its inputs, output, retries, validation errors, duration,
-  tokens and cost. The **Agent timeline** page shows it, along with the beat sheet (intensity
-  chart), the page plan and the Director's layouts.
-- **Original characters only.** Prompts forbid existing franchises, and well-known
-  copyrighted character names are renamed (`agents/safety.py`).
+  (`backend/app/agents/state.py`), saved as `output/<job>/project.json` after every step. That gives
+  pause-for-approval, crash recovery and **resume** for free, and the editor works on the same file.
+- **The graph.** A [LangGraph](https://langchain-ai.github.io/langgraph/) state graph
+  (`agents/graph.py`, `agents/pipeline.py`); each node skips itself if its output already exists.
+- **Structured outputs.** Every LLM agent answers with JSON matching a Pydantic schema
+  (`agents/schemas.py`); validation errors are sent back for up to 2 retries (`agents/runner.py`).
+- **The LLM proposes, code decides.** Pacing and camera rules, the pass/fail threshold, how a fix
+  is applied, bubble placement and budgets are plain code, so they hold every time.
+- **Agent trace.** Every step records inputs, output, retries, duration, tokens and cost; the Agent
+  timeline shows them, with dedicated views for the beat sheet, page plan, Director, bible and the
+  Editor's quality loop.
 
-### Layout templates
+## What each feature does, and how to use it
 
-There are 10 page layouts (`pipeline/templates.py`): splash, two tiers, three tiers, big top,
-classic four, four-koma, tall vertical, action burst, conversation and six-grid. Each slot has a
-size class (splash/large/medium/small), so the Director can match the Writer's panel sizes
-(for example, the climax goes in a large slot).
+### Quality loop (Editor agent)
+After each panel is drawn, a **vision LLM** sees the panel plus the character reference images and
+returns a strict grade sheet. It scores nine criteria from 1 to 5 (action, characters, people count,
+likeness, shot/angle, emotion, anatomy, manga style, room for bubbles), gives pass/fail, lists the
+problems, and proposes a **fix** that code can apply: prompt tags to add or remove, negative-prompt
+additions, IP-Adapter weight, new seed. The grade is combined with the CLIP likeness score
+(`agents/quality.py`):
 
-## Character consistency
+```
+editor   = mean((score − 1) / 4)                        0..1
+clip     = (similarity − 0.60) / (0.90 − 0.60)          weakest character, clamped 0..1
+combined = 0.7 · editor + 0.3 · clip
+pass     = combined ≥ 0.65  and  no criterion ≤ 2  and  Editor verdict "pass"
+```
 
-Image models have no memory, so every panel is drawn from scratch. Five layers keep a
-character looking the same:
+Failed panels are redrawn with the fix, up to `EDITOR_MAX_ATTEMPTS=3`, within per-job budgets
+(`JOB_MAX_LLM_CALLS`, `JOB_MAX_LLM_COST_USD`, `JOB_MAX_GPU_SECONDS`). When a limit is hit, the best
+attempt is kept and marked **needs review**. Every attempt is stored. Open **Agent timeline → ★
+Quality loop** (or `/jobs/<id>?tab=quality`) to see them side by side, with scores, the Editor's
+reasoning and the fixes applied.
 
-1. **Fixed visual tags** in the character bible (hair, eyes, outfit, accessories, marks),
-   pasted *word for word* into every prompt where the character appears.
-2. **Reference sheets**: a turnaround (front/side/back) and an expression sheet
-   (neutral/happy/angry/sad/surprised), drawn from **fixed seeds** stored in the bible and
-   cropped into individual reference images.
-3. **Your approval** on the **Cast** page, where you can edit tags, regenerate a sheet with a
-   new seed, or approve. Approved casts are saved per project, so a later chapter
-   (`project_id`) reuses the same characters.
-4. **IP-Adapter**: when drawing a panel, ComfyUI receives the character's reference image.
-   It picks the expression that matches the panel's emotion, otherwise the front view.
-   The weight is configurable (`IPADAPTER_WEIGHT`, default 0.7). Two characters get two
-   references at reduced weight (see the limitation in DECISIONS.md #40).
-5. **A consistency score**: the CLIP image-embedding similarity between each panel and its
-   characters' references, shown next to every panel in the reader. As a rough guide, ≥0.85
-   means the same look and <0.70 means the character has probably drifted. This is
-   groundwork for a future editor agent that redraws drifted panels.
+### Canvas editor (human in the loop)
+**✎ Edit** tab (react-konva):
 
-## Providers: from mock to real
+- **Bubbles, narration boxes and sound effects** are separate layers: drag, resize, edit the text,
+  change the type (speech, thought, shout, narration, SFX), drag the orange dot to aim the tail,
+  toggle vertical text. **Save page** re-renders the PNG/PDF/CBZ/webtoon.
+- **Tell the director**: select a panel and type "make her angrier" or "camera from below". The
+  **Panel Revision agent** rewrites the panel spec, and the panel is redrawn through the quality loop.
+- **Inpainting**: paint over a region, say what should be there, and only that region is redrawn
+  (with the character's reference when the region shows a character).
+- **Locks**: a locked panel is never redrawn automatically. A locked character look can't be edited,
+  and automatic fixes can't change its tags or reference strength (Cast page).
+- **Versions**: every bubble save, redraw and inpaint is a version; **↶ / ↷** undo and redo, and
+  each panel and page has a version list with **Restore**.
 
-Settings live in `.env` at the repo root (copy `.env.example`; `.env` is git-ignored and
-keys are never logged).
+### Letterer
+`agents/letterer.py` detects anime faces (`vision/faces.py`, OpenCV `lbpcascade_animeface`) and
+measures how busy the art is, then places items in reading order (right-to-left by default):
+narration first, dialogue in script order, then sound effects. Bubbles never cover faces when
+there is room, and tails point at the speaker's face. The font auto-fits; Japanese/Chinese text is
+set vertically (`LETTERING_VERTICAL=auto|on|off`). Fonts: Comic Neue and Bangers (SIL OFL, licences
+in `backend/assets/fonts/`). Tick **Faces** in the editor to see what it avoided.
 
-**LLM** (`LLM_PROVIDER=auto` picks the first one configured):
+### Storyboard + ControlNet
+For each panel the app draws a quick 768 px rough, extracts a **pose skeleton** (DWPose) or **line
+art** from it, and the final panel follows that layout through **ControlNet**
+(`CONTROLNET_STRENGTH=0.55`, guidance for the first 60% of the steps). The rough and the guide are
+shown in the Quality loop. Without the ControlNet model or nodes the stage is skipped automatically.
 
-| Priority | Provider | Set in `.env` |
+### Character LoRA (optional)
+On the **Cast** page, **⚙ Train character LoRA** builds a dataset from the approved references
+(captions from the fixed tags plus a trigger word), trains an SDXL LoRA with kohya-ss sd-scripts in
+the background (progress and logs shown; 8 GB settings in `training/lora.py`), and compares
+consistency on test drawings without and with the LoRA. From then on panels use it automatically,
+with IP-Adapter turned down. No local GPU? See **[CLOUD_TRAINING.md](CLOUD_TRAINING.md)** and
+import the result. Without sd-scripts a mock trainer demonstrates the flow.
+
+### Series and exports
+Every manga is chapter 1 of a series (**Series** page). **Write chapter 2** reuses the approved
+cast (tags, seeds, sheets, locks, LoRAs) and the series' art-style tags, and the Writer reads the
+**story so far**, which it updates after every chapter. The Reader downloads PNG pages, a PDF, a
+**CBZ** (with `ComicInfo.xml`, right-to-left) and a **webtoon** strip, and has a vertical
+**Webtoon** view.
+
+### Demo mode
+`samples/demo/` holds a finished 2-chapter series made with the real pipeline
+(`scripts/make_demo.py`). **▶ Open the demo** on the home page (or `POST /api/demo`) copies it into
+the output folder and opens it, so presentations need no GPU and no keys.
+
+## Providers
+
+Settings live in `.env` at the repo root (copy `.env.example`; `.env` is git-ignored and keys are
+never logged).
+
+| | Provider | Set in `.env` |
 |---|---|---|
-| 1 | Anthropic Claude (official SDK, structured outputs, `claude-opus-5-5`) | `ANTHROPIC_API_KEY` |
-| 2 | Google Gemini (REST, JSON-schema mode) | `GEMINI_API_KEY` (+ `GEMINI_MODEL`) |
-| 3 | Any OpenAI-compatible server (OpenAI, Ollama, LM Studio, vLLM, OpenRouter…) | `OPENAI_BASE_URL` + `OPENAI_API_KEY` (+ `OPENAI_MODEL`) |
-| – | Mock (deterministic, offline) | nothing |
+| LLM 1 | Anthropic Claude (structured outputs, vision) | `ANTHROPIC_API_KEY` |
+| LLM 2 | Google Gemini (JSON-schema mode, vision) | `GEMINI_API_KEY` |
+| LLM 3 | Any OpenAI-compatible server (vision models for the Editor) | `OPENAI_BASE_URL` + `OPENAI_API_KEY` |
+| LLM – | Mock (deterministic, offline; a simulated Editor) | nothing |
+| Images | ComfyUI (auto-detected at `COMFYUI_URL`) | see SETUP_COMFYUI.md |
+| Images – | Mock (placeholder art) | nothing |
 
-Tokens and cost are counted per job and shown in the timeline. Unknown models count as $0
-unless you set `LLM_INPUT_PRICE_PER_MTOK` / `LLM_OUTPUT_PRICE_PER_MTOK`.
-
-**Images** (`IMAGE_PROVIDER=auto`): **ComfyUI** whenever it answers at `COMFYUI_URL`
-(default `http://127.0.0.1:8188`), otherwise mock. There is also a stub for a hosted image
-API (`providers/hosted_image.py`).
+The Editor needs a **vision-capable** model (Claude, Gemini, GPT-4o-class). Token use and cost are
+counted per job; the Quality loop shows the budget meters. See PROGRESS.md for measured times and
+the estimated cost per page.
 
 ## Running ComfyUI (real images, 8 GB GPU)
 
-ComfyUI wasn't installed on the build machine. Follow **[SETUP_COMFYUI.md](SETUP_COMFYUI.md)**,
-which covers the portable Windows build, the IP-Adapter custom nodes, and the three model
-downloads (Animagine XL 3.1, IP-Adapter Plus SDXL, CLIP-ViT-H). Then check the connection:
+Follow **[SETUP_COMFYUI.md](SETUP_COMFYUI.md)**: ComfyUI + IP-Adapter Plus + controlnet_aux custom
+nodes, and the models (Animagine XL 3.1, IP-Adapter Plus SDXL, CLIP-ViT-H, ControlNet union SDXL).
+Every workflow was measured on an RTX 4060 Laptop (8 GB). Run `python -m app.tools.bench` (in
+`backend/`) to measure your own GPU.
 
 ```bash
 cd backend
-.venv/Scripts/python -m app.tools.comfy_check             # lists installed nodes and models
-.venv/Scripts/python -m app.tools.comfy_check --generate  # one real 832x1216 test panel -> samples/
+.venv/Scripts/python -m app.tools.comfy_check             # nodes and models found
+.venv/Scripts/python -m app.tools.comfy_check --generate  # one real test panel
+.venv/Scripts/python -m app.tools.bench                   # time + peak VRAM of every workflow
 ```
-
-The app reads `/object_info` and only uses nodes that exist. Without IP-Adapter it falls back
-to plain text-to-image and shows a warning. Workflows are JSON templates in
-`backend/workflows/` with `{{placeholders}}` filled in code. To fit in 8 GB, it uses one
-checkpoint, draws panels sequentially, calls `/free` between stages, works at about
-832×1216, and runs CLIP on the CPU.
-
-## The web app
-
-- **Home**: paste a story or pick one of three samples (action, drama, comedy). Choose
-  auto-approve for unattended runs, or continue an earlier project to reuse its cast.
-- **Progress**: live per-stage progress across 10 stages.
-- **Agent timeline**: each agent's work, retries, rule fixes, tokens and cost, plus the beat
-  sheet, page plan and Director decisions (with layout thumbnails).
-- **Cast**: the bible and sheets for each main character, with **New seed**, **Edit**,
-  **Approve** and **Approve all & draw panels**.
-- **Read**: the manga reader (right-to-left by default, toggle for left-to-right, arrow keys),
-  PNG and PDF downloads, and a panel gallery with prompts, seeds, IP-Adapter references and
-  consistency scores.
-
-## Command line and samples
-
-```bash
-cd backend
-.venv/Scripts/python -m app.cli ../samples/stories/drama_last_lighthouse.txt --out ../samples/output/drama
-python scripts/tasks.py sample     # (from the repo root) re-runs all samples/stories/*.txt
-```
-
-`samples/output/<story>/` holds the committed results of the three sample stories (mock LLM
-and mock images, real CLIP scores): `project.json`, character sheets and crops, panels, pages
-and PDFs.
 
 ## Tests
 
 ```bash
-python scripts/tasks.py test                      # all unit tests, mock mode, no GPU/keys
-RUN_SLOW=1 python -m pytest tests/test_consistency.py   # (in backend/) real CLIP test
-python -m pytest tests/test_integration.py -s           # (in backend/) real end-to-end run
+python scripts/tasks.py test                         # all unit tests, mock mode, no GPU/keys
+cd backend && .venv/Scripts/python -m pytest tests/test_integration.py -s   # real end-to-end run
 ```
 
-The integration test skips itself unless ComfyUI is reachable or an LLM key is set. It uses
-whatever is available and writes its output to `samples/integration_output/`.
+The integration tests skip themselves unless ComfyUI is reachable or an LLM key is set (the
+LoRA one also needs sd-scripts). `scripts/ui_smoke.py` drives the editor in a real browser
+(Playwright + the installed Edge/Chrome).
 
-## API
+## API (main endpoints)
 
 | Method | Path | |
 |---|---|---|
 | POST | `/api/jobs` | `{"story", "auto_approve"?, "project_id"?}` → job |
-| GET | `/api/jobs/{id}` | status (queued/running/awaiting_approval/done/failed), stage progress, result |
-| GET | `/api/jobs/{id}/project` | full agent state (trace, beat sheet, plans, cast, prompts, panels) |
-| POST | `/api/jobs/{id}/approve` | approve the whole cast and continue |
-| POST | `/api/jobs/{id}/characters/{name}/approve` | `{"approved": bool}` |
-| POST | `/api/jobs/{id}/characters/{name}/regenerate` | `{"sheet": "turnaround"\|"expressions"\|"both"}` (new seed) |
-| PATCH | `/api/jobs/{id}/characters/{name}` | edit description / visual tags |
-| GET | `/api/layouts`, `/api/samples`, `/api/projects`, `/api/health` | layout library, sample stories, saved casts, providers |
-| GET | `/files/{id}/...` | generated files |
-
-## Docker
-
-```bash
-cp .env.example .env
-docker compose up --build                   # WITH_CLIP=1 docker compose up --build  for CLIP scores
-```
-
-ComfyUI stays on the host (it needs the GPU); set `COMFYUI_URL=http://host.docker.internal:8188`.
+| GET | `/api/jobs/{id}` · `/project` | status / full agent state |
+| POST | `/api/jobs/{id}/approve`, `/characters/{name}/approve` · `/regenerate` · PATCH `/characters/{name}` | cast approval |
+| GET / PUT | `/api/jobs/{id}/pages/{p}/editor` · `/lettering` (+ POST `/lettering/reset`) | canvas editor |
+| POST | `/api/jobs/{id}/panels/{p}/{n}/revise` · `/inpaint` · `/lock` | panel actions (queued on the GPU worker) |
+| GET / POST | `/api/jobs/{id}/history` · `/history/undo` · `/redo` · `/restore` | versions |
+| POST | `/api/jobs/{id}/characters/{name}/lock` · `/lora/train` · `/lora/import` | look lock, LoRA |
+| GET | `/api/trainings/{id}` (+ POST `/cancel`) · `/api/training/info` | training progress + logs |
+| GET / PATCH / POST | `/api/series` · `/api/series/{pid}` · `/api/series/{pid}/chapters` | series |
+| GET / POST | `/api/demo` | demo mode |
+| GET | `/api/layouts`, `/api/samples`, `/api/projects`, `/api/health`, `/files/{id}/...` | misc |
 
 ## Project layout
 
 ```
-backend/app/agents/     writer, director, character designer, prompt builder, sheets, graph, state, runner
-backend/app/comfy/      ComfyUI client (+ /object_info discovery) and workflow template injection
+backend/app/agents/     writer, director, character designer, editor, revision, letterer, storyboard,
+                        quality + redraw loop, history, series, inpaint, prompt builder, sheets, graph
+backend/app/training/   LoRA dataset + kohya command + background trainer
+backend/app/vision/     CLIP consistency score, anime face detection (+ cascade model)
+backend/app/comfy/      ComfyUI client and workflow injection (IP-Adapter, ControlNet, LoRA)
 backend/app/providers/  LLM (anthropic, gemini, openai-compatible, mock) + image (comfyui, hosted, mock)
-backend/app/pipeline/   layout templates, layout, lettering, export
-backend/app/vision/     CLIP consistency score
-backend/workflows/      ComfyUI workflow templates (JSON)
-frontend/               Next.js: home, progress, agent timeline, cast, reader
-samples/                sample stories + their generated output
-PLAN.md · PHASE_1_2_PLAN.md · PROGRESS.md · DECISIONS.md · SETUP_COMFYUI.md
+backend/app/pipeline/   layout templates, lettering layers, masks, exports
+backend/workflows/      ComfyUI workflow templates (txt2img, IP-Adapter, inpaint, preprocessors)
+backend/assets/fonts/   Comic Neue + Bangers (OFL)
+frontend/               Next.js: landing, series, job (progress, timeline + quality loop, cast, read, edit)
+samples/                stories, demo bundle, outputs, benchmarks
+comfyui/, tools/        local ComfyUI and sd-scripts installs (git-ignored)
+PHASE_3_5_PLAN.md · PROGRESS.md · DECISIONS.md · SETUP_COMFYUI.md · CLOUD_TRAINING.md
 ```
-
-## Next steps (Phase 3 ideas)
-
-- **Editor agent**: when a panel's consistency score is low, redraw it (new seed, higher
-  IP-Adapter weight) or flag it for review.
-- **Regional IP-Adapter** for multi-character panels (attention masks per character) and
-  **ControlNet** (OpenPose / lineart) for poses.
-- **A per-character LoRA**, trained from the approved sheets, for the strongest consistency.
-- Persistent jobs (SQLite) and cancellation; streaming agent progress over SSE.
 
 ## AI glossary
 
-- **Agent**: an LLM call with a role, instructions and a strict output format. Several
-  agents hand work to each other through the shared state.
-- **Structured output**: the LLM must return JSON in a given schema; we validate it and ask
-  for fixes.
-- **Prompt tags / negative prompt**: comma-separated tags tell the diffusion model what to
-  draw (earlier tags weigh more); the negative prompt says what to avoid.
+- **Agent**: an LLM call with a role, instructions and a strict output format. Agents hand work to
+  each other through the shared state.
+- **Structured output**: the LLM must return JSON in a given schema; we validate it and ask for fixes.
+- **Vision LLM**: a language model that also reads images; the Editor uses one to grade panels.
+- **Prompt tags / negative prompt**: comma-separated tags tell the diffusion model what to draw
+  (earlier tags weigh more; `(tag:1.15)` adds weight); the negative prompt says what to avoid.
 - **Seed**: the starting noise. The same seed, prompt and settings give the same image.
-- **IP-Adapter**: turns a reference *image* into extra guidance, so the model draws someone
-  who looks like that picture.
-- **CLIP similarity**: CLIP maps images to vectors (embeddings); the cosine of the angle
-  between two vectors measures how alike the images look.
+- **IP-Adapter**: turns a reference *image* into extra guidance, so the model draws someone who
+  looks like that picture.
+- **ControlNet**: a helper network that makes the drawing follow a *control image* (pose skeleton,
+  line art) for layout.
+- **LoRA**: a small add-on trained on a few images that teaches the model one new concept (a
+  character), switched on by a trigger word.
+- **Inpainting**: redrawing only the white area of a mask, leaving the rest pixel-identical.
+- **CLIP similarity**: CLIP maps images to vectors; the cosine of the angle between two vectors
+  measures how alike two pictures look.
+- **Face detection (cascade)**: a fast classic detector that slides a window over the image and runs
+  cheap pattern tests trained on anime faces.

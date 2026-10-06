@@ -234,3 +234,34 @@ reasonable option; change freely.
     832×1216 (6.6 GB peak, ~75 s cold); an out-of-memory error retries without ControlNet, then at 85%.
     On the real run 4 of 5 roughs gave no detectable pose (two-character anime roughs), so line art did most
     of the guiding.
+64. **LoRA trainer: kohya-ss sd-scripts** (Apache-2.0) in its own venv (`tools/sd-scripts/venv`,
+    git-ignored), run as a subprocess (`accelerate launch sdxl_train_network.py`), so its pinned
+    dependencies never touch the backend or ComfyUI. `TRAINER=auto` uses it when installed, else a mock
+    trainer (seconds, placeholder file, never used for drawing) so the flow is testable and demoable.
+65. **8 GB + 16 GB RAM training settings**, found by running it for real (each failure is in PROGRESS.md):
+    rank 16 / alpha 8, 768 px, buckets capped at 768, batch 1, UNet only, Adafactor, `--fp8_base`,
+    `--full_fp16` (SDXL loaded in fp16: ~7 GB RAM instead of ~14 GB fp32), cached latents and text
+    embeddings, gradient checkpointing, SDPA, fp32 VAE. Not used: `--shuffle_caption` (kohya forbids it with
+    cached text embeddings) and `--lowram` (loads everything to VRAM at once and runs out of 8 GB; kept as
+    `LORA_LOWRAM` for 12 GB+ cards). Measured: ~2 s/step, 600 steps ≈ 20 min, 3.8 GB VRAM.
+66. **One GPU, one user**: a shared `GPU_LOCK` makes the job worker wait while a LoRA trains; training starts
+    by asking ComfyUI to unload models. On this 16 GB machine ComfyUI must also run with
+    `--disable-pinned-memory` while training (ComfyUI pins ~6.4 GB of RAM by default) — documented.
+67. **Dataset + captions**: approved view and expression crops plus up to 6 accepted solo panels with CLIP ≥
+    0.85; caption = `<trigger>, <fixed bible tags>, <view/expression>, monochrome, greyscale, manga`. The
+    trigger is `<slug>_chr` (a made-up token). Panels then get the trigger in the character group, a
+    `LoraLoader` at strength 0.8 (0.6 each with two characters), and IP-Adapter turned down to 0.45.
+68. **Before/after consistency** = the mean CLIP similarity of two fixed-seed test drawings of the character
+    without vs with the LoRA (same prompt, references and seeds), stored on the character and shown on the
+    Cast page with the drawings.
+69. **Series memory** (`agents/series.py`): `series.json` per project id (title, style tags, story so far,
+    open threads, character notes, chapters). The Writer reads the story so far before planning chapter 2+
+    and a `writer_summary` agent rewrites it after export (a failure there never fails a finished chapter).
+    A chapter = a job with the project id; cast, locks and LoRAs come through the existing cast store.
+70. **Exports**: CBZ = ZIP_STORED page PNGs + `ComicInfo.xml` (`Manga=YesAndRightToLeft` for RTL);
+    webtoon = every lettered panel cut from the rendered RTL pages in reading order, scaled to 800 px wide,
+    stacked with gaps and sliced at panel boundaries into parts ≤ 4000 px (what webtoon sites accept).
+    Re-exported after every edit.
+71. **Demo mode**: `samples/demo/` (made by `scripts/make_demo.py` with the real pipeline) is copied into the
+    output folder by `POST /api/demo` and registered like any finished job. PNGs are stored greyscale and
+    LoRA weights/datasets are left out to keep the repository small.

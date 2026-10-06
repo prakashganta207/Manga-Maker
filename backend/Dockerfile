@@ -11,6 +11,7 @@ RUN if [ "$WITH_CLIP" = "1" ]; then pip install --no-cache-dir -r requirements-a
 
 COPY app ./app
 COPY workflows ./workflows
+COPY assets ./assets
 COPY tests ./tests
 COPY pyproject.toml .
 

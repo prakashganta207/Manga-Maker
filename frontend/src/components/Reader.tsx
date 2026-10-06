@@ -35,11 +35,13 @@ export default function Reader({ jobId, result, project }: { jobId: string; resu
     }
   });
   const [pageIndex, setPageIndex] = useState(0);
+  const [webtoon, setWebtoon] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const rtl = direction === "rtl";
   const output = result.outputs[direction] ?? { pages: [], pdf: null };
+  const strips = result.outputs.rtl?.webtoon ?? [];
   const pages = output.pages;
   const pageCount = pages.length;
 
@@ -121,6 +123,33 @@ export default function Reader({ jobId, result, project }: { jobId: string; resu
         </ul>
       )}
 
+      {strips.length > 0 && (
+        <div className="flex gap-2" role="tablist" aria-label="Reading mode">
+          {[
+            [false, "▤ Pages"],
+            [true, "▯ Webtoon (vertical scroll)"],
+          ].map(([value, label]) => (
+            <button
+              key={String(label)}
+              type="button"
+              role="tab"
+              aria-selected={webtoon === value}
+              onClick={() => setWebtoon(value as boolean)}
+              className={`border-2 border-ink px-3 py-1 text-sm font-bold ${webtoon === value ? "bg-ink text-paper" : "bg-paper"}`}
+            >
+              {label as string}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {webtoon ? (
+        <div className="panel mx-auto max-w-xl bg-white p-0">
+          {strips.map((src, i) => (
+            <img key={src} src={fileUrl(src)} alt={`Webtoon part ${i + 1}`} className="block w-full" loading="lazy" />
+          ))}
+        </div>
+      ) : (
       <div className="panel p-3">
         <img key={pages[pageIndex]} src={fileUrl(pages[pageIndex])} alt={`Page ${pageNumber} of ${result.title}`} className="mx-auto h-auto w-full max-w-3xl bg-white" />
         <div className="mt-3 flex items-center justify-between">
@@ -135,6 +164,7 @@ export default function Reader({ jobId, result, project }: { jobId: string; resu
           </button>
         </div>
       </div>
+      )}
 
       <section className="panel space-y-3 p-4">
         <h2 className="text-lg font-bold">Download ({rtl ? "right-to-left" : "left-to-right"})</h2>
@@ -166,7 +196,30 @@ export default function Reader({ jobId, result, project }: { jobId: string; resu
               {busy === "pdf" ? "Downloading…" : "PDF · all pages"}
             </button>
           )}
+          {output.cbz && (
+            <button type="button" className="btn" disabled={busy !== null} onClick={() => download(output.cbz!, `${base}.cbz`, "cbz")}>
+              {busy === "cbz" ? "Downloading…" : "CBZ · comic reader"}
+            </button>
+          )}
+          {strips.length > 0 && (
+            <button
+              type="button"
+              className="btn"
+              disabled={busy !== null}
+              onClick={async () => {
+                for (const [i, url] of strips.entries()) {
+                  await download(url, `${slug(result.title)}-webtoon-${String(i + 1).padStart(2, "0")}.png`, "webtoon");
+                }
+              }}
+            >
+              {busy === "webtoon" ? "Downloading…" : `Webtoon · ${strips.length} part${strips.length > 1 ? "s" : ""}`}
+            </button>
+          )}
         </div>
+        <p className="text-xs text-ink/60">
+          CBZ opens in comic readers (pages in order, marked right-to-left for manga). The webtoon is one vertical strip of the
+          lettered panels in reading order, cut into parts of up to 4000 px.
+        </p>
         {downloadError && <p className="text-sm text-red-800">{downloadError}</p>}
       </section>
 
