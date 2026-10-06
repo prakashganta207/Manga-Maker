@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal
@@ -20,6 +21,19 @@ from .runner import AgentStep
 from .schemas import BeatSheet, CharacterDesign, DirectorPlan, EditorFix, EditorReview, PagePlan
 
 PROJECT_FILE = "project.json"
+
+
+def replace_with_retry(src: Path, dst: Path, attempts: int = 10, delay: float = 0.05) -> None:
+    """os.replace, retried briefly: on Windows it fails with "Access is denied" while another process
+    (antivirus scan, search indexer, the API reading the file) has the target open for a moment."""
+    for attempt in range(attempts):
+        try:
+            os.replace(src, dst)
+            return
+        except PermissionError:
+            if attempt == attempts - 1:
+                raise
+            time.sleep(delay * (attempt + 1))
 
 EXPRESSIONS = ["neutral", "happy", "angry", "sad", "surprised"]
 VIEWS = ["front", "side", "back"]
@@ -355,7 +369,7 @@ class MangaProject(BaseModel):
         path = job_dir / PROJECT_FILE
         tmp = path.with_suffix(".tmp")
         tmp.write_text(self.model_dump_json(indent=2), encoding="utf-8")
-        os.replace(tmp, path)  # atomic: a crash never leaves a half-written file
+        replace_with_retry(tmp, path)  # atomic: a crash never leaves a half-written file
         return path
 
     @classmethod

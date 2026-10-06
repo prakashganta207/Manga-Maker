@@ -1,6 +1,6 @@
 # Progress
 
-## Phase 3–5 (quality loop, interactive editor, pro features) — in progress
+## Phase 3–5 (quality loop, interactive editor, pro features) — M1–M12 code done; real final run blocked
 
 Plan: PHASE_3_5_PLAN.md. Test command: `python scripts/tasks.py test` (mock mode, no GPU/keys).
 
@@ -102,8 +102,36 @@ Cost per page (budget counters): mock LLM → $0. With a real vision Editor, est
   (sheets 100 s, storyboard 104 s, panels 897 s for 5 panels / 12 attempts at 52–91 s each). Panels are
   now single coherent compositions; the mock Editor's random "flaws" cause most of the redraw time.
 
+- **M10 LoRA training**: dataset from approved references + good solo panels with fixed-tag captions,
+  kohya sd-scripts in its own venv, background training job with progress/logs, "Train character LoRA"
+  on the Cast page, LoRA used automatically (IP-Adapter turned down), before/after consistency,
+  `CLOUD_TRAINING.md`. 8 GB settings found by real attempts (DECISIONS #65): 1024 px buckets OOM'd in
+  the VAE cache → capped at 768; `--shuffle_caption` rejected with cached text embeddings → removed;
+  fp32 SDXL load ran 16 GB RAM out → `--full_fp16`; `--lowram` OOM'd VRAM → opt-in only.
+  Measured ~2 s/step, 600 steps ≈ 20 min, 3.8 GB VRAM. No finished real LoRA is kept on disk yet.
+- **M11 Series memory + exports**: `series.json` per project (story so far, open threads, character
+  notes), Writer reads it for chapter 2+, summary agent updates it after export; `/api/series` routes;
+  Projects list + project page (chapters, cast/LoRA status, "Write the next chapter"); PNG, PDF (RTL+LTR),
+  CBZ with ComicInfo.xml, webtoon strips ≤ 4000 px.
+- **M12 Demo mode + polish**: landing page with the pipeline diagram, "Open the demo" button
+  (`POST /api/demo` copies `samples/demo/`), `error.tsx` / `not-found.tsx`, Phase 5 integration tests
+  (auto-skip without ComfyUI/kohya), `scripts/make_demo.py` (`python scripts/tasks.py demo`).
+- **Fix (2026-10-07)**: `project.json` saves failed on Windows with "Access is denied" when another
+  process briefly held the file (hit during the final run); `os.replace` is now retried. 2 tests.
+- **Final 2-chapter run, mock mode** (`make_demo.py --train-lora`, mock LLM/images/trainer): chapter 1
+  + 2 with the same project id, cast reused (sheets + approval skipped in ch2), chapter 2 numbered from
+  the series, 10 + 10 panels accepted, every export written; 16 s per chapter. The bundle in
+  `samples/demo/` is from this mock run (`demo.json` says so) and is **not committed**.
+
+`python scripts/tasks.py test` → all passed, 9 skipped (opt-in / integration). tsc + eslint clean.
+
 ### Next
-- M10 LoRA training (code + mock trainer in place; real kohya run pending).
+- **Blocked**: the real final run (ComfyUI + kohya LoRA). Since 2026-10-07 Windows Application Control
+  blocks `scipy\signal\_peak_finding_utils.pyd` in `comfyui/.venv` on every load (it loaded fine on
+  2026-10-06), so ComfyUI won't start. Not worked around (it's a system security policy). After allowing
+  it (or reinstalling scipy in that venv): `python scripts/tasks.py comfyui`, then
+  `backend\.venv\Scripts\python scripts\make_demo.py --train-lora`, then commit `samples/demo` and
+  `samples/output/rooftop_series`.
 
 ### Known issues
 - No LLM key on this machine: the Editor runs as the mock (it can't see real flaws such as the
