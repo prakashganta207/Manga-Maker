@@ -32,9 +32,12 @@ export interface JobResult {
   usage: Usage;
   quality?: QualitySummary;
   characters: CharacterSummary[];
-  outputs: Partial<Record<Direction, { pages: string[]; pdf: string | null }>>;
+  outputs: Partial<Record<Direction, { pages: string[]; pdf: string | null; cbz?: string | null; webtoon?: string[] }>>;
   files_base: string;
   project_url: string;
+  chapter?: number;
+  project_id?: string;
+  series_title?: string;
 }
 
 export interface Job {
@@ -434,6 +437,46 @@ export interface HistorySummary {
   page?: number;
 }
 
+export interface DemoInfo {
+  available: boolean;
+  loaded?: boolean;
+  project_id?: string;
+  jobs?: string[];
+  title?: string;
+}
+
+export interface ChapterInfo {
+  number: number;
+  job_id: string;
+  title: string;
+  status: string;
+  summary: string;
+  created_at: string;
+  cover: string | null;
+}
+
+export interface SeriesCastMember {
+  name: string;
+  role: string;
+  approved: boolean;
+  look_locked: boolean;
+  lora: string;
+  lora_trainer: string;
+  tags: string;
+  image: string | null;
+}
+
+export interface Series {
+  project_id: string;
+  title: string;
+  style_tags: string;
+  story_so_far: string;
+  open_threads: string[];
+  character_notes: string[];
+  chapters: ChapterInfo[];
+  cast: SeriesCastMember[];
+}
+
 export interface LayoutTemplate {
   id: string;
   name: string;
@@ -540,6 +583,17 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ locked }),
     }),
+  series: () => request<Series[]>("/api/series"),
+  seriesOne: (pid: string) => request<Series>(`/api/series/${encodeURIComponent(pid)}`),
+  patchSeries: (pid: string, patch: { title?: string; style_tags?: string }) =>
+    request<Series>(`/api/series/${encodeURIComponent(pid)}`, { method: "PATCH", body: JSON.stringify(patch) }),
+  newChapter: (pid: string, story: string, auto_approve?: boolean) =>
+    request<Job>(`/api/series/${encodeURIComponent(pid)}/chapters`, {
+      method: "POST",
+      body: JSON.stringify({ story, ...(auto_approve === undefined ? {} : { auto_approve }) }),
+    }),
+  demoStatus: () => request<DemoInfo>("/api/demo"),
+  loadDemo: () => request<DemoInfo>("/api/demo", { method: "POST" }),
   trainingInfo: () => request<TrainingInfo>("/api/training/info"),
   trainLora: (id: string, name: string) =>
     request<Training>(`/api/jobs/${encodeURIComponent(id)}/characters/${encodeURIComponent(name)}/lora/train`, { method: "POST" }),

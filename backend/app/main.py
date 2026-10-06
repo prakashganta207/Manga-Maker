@@ -201,6 +201,10 @@ def create_app(settings: Settings | None = None, llm: LLMProvider | None = None,
     register_editor_routes(app)
     from .routes_training import register_training_routes  # noqa: E402
     register_training_routes(app)
+    from .routes_series import register_series_routes  # noqa: E402
+    register_series_routes(app)
+    from .routes_demo import register_demo_routes  # noqa: E402
+    register_demo_routes(app)
 
     app.mount("/files", StaticFiles(directory=settings.output_dir), name="files")
     return app
