@@ -145,7 +145,9 @@ def training_args(settings: Settings, dataset: Path, output_dir: Path, name: str
         f"--train_data_dir={dataset}",
         f"--output_dir={output_dir}", f"--output_name={name}",
         f"--resolution={settings.lora_resolution},{settings.lora_resolution}",  # 768 px: fits 8 GB, enough detail
-        "--enable_bucket", "--min_bucket_reso=512", f"--max_bucket_reso={settings.lora_resolution + 256}",
+        # Buckets group images by shape; capping them at the training size keeps the fp32 VAE (below) from
+        # running out of memory while it encodes the images once (1024 px buckets OOM'd on 8 GB).
+        "--enable_bucket", "--min_bucket_reso=448", f"--max_bucket_reso={settings.lora_resolution}",
         "--network_module=networks.lora",
         f"--network_dim={settings.lora_rank}",       # rank: size of the small matrices (16 = plenty for 1 character)
         f"--network_alpha={settings.lora_alpha}",    # scales the update; alpha = rank/2 is a stable default
@@ -157,15 +159,21 @@ def training_args(settings: Settings, dataset: Path, output_dir: Path, name: str
         "--optimizer_args", "scale_parameter=False", "relative_step=False", "warmup_init=False",
         "--lr_scheduler=constant_with_warmup", "--lr_warmup_steps=30",
         "--mixed_precision=fp16", "--save_precision=fp16",
+        "--full_fp16",                               # load SDXL in fp16, not fp32: ~7 GB of RAM instead of ~14 GB
         "--fp8_base",                                # keep the frozen SDXL weights in 8-bit floats (~halves VRAM)
         "--gradient_checkpointing",                  # recompute activations instead of storing them
         "--cache_latents", "--cache_latents_to_disk",  # encode images with the VAE once, then unload it
         "--cache_text_encoder_outputs",              # same for the captions' text embeddings
         "--sdpa",                                    # PyTorch's memory-efficient attention
         "--no_half_vae",                             # SDXL's VAE overflows in fp16
-        "--caption_extension=.txt", "--shuffle_caption", "--keep_tokens=1",  # trigger word always first
+        # Captions are used as written (trigger word first). No --shuffle_caption: kohya can't shuffle
+        # captions whose text embeddings were cached (--cache_text_encoder_outputs saves ~2 GB).
+        "--caption_extension=.txt",
         "--save_model_as=safetensors", "--save_every_n_steps=10000",
         "--seed=42", "--max_data_loader_n_workers=0",
+        # --lowram loads all weights straight to the GPU (saves ~7 GB of system RAM) but then SDXL doesn't
+        # fit in 8 GB of VRAM while caching latents; only for GPUs with 12 GB+ on low-RAM machines.
+        *(["--lowram"] if settings.lora_lowram else []),
     ]
 
 

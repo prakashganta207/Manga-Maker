@@ -145,6 +145,7 @@ class Settings:
     lora_steps: int = 600
     lora_learning_rate: float = 1e-4
     lora_repeats: int = 10
+    lora_lowram: bool = False             # kohya --lowram (only for 12 GB+ GPUs on machines short of RAM)
     lora_strength: float = 0.8            # LoRA strength in panel workflows
     ipadapter_weight_with_lora: float = 0.45   # IP-Adapter is turned down when a LoRA carries the look
 
@@ -221,6 +222,7 @@ class Settings:
             lora_steps=max(20, min(5000, _env_int("LORA_STEPS", 600))),
             lora_learning_rate=max(1e-6, min(1e-2, _env_float("LORA_LEARNING_RATE", 1e-4))),
             lora_repeats=max(1, min(50, _env_int("LORA_REPEATS", 10))),
+            lora_lowram=_env_bool("LORA_LOWRAM", False),
             lora_strength=max(0.0, min(1.5, _env_float("LORA_STRENGTH", 0.8))),
             ipadapter_weight_with_lora=max(0.0, min(1.2, _env_float("IPADAPTER_WEIGHT_WITH_LORA", 0.45))),
         )

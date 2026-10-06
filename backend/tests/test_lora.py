@@ -44,6 +44,8 @@ def test_kohya_args_are_8gb_friendly(settings, tmp_path):
                  "--resolution=768,768", "--network_dim=16"):
         assert flag in args
     assert args[0] == "sdxl_train_network.py"
+    # kohya rejects caption shuffling together with cached text-encoder outputs
+    assert "--shuffle_caption" not in args
 
 
 @pytest.mark.parametrize("line, expected", [
